@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { 
   CreditCard, 
@@ -13,7 +14,9 @@ import {
   TrendingUp, 
   Calendar,
   AlertCircle,
-  CheckCircle
+  CheckCircle,
+  Building,
+  Users
 } from 'lucide-react';
 
 interface BillingManagementProps {
@@ -25,15 +28,18 @@ const BillingManagement: React.FC<BillingManagementProps> = ({ organizations, on
   const { toast } = useToast();
   const [selectedPeriod, setSelectedPeriod] = useState('current');
 
-  const billingStats = {
-    totalRevenue: '$124,850',
-    monthlyRecurring: '$24,500',
+  // Platform-wide billing stats for Startup Admin
+  const platformBillingStats = {
+    totalRevenue: '$47,350',
+    monthlyRecurring: '$38,200',
     activeSubscriptions: 47,
-    churnRate: '2.1%'
+    churnRate: '2.1%',
+    avgRevenuePerUser: '$812',
+    growthRate: '+15.3%'
   };
 
   const handleSuspendAccount = (orgId: string) => {
-    onUpdateBilling(orgId, { status: 'suspended' });
+    onUpdateBilling(orgId, { billingStatus: 'suspended' });
     toast({
       title: "Account Suspended",
       description: "Organization billing has been suspended.",
@@ -41,7 +47,7 @@ const BillingManagement: React.FC<BillingManagementProps> = ({ organizations, on
   };
 
   const handleReactivateAccount = (orgId: string) => {
-    onUpdateBilling(orgId, { status: 'active' });
+    onUpdateBilling(orgId, { billingStatus: 'active' });
     toast({
       title: "Account Reactivated",
       description: "Organization billing has been reactivated.",
@@ -77,64 +83,101 @@ const BillingManagement: React.FC<BillingManagementProps> = ({ organizations, on
 
   return (
     <div className="space-y-6">
-      {/* Billing Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      {/* Platform Revenue Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                <p className="text-2xl font-bold text-gray-900">{billingStats.totalRevenue}</p>
+                <p className="text-xs font-medium text-gray-600">Total Revenue</p>
+                <p className="text-lg font-bold text-gray-900">{platformBillingStats.totalRevenue}</p>
               </div>
-              <DollarSign className="w-8 h-8 text-green-600" />
+              <DollarSign className="w-6 h-6 text-green-600" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Monthly Recurring</p>
-                <p className="text-2xl font-bold text-gray-900">{billingStats.monthlyRecurring}</p>
+                <p className="text-xs font-medium text-gray-600">Monthly Recurring</p>
+                <p className="text-lg font-bold text-gray-900">{platformBillingStats.monthlyRecurring}</p>
               </div>
-              <TrendingUp className="w-8 h-8 text-blue-600" />
+              <TrendingUp className="w-6 h-6 text-blue-600" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Active Subscriptions</p>
-                <p className="text-2xl font-bold text-gray-900">{billingStats.activeSubscriptions}</p>
+                <p className="text-xs font-medium text-gray-600">Active Subs</p>
+                <p className="text-lg font-bold text-gray-900">{platformBillingStats.activeSubscriptions}</p>
               </div>
-              <CheckCircle className="w-8 h-8 text-purple-600" />
+              <CheckCircle className="w-6 h-6 text-purple-600" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Churn Rate</p>
-                <p className="text-2xl font-bold text-gray-900">{billingStats.churnRate}</p>
+                <p className="text-xs font-medium text-gray-600">Churn Rate</p>
+                <p className="text-lg font-bold text-gray-900">{platformBillingStats.churnRate}</p>
               </div>
-              <AlertCircle className="w-8 h-8 text-orange-600" />
+              <AlertCircle className="w-6 h-6 text-orange-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-gray-600">Avg Revenue</p>
+                <p className="text-lg font-bold text-gray-900">{platformBillingStats.avgRevenuePerUser}</p>
+              </div>
+              <Users className="w-6 h-6 text-indigo-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-gray-600">Growth Rate</p>
+                <p className="text-lg font-bold text-green-600">{platformBillingStats.growthRate}</p>
+              </div>
+              <Building className="w-6 h-6 text-cyan-600" />
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Billing Table */}
+      {/* Platform Billing Controls */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center">
-            <CreditCard className="w-5 h-5 mr-2" />
-            Billing Overview
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center">
+              <CreditCard className="w-5 h-5 mr-2" />
+              Platform Billing Management
+            </CardTitle>
+            <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Select period" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="current">Current Month</SelectItem>
+                <SelectItem value="last">Last Month</SelectItem>
+                <SelectItem value="quarter">This Quarter</SelectItem>
+                <SelectItem value="year">This Year</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </CardHeader>
         <CardContent>
           <Table>

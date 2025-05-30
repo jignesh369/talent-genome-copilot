@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,7 +24,9 @@ import {
   CreditCard,
   Cog,
   Activity,
-  Shield
+  Shield,
+  Edit,
+  Search
 } from 'lucide-react';
 
 const StartupAdmin = () => {
@@ -33,6 +36,7 @@ const StartupAdmin = () => {
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create');
   const [analyticsDateRange, setAnalyticsDateRange] = useState('30d');
 
+  // Standardized organization data
   const [organizations, setOrganizations] = useState([
     { 
       id: '1', 
@@ -65,14 +69,31 @@ const StartupAdmin = () => {
       monthlyAmount: 99,
       billingStatus: 'active',
       nextBilling: 'Jan 20, 2024'
+    },
+    { 
+      id: '3', 
+      name: 'GrowthCo Enterprise', 
+      domain: 'growthco.io', 
+      industry: 'healthcare',
+      size: '201-1000',
+      plan: 'enterprise',
+      status: 'active',
+      contactEmail: 'admin@growthco.io',
+      contactName: 'Mike Chen',
+      userLimit: 100,
+      jobLimit: 50,
+      monthlyAmount: 599,
+      billingStatus: 'active',
+      nextBilling: 'Jan 25, 2024'
     }
   ]);
 
-  const stats = [
-    { label: 'Customer Organizations', value: '12', icon: Building, color: 'text-blue-600' },
-    { label: 'Total Users', value: '347', icon: Users, color: 'text-green-600' },
+  // Platform-wide stats for Startup Admin
+  const platformStats = [
+    { label: 'Total Organizations', value: organizations.length.toString(), icon: Building, color: 'text-blue-600' },
+    { label: 'Platform Users', value: '347', icon: Users, color: 'text-green-600' },
     { label: 'Active Jobs', value: '89', icon: Briefcase, color: 'text-purple-600' },
-    { label: 'Monthly Revenue', value: '$24.5k', icon: TrendingUp, color: 'text-orange-600' }
+    { label: 'Monthly Revenue', value: '$47.3k', icon: TrendingUp, color: 'text-orange-600' }
   ];
 
   const recentActivities = [
@@ -102,7 +123,13 @@ const StartupAdmin = () => {
 
   const handleSaveOrganization = (data: any) => {
     if (modalMode === 'create') {
-      const newOrg = { ...data, id: Date.now().toString() };
+      const newOrg = { 
+        ...data, 
+        id: Date.now().toString(),
+        monthlyAmount: data.plan === 'enterprise' ? 599 : data.plan === 'professional' ? 299 : 99,
+        billingStatus: 'active',
+        nextBilling: 'Jan 30, 2024'
+      };
       setOrganizations(prev => [...prev, newOrg]);
     } else {
       setOrganizations(prev => 
@@ -128,8 +155,8 @@ const StartupAdmin = () => {
                 <Building className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">TalentGenome Admin</h1>
-                <p className="text-sm text-gray-600">Startup Administration Panel</p>
+                <h1 className="text-2xl font-bold text-gray-900">TalentGenome Platform Admin</h1>
+                <p className="text-sm text-gray-600">Platform-wide Administration & Analytics</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -151,16 +178,20 @@ const StartupAdmin = () => {
             Welcome back, {user?.user_metadata?.first_name || 'Admin'}! 👋
           </h2>
           <p className="text-gray-600">
-            Here's what's happening with your platform today.
+            Monitor platform performance, manage customer organizations, and oversee billing across all accounts.
           </p>
         </div>
 
         {/* Admin Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="overview" className="flex items-center space-x-2">
               <BarChart3 className="w-4 h-4" />
               <span>Overview</span>
+            </TabsTrigger>
+            <TabsTrigger value="organizations" className="flex items-center space-x-2">
+              <Building className="w-4 h-4" />
+              <span>Organizations</span>
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center space-x-2">
               <TrendingUp className="w-4 h-4" />
@@ -185,9 +216,9 @@ const StartupAdmin = () => {
           </TabsList>
 
           <TabsContent value="overview">
-            {/* Stats Grid */}
+            {/* Platform Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {stats.map((stat, index) => (
+              {platformStats.map((stat, index) => (
                 <Card key={index} className="hover:shadow-lg transition-shadow">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
@@ -281,6 +312,81 @@ const StartupAdmin = () => {
                         </div>
                       </div>
                       <span className="text-sm text-gray-500">{activity.time}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="organizations">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center">
+                    <Building className="w-5 h-5 mr-2" />
+                    Customer Organizations ({organizations.length})
+                  </CardTitle>
+                  <Button size="sm" onClick={handleCreateOrganization}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Organization
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {organizations.map((org) => (
+                    <div key={org.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                          {org.name.split(' ').map(n => n[0]).join('')}
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-gray-900">{org.name}</h4>
+                          <p className="text-sm text-gray-600">{org.contactEmail}</p>
+                          <p className="text-xs text-gray-500">{org.domain}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center space-x-4">
+                        <div className="text-center">
+                          <Badge className={
+                            org.plan === 'enterprise' ? 'bg-purple-100 text-purple-800' :
+                            org.plan === 'professional' ? 'bg-blue-100 text-blue-800' :
+                            'bg-green-100 text-green-800'
+                          }>
+                            {org.plan}
+                          </Badge>
+                          <p className="text-xs text-gray-600 mt-1">{org.userLimit} users</p>
+                        </div>
+                        
+                        <Badge 
+                          variant={org.status === 'active' ? 'default' : org.status === 'trial' ? 'secondary' : 'outline'}
+                          className={
+                            org.status === 'active' ? 'bg-green-100 text-green-800' : 
+                            org.status === 'trial' ? 'bg-blue-100 text-blue-800' : ''
+                          }
+                        >
+                          {org.status}
+                        </Badge>
+                        
+                        <div className="flex items-center space-x-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleViewOrganization(org)}
+                          >
+                            <Search className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleEditOrganization(org)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
