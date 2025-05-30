@@ -7,6 +7,9 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import OrganizationModal from '@/components/modals/OrganizationModal';
 import BillingManagement from '@/components/admin/BillingManagement';
 import SystemConfiguration from '@/components/admin/SystemConfiguration';
+import AdvancedAnalytics from '@/components/admin/AdvancedAnalytics';
+import SystemHealth from '@/components/admin/SystemHealth';
+import AuditLogs from '@/components/admin/AuditLogs';
 import { 
   Building, 
   Users, 
@@ -18,7 +21,9 @@ import {
   UserCheck,
   FileText,
   CreditCard,
-  Cog
+  Cog,
+  Activity,
+  Shield
 } from 'lucide-react';
 
 const StartupAdmin = () => {
@@ -26,6 +31,7 @@ const StartupAdmin = () => {
   const [showOrgModal, setShowOrgModal] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState(null);
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create');
+  const [analyticsDateRange, setAnalyticsDateRange] = useState('30d');
 
   const [organizations, setOrganizations] = useState([
     { 
@@ -149,107 +155,165 @@ const StartupAdmin = () => {
           </p>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat, index) => (
-            <Card key={index} className="hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">{stat.label}</p>
-                    <p className="text-3xl font-bold text-gray-900 mt-1">{stat.value}</p>
-                  </div>
-                  <div className={`w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center ${stat.color}`}>
-                    <stat.icon className="w-6 h-6" />
-                  </div>
+        {/* Admin Tabs */}
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="overview" className="flex items-center space-x-2">
+              <BarChart3 className="w-4 h-4" />
+              <span>Overview</span>
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center space-x-2">
+              <TrendingUp className="w-4 h-4" />
+              <span>Analytics</span>
+            </TabsTrigger>
+            <TabsTrigger value="health" className="flex items-center space-x-2">
+              <Activity className="w-4 h-4" />
+              <span>System Health</span>
+            </TabsTrigger>
+            <TabsTrigger value="billing" className="flex items-center space-x-2">
+              <CreditCard className="w-4 h-4" />
+              <span>Billing</span>
+            </TabsTrigger>
+            <TabsTrigger value="audit" className="flex items-center space-x-2">
+              <Shield className="w-4 h-4" />
+              <span>Audit Logs</span>
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center space-x-2">
+              <Cog className="w-4 h-4" />
+              <span>Settings</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview">
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {stats.map((stat, index) => (
+                <Card key={index} className="hover:shadow-lg transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">{stat.label}</p>
+                        <p className="text-3xl font-bold text-gray-900 mt-1">{stat.value}</p>
+                      </div>
+                      <div className={`w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center ${stat.color}`}>
+                        <stat.icon className="w-6 h-6" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Action Cards */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={handleCreateOrganization}>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Building className="w-5 h-5 mr-2 text-blue-600" />
+                    Manage Organizations
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600 mb-4">
+                    View, create, and manage customer organizations on the platform.
+                  </p>
+                  <Button className="w-full">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Organization
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <BarChart3 className="w-5 h-5 mr-2 text-green-600" />
+                    Platform Analytics
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600 mb-4">
+                    Monitor usage, performance, and revenue across all customers.
+                  </p>
+                  <Button variant="outline" className="w-full">
+                    View Reports
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Settings className="w-5 h-5 mr-2 text-purple-600" />
+                    System Settings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600 mb-4">
+                    Configure platform settings, pricing, and feature flags.
+                  </p>
+                  <Button variant="outline" className="w-full">
+                    Configure
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Recent Activity */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <FileText className="w-5 h-5 mr-2" />
+                  Recent Platform Activity
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {recentActivities.map((activity, index) => (
+                    <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                          <UserCheck className="w-4 h-4 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900">{activity.action}</p>
+                          <p className="text-sm text-gray-600">{activity.organization}</p>
+                        </div>
+                      </div>
+                      <span className="text-sm text-gray-500">{activity.time}</span>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
+          </TabsContent>
 
-        {/* Action Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={handleCreateOrganization}>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Building className="w-5 h-5 mr-2 text-blue-600" />
-                Manage Organizations
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 mb-4">
-                View, create, and manage customer organizations on the platform.
-              </p>
-              <Button className="w-full">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Organization
-              </Button>
-            </CardContent>
-          </Card>
+          <TabsContent value="analytics">
+            <AdvancedAnalytics 
+              dateRange={analyticsDateRange}
+              onDateRangeChange={setAnalyticsDateRange}
+            />
+          </TabsContent>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <BarChart3 className="w-5 h-5 mr-2 text-green-600" />
-                Platform Analytics
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 mb-4">
-                Monitor usage, performance, and revenue across all customers.
-              </p>
-              <Button variant="outline" className="w-full">
-                View Reports
-              </Button>
-            </CardContent>
-          </Card>
+          <TabsContent value="health">
+            <SystemHealth />
+          </TabsContent>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Settings className="w-5 h-5 mr-2 text-purple-600" />
-                System Settings
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 mb-4">
-                Configure platform settings, pricing, and feature flags.
-              </p>
-              <Button variant="outline" className="w-full">
-                Configure
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+          <TabsContent value="billing">
+            <BillingManagement 
+              organizations={organizations}
+              onUpdateBilling={handleUpdateBilling}
+            />
+          </TabsContent>
 
-        {/* Recent Activity */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <FileText className="w-5 h-5 mr-2" />
-              Recent Platform Activity
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentActivities.map((activity, index) => (
-                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <UserCheck className="w-4 h-4 text-blue-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">{activity.action}</p>
-                      <p className="text-sm text-gray-600">{activity.organization}</p>
-                    </div>
-                  </div>
-                  <span className="text-sm text-gray-500">{activity.time}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+          <TabsContent value="audit">
+            <AuditLogs />
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <SystemConfiguration />
+          </TabsContent>
+        </Tabs>
       </main>
 
       {/* Organization Modal */}
