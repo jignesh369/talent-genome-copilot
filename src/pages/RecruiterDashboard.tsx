@@ -1,120 +1,161 @@
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Progress } from "@/components/ui/progress";
-import { Calendar, Users, Clock, Star, MessageCircle, ChevronRight } from "lucide-react";
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/components/auth/AuthProvider';
+import UserProfileDropdown from '@/components/navigation/UserProfileDropdown';
+import NotificationDropdown from '@/components/navigation/NotificationDropdown';
+import InviteMemberModal from '@/components/modals/InviteMemberModal';
+import CreateJobForm from '@/components/forms/CreateJobForm';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
+import { 
+  Users, 
+  Briefcase, 
+  UserPlus, 
+  Plus,
+  TrendingUp,
+  Building,
+  Search,
+  Filter,
+  MoreHorizontal,
+  Edit,
+  Trash2,
+  Calendar,
+  MessageSquare,
+  Target
+} from 'lucide-react';
+import CandidatePipeline from '@/components/admin/CandidatePipeline';
 
 const RecruiterDashboard = () => {
-  const [selectedRole, setSelectedRole] = useState(1);
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showCreateJobModal, setShowCreateJobModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterRole, setFilterRole] = useState('all');
 
   const stats = [
-    { label: "Open Roles", value: "5", icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
-    { label: "Interviews Today", value: "3", icon: Calendar, color: "text-purple-600", bg: "bg-purple-50" },
-    { label: "Pending Reviews", value: "12", icon: Clock, color: "text-orange-600", bg: "bg-orange-50" },
-    { label: "Offers Extended", value: "2", icon: Star, color: "text-green-600", bg: "bg-green-50" },
+    { label: 'Active Jobs', value: '12', icon: Briefcase, color: 'text-blue-600', change: '+3 this month' },
+    { label: 'Candidates', value: '156', icon: Users, color: 'text-green-600', change: '+23 this week' },
+    { label: 'Interviews', value: '8', icon: Calendar, color: 'text-purple-600', change: '4 scheduled today' },
+    { label: 'Placement Rate', value: '85%', icon: Target, color: 'text-orange-600', change: '+5% vs last month' }
   ];
 
-  const openRoles = [
-    {
-      id: 1,
-      title: "Senior Frontend Developer",
-      department: "Engineering",
-      applicants: 45,
-      progress: 75,
-      status: "active",
-      urgency: "high"
-    },
-    {
-      id: 2,
-      title: "Product Manager",
-      department: "Product",
-      applicants: 32,
-      progress: 50,
-      status: "active",
-      urgency: "medium"
-    },
-    {
-      id: 3,
-      title: "UX Designer",
-      department: "Design",
-      applicants: 28,
-      progress: 90,
-      status: "almost-filled",
-      urgency: "low"
-    }
+  const [teamMembers, setTeamMembers] = useState([
+    { id: '1', name: 'Sarah Johnson', email: 'sarah@company.com', role: 'recruiter', status: 'Active', jobs: 3, department: 'HR', lastActive: '2 hours ago' },
+    { id: '2', name: 'Mike Chen', email: 'mike@company.com', role: 'hiring_manager', status: 'Active', jobs: 2, department: 'Engineering', lastActive: '1 day ago' },
+    { id: '3', name: 'Emily Davis', email: 'emily@company.com', role: 'recruiter', status: 'Active', jobs: 3, department: 'HR', lastActive: '30 mins ago' },
+    { id: '4', name: 'Alex Wilson', email: 'alex@company.com', role: 'interviewer', status: 'Inactive', jobs: 0, department: 'Product', lastActive: '1 week ago' }
+  ]);
+
+  const recentJobs = [
+    { id: '1', title: 'Senior Frontend Developer', candidates: 23, status: 'Active', posted: '3 days ago' },
+    { id: '2', title: 'Product Manager', candidates: 18, status: 'Active', posted: '1 week ago' },
+    { id: '3', title: 'UX Designer', candidates: 12, status: 'Draft', posted: '2 days ago' },
+    { id: '4', title: 'Backend Engineer', candidates: 31, status: 'Active', posted: '5 days ago' }
   ];
 
-  const todayInterviews = [
-    {
-      id: 1,
-      candidateName: "Alex Kumar",
-      role: "Senior Frontend Developer",
-      time: "10:00 AM",
-      type: "Technical Interview",
-      status: "upcoming"
-    },
-    {
-      id: 2,
-      candidateName: "Sarah Johnson",
-      role: "Product Manager",
-      time: "2:00 PM",
-      type: "Behavioral Interview",
-      status: "upcoming"
-    },
-    {
-      id: 3,
-      candidateName: "Mike Chen",
-      role: "UX Designer",
-      time: "4:00 PM",
-      type: "Portfolio Review",
-      status: "upcoming"
-    }
-  ];
-
-  const getUrgencyColor = (urgency: string) => {
-    switch (urgency) {
-      case "high": return "bg-red-100 text-red-800";
-      case "medium": return "bg-yellow-100 text-yellow-800";
-      case "low": return "bg-green-100 text-green-800";
-      default: return "bg-gray-100 text-gray-800";
-    }
+  const handleInviteMember = (memberData: any) => {
+    const newMember = {
+      id: Date.now().toString(),
+      name: `${memberData.firstName} ${memberData.lastName}`,
+      email: memberData.email,
+      role: memberData.role,
+      status: 'Pending',
+      jobs: 0,
+      department: memberData.department || 'Unassigned',
+      lastActive: 'Never'
+    };
+    setTeamMembers(prev => [...prev, newMember]);
   };
+
+  const handleCreateJob = (jobData: any) => {
+    toast({
+      title: "Job Created",
+      description: `${jobData.title} has been posted successfully.`,
+    });
+    console.log('Creating job:', jobData);
+    setShowCreateJobModal(false);
+  };
+
+  const handleEditMember = (memberId: string) => {
+    toast({
+      title: "Edit Member",
+      description: "Member editing functionality will be implemented.",
+    });
+  };
+
+  const handleRemoveMember = (memberId: string) => {
+    setTeamMembers(prev => prev.filter(member => member.id !== memberId));
+    toast({
+      title: "Member Removed",
+      description: "Team member has been removed successfully.",
+    });
+  };
+
+  const filteredMembers = teamMembers.filter(member => {
+    const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         member.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRole = filterRole === 'all' || member.role.toLowerCase().includes(filterRole.toLowerCase());
+    return matchesSearch && matchesRole;
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Recruiter Dashboard</h1>
-            <p className="text-gray-600">Manage your recruitment activities and candidate pipeline</p>
-          </div>
-          <div className="flex items-center space-x-4">
-            <Button className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
-              Create New Role
-            </Button>
-            <Avatar className="h-8 w-8">
-              <AvatarFallback>RD</AvatarFallback>
-            </Avatar>
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <Building className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Recruiter Dashboard</h1>
+                <p className="text-sm text-gray-600">Manage jobs, candidates, and hiring pipeline</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Button onClick={() => window.location.href = '/search'}>
+                <Search className="w-4 h-4 mr-2" />
+                AI Search
+              </Button>
+              <NotificationDropdown />
+              <UserProfileDropdown />
+            </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          {stats.map((stat) => (
-            <Card key={stat.label} className="bg-white border-0 shadow-lg">
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <div className={`p-2 rounded-lg ${stat.bg}`}>
-                    <stat.icon className={`h-5 w-5 ${stat.color}`} />
-                  </div>
+      <main className="max-w-7xl mx-auto px-6 py-8">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            Welcome back, {user?.user_metadata?.first_name || 'Recruiter'}! 👋
+          </h2>
+          <p className="text-gray-600">
+            Here's what's happening with your recruitment activities today.
+          </p>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {stats.map((stat, index) => (
+            <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                    <p className="text-sm text-gray-600">{stat.label}</p>
+                    <p className="text-sm font-medium text-gray-600">{stat.label}</p>
+                    <p className="text-3xl font-bold text-gray-900 mt-1">{stat.value}</p>
+                    <p className="text-xs text-green-600 mt-1">{stat.change}</p>
+                  </div>
+                  <div className={`w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center ${stat.color}`}>
+                    <stat.icon className="w-6 h-6" />
                   </div>
                 </div>
               </CardContent>
@@ -122,106 +163,194 @@ const RecruiterDashboard = () => {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Open Roles */}
-          <div className="lg:col-span-2">
-            <Card className="bg-white shadow-lg border-0">
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="jobs">Jobs</TabsTrigger>
+            <TabsTrigger value="candidates">Candidates</TabsTrigger>
+            <TabsTrigger value="team">Team</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-6">
+            {/* Candidate Pipeline with candidates visible for recruiters */}
+            <CandidatePipeline showCandidates={true} />
+
+            {/* Recent Jobs */}
+            <Card>
               <CardHeader>
-                <CardTitle className="text-xl font-bold text-gray-900">Open Roles</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center">
+                    <Briefcase className="w-5 h-5 mr-2" />
+                    Recent Jobs
+                  </CardTitle>
+                  <Button size="sm" onClick={() => setShowCreateJobModal(true)}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    New Job
+                  </Button>
+                </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {openRoles.map((role) => (
-                  <div key={role.id} className="bg-gray-50 rounded-lg p-4">
-                    <div className="flex items-start justify-between mb-3">
+              <CardContent>
+                <div className="space-y-4">
+                  {recentJobs.map((job) => (
+                    <div key={job.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                       <div>
-                        <h4 className="font-semibold text-gray-900">{role.title}</h4>
-                        <p className="text-sm text-gray-600">{role.department}</p>
-                        <p className="text-xs text-gray-500">{role.applicants} applicants</p>
+                        <h4 className="font-medium text-gray-900">{job.title}</h4>
+                        <p className="text-sm text-gray-600">{job.candidates} candidates • Posted {job.posted}</p>
                       </div>
-                      <div className="flex space-x-2">
-                        <Badge className={getUrgencyColor(role.urgency)}>
-                          {role.urgency} priority
+                      <div className="flex items-center space-x-2">
+                        <Badge 
+                          variant={job.status === 'Active' ? 'default' : 'secondary'}
+                          className={job.status === 'Active' ? 'bg-green-100 text-green-800' : ''}
+                        >
+                          {job.status}
                         </Badge>
-                        <Badge variant="outline">
-                          {role.status}
+                        <Button variant="ghost" size="sm">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="jobs">
+            {/* Jobs management content */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Job Management</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">Job management functionality will be implemented here.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="candidates">
+            {/* Candidates management content */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Candidate Management</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">Candidate management functionality will be implemented here.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="team">
+            {/* Team Members */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center">
+                    <Users className="w-5 h-5 mr-2" />
+                    Team Members ({filteredMembers.length})
+                  </CardTitle>
+                  <Button size="sm" onClick={() => setShowInviteModal(true)}>
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Invite
+                  </Button>
+                </div>
+                
+                {/* Filters and Search */}
+                <div className="flex items-center space-x-4 mt-4">
+                  <div className="flex-1">
+                    <Input
+                      placeholder="Search team members..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="max-w-sm"
+                    />
+                  </div>
+                  <Select value={filterRole} onValueChange={setFilterRole}>
+                    <SelectTrigger className="w-48">
+                      <Filter className="w-4 h-4 mr-2" />
+                      <SelectValue placeholder="Filter by role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Roles</SelectItem>
+                      <SelectItem value="recruiter">Recruiters</SelectItem>
+                      <SelectItem value="hiring">Hiring Managers</SelectItem>
+                      <SelectItem value="admin">Admins</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {filteredMembers.map((member) => (
+                    <div key={member.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                          {member.name.split(' ').map(n => n[0]).join('')}
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900">{member.name}</p>
+                          <p className="text-sm text-gray-600">{member.email}</p>
+                          <p className="text-xs text-gray-500">{member.department}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <div className="text-center">
+                          <p className="text-sm font-medium text-gray-900">{member.role.replace('_', ' ')}</p>
+                          <p className="text-xs text-gray-600">{member.jobs} active jobs</p>
+                        </div>
+                        <Badge 
+                          variant={member.status === 'Active' ? 'default' : member.status === 'Pending' ? 'secondary' : 'outline'}
+                          className={
+                            member.status === 'Active' ? 'bg-green-100 text-green-800' : 
+                            member.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : ''
+                          }
+                        >
+                          {member.status}
                         </Badge>
+                        <div className="flex items-center space-x-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleEditMember(member.id)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleRemoveMember(member.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Hiring Progress</span>
-                        <span className="font-medium">{role.progress}%</span>
-                      </div>
-                      <Progress value={role.progress} className="h-2" />
-                    </div>
-                    <div className="flex justify-between mt-3">
-                      <Button variant="outline" size="sm">
-                        View Pipeline
-                      </Button>
-                      <Button size="sm" className="bg-purple-600 text-white">
-                        Manage <ChevronRight className="w-4 h-4 ml-1" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </CardContent>
             </Card>
-          </div>
+          </TabsContent>
+        </Tabs>
+      </main>
 
-          {/* Today's Interviews */}
-          <div className="space-y-6">
-            <Card className="bg-white shadow-lg border-0">
-              <CardHeader>
-                <CardTitle className="text-lg font-bold text-gray-900">Today's Interviews</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {todayInterviews.map((interview) => (
-                  <div key={interview.id} className="bg-blue-50 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h5 className="font-medium text-gray-900">{interview.candidateName}</h5>
-                      <span className="text-sm font-medium text-blue-600">{interview.time}</span>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-1">{interview.role}</p>
-                    <p className="text-xs text-gray-500 mb-3">{interview.type}</p>
-                    <div className="flex space-x-2">
-                      <Button size="sm" variant="outline" className="text-xs">
-                        View Profile
-                      </Button>
-                      <Button size="sm" className="bg-blue-600 text-white text-xs">
-                        Join Interview
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-                <Button variant="outline" className="w-full">
-                  View All Interviews
-                </Button>
-              </CardContent>
-            </Card>
+      {/* Modals */}
+      <InviteMemberModal
+        isOpen={showInviteModal}
+        onClose={() => setShowInviteModal(false)}
+        onInvite={handleInviteMember}
+      />
 
-            {/* Quick Actions */}
-            <Card className="bg-gradient-to-br from-purple-500 to-pink-600 text-white shadow-lg border-0">
-              <CardHeader>
-                <CardTitle className="text-lg font-bold">Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button size="sm" className="w-full bg-white/20 text-white border-white/30 hover:bg-white/30">
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Message Candidates
-                </Button>
-                <Button size="sm" className="w-full bg-white/20 text-white border-white/30 hover:bg-white/30">
-                  <Star className="w-4 h-4 mr-2" />
-                  Review Applications
-                </Button>
-                <Button size="sm" className="w-full bg-white/20 text-white border-white/30 hover:bg-white/30">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Schedule Interviews
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
+      <Dialog open={showCreateJobModal} onOpenChange={setShowCreateJobModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create New Job</DialogTitle>
+          </DialogHeader>
+          <CreateJobForm
+            onSubmit={handleCreateJob}
+            onCancel={() => setShowCreateJobModal(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

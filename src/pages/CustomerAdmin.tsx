@@ -12,6 +12,8 @@ import NotificationDropdown from '@/components/navigation/NotificationDropdown';
 import InviteMemberModal from '@/components/modals/InviteMemberModal';
 import CreateJobForm from '@/components/forms/CreateJobForm';
 import UserRoleAssignment from '@/components/admin/UserRoleAssignment';
+import OrganizationModal from '@/components/modals/OrganizationModal';
+import BillingManagement from '@/components/admin/BillingManagement';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -43,15 +45,63 @@ const CustomerAdmin = () => {
   const { toast } = useToast();
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showCreateJobModal, setShowCreateJobModal] = useState(false);
+  const [showOrgModal, setShowOrgModal] = useState(false);
+  const [selectedOrg, setSelectedOrg] = useState(null);
+  const [orgModalMode, setOrgModalMode] = useState<'create' | 'edit' | 'view'>('create');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('all');
 
   const stats = [
-    { label: 'Team Members', value: '24', icon: Users, color: 'text-blue-600', change: '+2 this month' },
-    { label: 'Monthly Usage', value: '85%', icon: Activity, color: 'text-green-600', change: 'Within limits' },
-    { label: 'Integration Health', value: '98%', icon: Shield, color: 'text-purple-600', change: 'All systems operational' },
-    { label: 'Monthly Cost', value: '$2,450', icon: CreditCard, color: 'text-orange-600', change: '+5% vs last month' }
+    { label: 'Organizations', value: '47', icon: Building, color: 'text-blue-600', change: '+3 this month' },
+    { label: 'Monthly Revenue', value: '$24.5K', icon: CreditCard, color: 'text-green-600', change: '+12% vs last month' },
+    { label: 'System Health', value: '99.8%', icon: Shield, color: 'text-purple-600', change: 'All systems operational' },
+    { label: 'Active Users', value: '1,247', icon: Users, color: 'text-orange-600', change: '+85 this week' }
   ];
+
+  const [organizations, setOrganizations] = useState([
+    { 
+      id: '1', 
+      name: 'TechCorp Solutions', 
+      domain: 'techcorp.com', 
+      plan: 'enterprise', 
+      status: 'active', 
+      contactEmail: 'admin@techcorp.com',
+      contactName: 'John Smith',
+      userLimit: 100,
+      jobLimit: 50,
+      monthlyAmount: 599,
+      nextBilling: 'Jan 15, 2024',
+      billingStatus: 'active'
+    },
+    { 
+      id: '2', 
+      name: 'StartupXYZ', 
+      domain: 'startupxyz.com', 
+      plan: 'professional', 
+      status: 'active', 
+      contactEmail: 'founder@startupxyz.com',
+      contactName: 'Sarah Johnson',
+      userLimit: 25,
+      jobLimit: 15,
+      monthlyAmount: 199,
+      nextBilling: 'Jan 20, 2024',
+      billingStatus: 'active'
+    },
+    { 
+      id: '3', 
+      name: 'GrowthCo', 
+      domain: 'growthco.io', 
+      plan: 'starter', 
+      status: 'trial', 
+      contactEmail: 'team@growthco.io',
+      contactName: 'Mike Chen',
+      userLimit: 10,
+      jobLimit: 5,
+      monthlyAmount: 99,
+      nextBilling: 'Jan 25, 2024',
+      billingStatus: 'trial'
+    }
+  ]);
 
   const [teamMembers, setTeamMembers] = useState([
     { id: '1', name: 'Sarah Johnson', email: 'sarah@company.com', role: 'recruiter', status: 'Active', jobs: 3, department: 'HR', lastActive: '2 hours ago' },
@@ -104,6 +154,49 @@ const CustomerAdmin = () => {
       title: "Member Removed",
       description: "Team member has been removed successfully.",
     });
+  };
+
+  const handleCreateOrganization = () => {
+    setSelectedOrg(null);
+    setOrgModalMode('create');
+    setShowOrgModal(true);
+  };
+
+  const handleEditOrganization = (org: any) => {
+    setSelectedOrg(org);
+    setOrgModalMode('edit');
+    setShowOrgModal(true);
+  };
+
+  const handleViewOrganization = (org: any) => {
+    setSelectedOrg(org);
+    setOrgModalMode('view');
+    setShowOrgModal(true);
+  };
+
+  const handleSaveOrganization = (orgData: any) => {
+    if (orgModalMode === 'create') {
+      const newOrg = {
+        ...orgData,
+        id: Date.now().toString(),
+        monthlyAmount: orgData.plan === 'enterprise' ? 599 : orgData.plan === 'professional' ? 199 : 99,
+        nextBilling: 'Jan 30, 2024',
+        billingStatus: 'active'
+      };
+      setOrganizations(prev => [...prev, newOrg]);
+    } else {
+      setOrganizations(prev =>
+        prev.map(org => org.id === selectedOrg?.id ? { ...org, ...orgData } : org)
+      );
+    }
+  };
+
+  const handleUpdateBilling = (orgId: string, billingData: any) => {
+    setOrganizations(prev =>
+      prev.map(org => 
+        org.id === orgId ? { ...org, ...billingData } : org
+      )
+    );
   };
 
   const filteredMembers = teamMembers.filter(member => {
@@ -196,13 +289,14 @@ const CustomerAdmin = () => {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="team">Team Management</TabsTrigger>
-            <TabsTrigger value="roles">Role Management</TabsTrigger>
-            <TabsTrigger value="system">System Config</TabsTrigger>
+            <TabsTrigger value="organizations">Organizations</TabsTrigger>
+            <TabsTrigger value="billing">Billing</TabsTrigger>
+            <TabsTrigger value="team">Team</TabsTrigger>
+            <TabsTrigger value="roles">Roles</TabsTrigger>
+            <TabsTrigger value="system">System</TabsTrigger>
             <TabsTrigger value="integrations">Integrations</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -227,8 +321,91 @@ const CustomerAdmin = () => {
               ))}
             </div>
 
-            {/* Pipeline Overview - No Candidates */}
+            {/* Pipeline Overview - No individual candidates */}
             <CandidatePipeline showCandidates={false} />
+          </TabsContent>
+
+          <TabsContent value="organizations">
+            {/* Organizations Management */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center">
+                    <Building className="w-5 h-5 mr-2" />
+                    Organizations ({organizations.length})
+                  </CardTitle>
+                  <Button size="sm" onClick={handleCreateOrganization}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Organization
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {organizations.map((org) => (
+                    <div key={org.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                          {org.name.split(' ').map(n => n[0]).join('')}
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-gray-900">{org.name}</h4>
+                          <p className="text-sm text-gray-600">{org.contactEmail}</p>
+                          <p className="text-xs text-gray-500">{org.domain}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center space-x-4">
+                        <div className="text-center">
+                          <Badge className={
+                            org.plan === 'enterprise' ? 'bg-purple-100 text-purple-800' :
+                            org.plan === 'professional' ? 'bg-blue-100 text-blue-800' :
+                            'bg-green-100 text-green-800'
+                          }>
+                            {org.plan}
+                          </Badge>
+                          <p className="text-xs text-gray-600 mt-1">{org.userLimit} users</p>
+                        </div>
+                        
+                        <Badge 
+                          variant={org.status === 'active' ? 'default' : org.status === 'trial' ? 'secondary' : 'outline'}
+                          className={
+                            org.status === 'active' ? 'bg-green-100 text-green-800' : 
+                            org.status === 'trial' ? 'bg-blue-100 text-blue-800' : ''
+                          }
+                        >
+                          {org.status}
+                        </Badge>
+                        
+                        <div className="flex items-center space-x-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleViewOrganization(org)}
+                          >
+                            <Search className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleEditOrganization(org)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="billing">
+            <BillingManagement 
+              organizations={organizations}
+              onUpdateBilling={handleUpdateBilling}
+            />
           </TabsContent>
 
           <TabsContent value="team">
@@ -337,10 +514,6 @@ const CustomerAdmin = () => {
           <TabsContent value="integrations">
             <IntegrationSettings />
           </TabsContent>
-
-          <TabsContent value="analytics">
-            <TeamAnalytics />
-          </TabsContent>
         </Tabs>
       </main>
 
@@ -349,6 +522,14 @@ const CustomerAdmin = () => {
         isOpen={showInviteModal}
         onClose={() => setShowInviteModal(false)}
         onInvite={handleInviteMember}
+      />
+
+      <OrganizationModal
+        isOpen={showOrgModal}
+        onClose={() => setShowOrgModal(false)}
+        organization={selectedOrg}
+        onSave={handleSaveOrganization}
+        mode={orgModalMode}
       />
 
       <Dialog open={showCreateJobModal} onOpenChange={setShowCreateJobModal}>
