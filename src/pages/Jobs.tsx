@@ -1,11 +1,21 @@
 
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Plus, Users, Clock, DollarSign, MapPin } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Users, Clock, DollarSign, MapPin, Search, Filter } from "lucide-react";
+import CreateJobModal from "@/components/jobs/CreateJobModal";
+import JobDetailsModal from "@/components/jobs/JobDetailsModal";
 
 const Jobs = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [selectedJob, setSelectedJob] = useState<any>(null);
+  const [jobDetailsOpen, setJobDetailsOpen] = useState(false);
+
   const jobs = [
     {
       id: 1,
@@ -20,7 +30,9 @@ const Jobs = () => {
       interviewed: 4,
       offers: 1,
       daysOpen: 18,
-      priority: "High"
+      priority: "High",
+      description: "We're looking for a passionate frontend developer to join our team and help build the next generation of our platform.",
+      requirements: "5+ years of React experience, TypeScript, modern CSS frameworks, experience with testing"
     },
     {
       id: 2,
@@ -35,7 +47,9 @@ const Jobs = () => {
       interviewed: 6,
       offers: 2,
       daysOpen: 25,
-      priority: "Medium"
+      priority: "Medium",
+      description: "Lead product strategy and execution for our core platform features.",
+      requirements: "3+ years PM experience, technical background preferred, strong analytical skills"
     },
     {
       id: 3,
@@ -50,7 +64,9 @@ const Jobs = () => {
       interviewed: 3,
       offers: 0,
       daysOpen: 12,
-      priority: "High"
+      priority: "High",
+      description: "Design intuitive user experiences for our platform and mobile applications.",
+      requirements: "Portfolio showcasing UX/UI design, Figma proficiency, user research experience"
     },
     {
       id: 4,
@@ -65,9 +81,18 @@ const Jobs = () => {
       interviewed: 2,
       offers: 1,
       daysOpen: 35,
-      priority: "Low"
+      priority: "Low",
+      description: "Manage and scale our cloud infrastructure and deployment pipelines.",
+      requirements: "AWS/GCP experience, Kubernetes, CI/CD pipelines, infrastructure as code"
     }
   ];
+
+  const filteredJobs = jobs.filter(job => {
+    const matchesSearch = job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         job.department.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === "all" || job.status.toLowerCase() === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -87,6 +112,11 @@ const Jobs = () => {
     }
   };
 
+  const handleViewDetails = (job: any) => {
+    setSelectedJob(job);
+    setJobDetailsOpen(true);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -94,15 +124,37 @@ const Jobs = () => {
           <h1 className="text-3xl font-bold text-gray-900">Job Openings</h1>
           <p className="text-gray-600">Manage your open positions and hiring pipeline</p>
         </div>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Create Job
-        </Button>
+        <CreateJobModal />
+      </div>
+
+      {/* Filters */}
+      <div className="flex gap-4 items-center">
+        <div className="flex-1 relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Input
+            placeholder="Search jobs..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-40">
+            <Filter className="w-4 h-4 mr-2" />
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="on hold">On Hold</SelectItem>
+            <SelectItem value="closed">Closed</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Jobs Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        {jobs.map((job) => (
+        {filteredJobs.map((job) => (
           <Card key={job.id} className="hover:shadow-lg transition-shadow">
             <CardHeader>
               <div className="flex justify-between items-start">
@@ -179,13 +231,21 @@ const Jobs = () => {
               </div>
               
               <div className="flex gap-2 pt-2">
-                <Button size="sm" className="flex-1">View Details</Button>
+                <Button size="sm" className="flex-1" onClick={() => handleViewDetails(job)}>
+                  View Details
+                </Button>
                 <Button size="sm" variant="outline">Edit Job</Button>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
+
+      <JobDetailsModal
+        job={selectedJob}
+        open={jobDetailsOpen}
+        onOpenChange={setJobDetailsOpen}
+      />
     </div>
   );
 };

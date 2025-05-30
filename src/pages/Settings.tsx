@@ -1,244 +1,447 @@
 
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Settings as SettingsIcon, User, Bell, Shield, Zap, Database } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { useToast } from "@/hooks/use-toast";
+import { 
+  User, 
+  Building, 
+  Bell, 
+  Shield, 
+  CreditCard, 
+  Key, 
+  Mail, 
+  Phone,
+  MapPin,
+  Save,
+  LogOut
+} from "lucide-react";
 
 const Settings = () => {
+  const { user, userRole, signOut } = useAuth();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+
+  const [profile, setProfile] = useState({
+    firstName: '',
+    lastName: '',
+    email: user?.email || '',
+    phone: '',
+    title: '',
+    department: '',
+    bio: '',
+    location: '',
+    timezone: 'UTC-8'
+  });
+
+  const [notifications, setNotifications] = useState({
+    emailNewApplications: true,
+    emailInterviewReminders: true,
+    emailOfferUpdates: true,
+    pushNotifications: true,
+    weeklyReports: false,
+    marketingEmails: false
+  });
+
+  const [organization, setOrganization] = useState({
+    name: 'TechCorp Inc.',
+    website: 'https://techcorp.com',
+    industry: 'Technology',
+    size: '51-200 employees',
+    description: 'Leading technology company focused on innovation.'
+  });
+
+  const handleSaveProfile = async () => {
+    setLoading(true);
+    // TODO: Integrate with Supabase
+    setTimeout(() => {
+      setLoading(false);
+      toast({
+        title: "Profile Updated",
+        description: "Your profile has been saved successfully.",
+      });
+    }, 1000);
+  };
+
+  const handleSaveNotifications = async () => {
+    setLoading(true);
+    // TODO: Integrate with Supabase
+    setTimeout(() => {
+      setLoading(false);
+      toast({
+        title: "Notification Settings Updated",
+        description: "Your notification preferences have been saved.",
+      });
+    }, 1000);
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast({
+      title: "Signed Out",
+      description: "You have been successfully signed out.",
+    });
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
         <p className="text-gray-600">Manage your account and preferences</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Settings */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Profile Settings */}
+      <Tabs defaultValue="profile" className="w-full">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="profile">
+            <User className="h-4 w-4 mr-2" />
+            Profile
+          </TabsTrigger>
+          <TabsTrigger value="organization">
+            <Building className="h-4 w-4 mr-2" />
+            Organization
+          </TabsTrigger>
+          <TabsTrigger value="notifications">
+            <Bell className="h-4 w-4 mr-2" />
+            Notifications
+          </TabsTrigger>
+          <TabsTrigger value="security">
+            <Shield className="h-4 w-4 mr-2" />
+            Security
+          </TabsTrigger>
+          <TabsTrigger value="billing">
+            <CreditCard className="h-4 w-4 mr-2" />
+            Billing
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="profile" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Profile Settings
-              </CardTitle>
+              <CardTitle>Profile Information</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
+              <div className="flex items-center space-x-4">
+                <Avatar className="h-20 w-20">
+                  <AvatarImage src={user?.user_metadata?.avatar_url} />
+                  <AvatarFallback className="text-lg">
+                    {profile.firstName?.[0]}{profile.lastName?.[0]}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <Button variant="outline">Upload Photo</Button>
+                  <p className="text-sm text-gray-600 mt-1">JPG, PNG or GIF (max 5MB)</p>
+                </div>
+              </div>
+
+              <Separator />
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="firstName">First Name</Label>
-                  <Input id="firstName" placeholder="John" />
+                  <Input
+                    id="firstName"
+                    value={profile.firstName}
+                    onChange={(e) => setProfile({...profile, firstName: e.target.value})}
+                  />
                 </div>
                 <div>
                   <Label htmlFor="lastName">Last Name</Label>
-                  <Input id="lastName" placeholder="Doe" />
+                  <Input
+                    id="lastName"
+                    value={profile.lastName}
+                    onChange={(e) => setProfile({...profile, lastName: e.target.value})}
+                  />
                 </div>
               </div>
-              
+
               <div>
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="john.doe@company.com" />
+                <Input
+                  id="email"
+                  type="email"
+                  value={profile.email}
+                  onChange={(e) => setProfile({...profile, email: e.target.value})}
+                />
               </div>
-              
-              <div>
-                <Label htmlFor="role">Role</Label>
-                <Input id="role" placeholder="Senior Recruiter" />
-              </div>
-              
-              <Button>Save Changes</Button>
-            </CardContent>
-          </Card>
 
-          {/* Notification Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="h-5 w-5" />
-                Notification Preferences
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Email Notifications</Label>
-                  <p className="text-sm text-gray-600">Receive updates via email</p>
+                  <Label htmlFor="phone">Phone</Label>
+                  <Input
+                    id="phone"
+                    value={profile.phone}
+                    onChange={(e) => setProfile({...profile, phone: e.target.value})}
+                  />
                 </div>
-                <Switch />
-              </div>
-              
-              <div className="flex items-center justify-between">
                 <div>
-                  <Label>Push Notifications</Label>
-                  <p className="text-sm text-gray-600">Browser notifications for urgent updates</p>
+                  <Label htmlFor="title">Job Title</Label>
+                  <Input
+                    id="title"
+                    value={profile.title}
+                    onChange={(e) => setProfile({...profile, title: e.target.value})}
+                  />
                 </div>
-                <Switch />
               </div>
-              
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Weekly Digest</Label>
-                  <p className="text-sm text-gray-600">Summary of hiring activities</p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Candidate Updates</Label>
-                  <p className="text-sm text-gray-600">Status changes and new applications</p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-            </CardContent>
-          </Card>
 
-          {/* AI Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Zap className="h-5 w-5" />
-                AI & Automation
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Auto-screening</Label>
-                  <p className="text-sm text-gray-600">Automatically screen candidates with AI</p>
-                </div>
-                <Switch defaultChecked />
+              <div>
+                <Label htmlFor="bio">Bio</Label>
+                <Textarea
+                  id="bio"
+                  value={profile.bio}
+                  onChange={(e) => setProfile({...profile, bio: e.target.value})}
+                  placeholder="Tell us about yourself..."
+                  rows={3}
+                />
               </div>
-              
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Smart Outreach</Label>
-                  <p className="text-sm text-gray-600">AI-generated personalized messages</p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Hiring Genome Learning</Label>
-                  <p className="text-sm text-gray-600">Continuous learning from hiring decisions</p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Ghost Risk Alerts</Label>
-                  <p className="text-sm text-gray-600">Predict candidate dropout risk</p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Security */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5" />
-                Security
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label>Two-Factor Authentication</Label>
-                <div className="flex items-center justify-between mt-2">
-                  <Badge variant="outline">Enabled</Badge>
-                  <Button variant="outline" size="sm">Manage</Button>
-                </div>
-              </div>
-              
-              <div>
-                <Label>Password</Label>
-                <Button variant="outline" className="w-full mt-2">
-                  Change Password
-                </Button>
-              </div>
-              
-              <div>
-                <Label>Active Sessions</Label>
-                <p className="text-sm text-gray-600 mt-1">3 active sessions</p>
-                <Button variant="outline" size="sm" className="mt-2">
-                  View All
+              <div className="flex justify-end">
+                <Button onClick={handleSaveProfile} disabled={loading}>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Profile
                 </Button>
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
 
-          {/* Data & Privacy */}
+        <TabsContent value="organization" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Database className="h-5 w-5" />
-                Data & Privacy
-              </CardTitle>
+              <CardTitle>Organization Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label>Data Export</Label>
-                <Button variant="outline" className="w-full mt-2">
-                  Export Data
-                </Button>
+                <Label htmlFor="orgName">Organization Name</Label>
+                <Input
+                  id="orgName"
+                  value={organization.name}
+                  onChange={(e) => setOrganization({...organization, name: e.target.value})}
+                />
               </div>
-              
-              <div>
-                <Label>Data Retention</Label>
-                <p className="text-sm text-gray-600 mt-1">
-                  Candidates: 24 months<br/>
-                  Hires: 7 years
-                </p>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="website">Website</Label>
+                  <Input
+                    id="website"
+                    value={organization.website}
+                    onChange={(e) => setOrganization({...organization, website: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="industry">Industry</Label>
+                  <Input
+                    id="industry"
+                    value={organization.industry}
+                    onChange={(e) => setOrganization({...organization, industry: e.target.value})}
+                  />
+                </div>
               </div>
-              
+
               <div>
-                <Label>Privacy Policy</Label>
-                <Button variant="link" className="p-0 h-auto mt-1">
-                  View Privacy Policy
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={organization.description}
+                  onChange={(e) => setOrganization({...organization, description: e.target.value})}
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex justify-end">
+                <Button>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Organization
                 </Button>
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
 
-          {/* Plan Information */}
+        <TabsContent value="notifications" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Current Plan</CardTitle>
+              <CardTitle>Notification Preferences</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Badge className="bg-blue-100 text-blue-800">Professional</Badge>
-                <p className="text-sm text-gray-600 mt-2">
-                  Up to 1,000 candidates/month
-                </p>
-              </div>
-              
-              <div className="text-sm space-y-1">
-                <div className="flex justify-between">
-                  <span>Candidates this month:</span>
-                  <span>247/1,000</span>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <h4 className="font-medium">Email Notifications</h4>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>New Applications</Label>
+                    <p className="text-sm text-gray-600">Get notified when candidates apply to your jobs</p>
+                  </div>
+                  <Switch
+                    checked={notifications.emailNewApplications}
+                    onCheckedChange={(checked) => 
+                      setNotifications({...notifications, emailNewApplications: checked})
+                    }
+                  />
                 </div>
-                <div className="flex justify-between">
-                  <span>AI searches:</span>
-                  <span>156/500</span>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Interview Reminders</Label>
+                    <p className="text-sm text-gray-600">Reminders for upcoming interviews</p>
+                  </div>
+                  <Switch
+                    checked={notifications.emailInterviewReminders}
+                    onCheckedChange={(checked) => 
+                      setNotifications({...notifications, emailInterviewReminders: checked})
+                    }
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Weekly Reports</Label>
+                    <p className="text-sm text-gray-600">Weekly hiring pipeline summary</p>
+                  </div>
+                  <Switch
+                    checked={notifications.weeklyReports}
+                    onCheckedChange={(checked) => 
+                      setNotifications({...notifications, weeklyReports: checked})
+                    }
+                  />
                 </div>
               </div>
-              
-              <Button variant="outline" className="w-full">
-                Upgrade Plan
-              </Button>
+
+              <Separator />
+
+              <div className="space-y-4">
+                <h4 className="font-medium">Push Notifications</h4>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Browser Notifications</Label>
+                    <p className="text-sm text-gray-600">Real-time notifications in your browser</p>
+                  </div>
+                  <Switch
+                    checked={notifications.pushNotifications}
+                    onCheckedChange={(checked) => 
+                      setNotifications({...notifications, pushNotifications: checked})
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <Button onClick={handleSaveNotifications}>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Preferences
+                </Button>
+              </div>
             </CardContent>
           </Card>
-        </div>
-      </div>
+        </TabsContent>
+
+        <TabsContent value="security" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Security Settings</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <div>
+                  <Label>Current Role</Label>
+                  <div className="mt-1">
+                    <Badge className="capitalize">{userRole}</Badge>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div>
+                  <Label>Change Password</Label>
+                  <p className="text-sm text-gray-600 mb-2">Update your password to keep your account secure</p>
+                  <Button variant="outline">
+                    <Key className="h-4 w-4 mr-2" />
+                    Change Password
+                  </Button>
+                </div>
+
+                <Separator />
+
+                <div>
+                  <Label>Two-Factor Authentication</Label>
+                  <p className="text-sm text-gray-600 mb-2">Add an extra layer of security to your account</p>
+                  <Button variant="outline">
+                    <Shield className="h-4 w-4 mr-2" />
+                    Enable 2FA
+                  </Button>
+                </div>
+
+                <Separator />
+
+                <div>
+                  <Label className="text-red-600">Danger Zone</Label>
+                  <p className="text-sm text-gray-600 mb-2">Sign out of your account</p>
+                  <Button variant="destructive" onClick={handleSignOut}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="billing" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Billing & Subscription</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <h4 className="font-medium text-blue-900">Pro Plan</h4>
+                <p className="text-blue-700">$99/month • Unlimited jobs and candidates</p>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="font-medium">Payment Method</h4>
+                <div className="p-4 border rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <CreditCard className="h-8 w-8 text-gray-400" />
+                      <div>
+                        <p className="font-medium">•••• •••• •••• 4242</p>
+                        <p className="text-sm text-gray-600">Expires 12/25</p>
+                      </div>
+                    </div>
+                    <Button variant="outline">Update</Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="font-medium">Billing History</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center p-3 border rounded">
+                    <div>
+                      <p className="font-medium">December 2024</p>
+                      <p className="text-sm text-gray-600">Pro Plan</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium">$99.00</p>
+                      <Button variant="ghost" size="sm">Download</Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
