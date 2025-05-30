@@ -20,6 +20,8 @@ import CandidateInterviews from "./pages/CandidateInterviews";
 import CandidateMessages from "./pages/CandidateMessages";
 import CandidateOffers from "./pages/CandidateOffers";
 import CandidateProfile from "./pages/CandidateProfile";
+import CandidateAssessments from "./pages/CandidateAssessments";
+import HiringManagerDashboard from "./pages/HiringManagerDashboard";
 
 const queryClient = new QueryClient();
 
@@ -34,11 +36,15 @@ const App = () => (
           <Route path="/candidate-portal" element={<CandidatePortal />} />
           <Route path="/candidate-dashboard" element={<CandidateDashboard />} />
           <Route path="/candidate-jobs" element={<CandidateJobs />} />
+          <Route path="/candidate-assessments" element={<CandidateAssessments />} />
           <Route path="/candidate-interviews" element={<CandidateInterviews />} />
           <Route path="/candidate-messages" element={<CandidateMessages />} />
           <Route path="/candidate-offers" element={<CandidateOffers />} />
           <Route path="/candidate-profile" element={<CandidateProfile />} />
           <Route path="/apply/:jobId" element={<CandidateApplication />} />
+          
+          {/* Hiring Manager Routes */}
+          <Route path="/hiring-manager" element={<HiringManagerDashboard />} />
           
           {/* Main App Routes */}
           <Route path="/" element={

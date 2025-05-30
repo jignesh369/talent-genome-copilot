@@ -11,7 +11,8 @@ import {
   Calendar, 
   User, 
   Bell,
-  DollarSign
+  DollarSign,
+  Brain
 } from "lucide-react";
 
 interface CandidateLayoutProps {
@@ -24,6 +25,7 @@ const CandidateLayout = ({ children }: CandidateLayoutProps) => {
   const navItems = [
     { name: "Dashboard", href: "/candidate-dashboard", icon: Home },
     { name: "Jobs", href: "/candidate-jobs", icon: Briefcase },
+    { name: "Assessments", href: "/candidate-assessments", icon: Brain, badge: 2 },
     { name: "Messages", href: "/candidate-messages", icon: MessageCircle, badge: 2 },
     { name: "Interviews", href: "/candidate-interviews", icon: Calendar, badge: 1 },
     { name: "Offers", href: "/candidate-offers", icon: DollarSign },
@@ -89,8 +91,8 @@ const CandidateLayout = ({ children }: CandidateLayoutProps) => {
       </div>
 
       {/* Mobile Bottom Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-2 py-2 z-50">
-        <div className="grid grid-cols-6 gap-1">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-1 py-2 z-50">
+        <div className="grid grid-cols-7 gap-1">
           {navItems.map((item) => (
             <Link
               key={item.name}
@@ -102,7 +104,7 @@ const CandidateLayout = ({ children }: CandidateLayoutProps) => {
                   : "text-gray-600"
               )}
             >
-              <item.icon className="h-4 w-4 mb-1" />
+              <item.icon className="h-3 w-3 mb-1" />
               <span className="text-xs font-medium truncate">{item.name}</span>
               {item.badge && (
                 <Badge className="absolute -top-1 -right-1 h-3 w-3 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 text-white">
