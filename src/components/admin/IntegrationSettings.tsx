@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,7 +16,7 @@ import {
   Link,
   CheckCircle,
   AlertCircle,
-  Sync
+  RefreshCw
 } from 'lucide-react';
 
 const IntegrationSettings: React.FC = () => {
@@ -122,7 +121,7 @@ const IntegrationSettings: React.FC = () => {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-gray-900">Integration Settings</h2>
         <Button variant="outline">
-          <Sync className="w-4 h-4 mr-2" />
+          <RefreshCw className="w-4 h-4 mr-2" />
           Sync All
         </Button>
       </div>
