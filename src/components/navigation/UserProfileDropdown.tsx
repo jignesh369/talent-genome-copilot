@@ -17,7 +17,12 @@ const UserProfileDropdown = () => {
   const { user, userRole, signOut } = useAuth();
 
   const handleProfileClick = () => {
-    window.location.href = '/settings';
+    // Redirect based on user role
+    if (userRole === 'customer_admin') {
+      window.location.href = '/customer-admin';
+    } else {
+      window.location.href = '/settings';
+    }
   };
 
   const handleSignOut = async () => {
@@ -80,7 +85,7 @@ const UserProfileDropdown = () => {
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleProfileClick} className="cursor-pointer">
           <User className="mr-2 h-4 w-4" />
-          Profile & Settings
+          {userRole === 'customer_admin' ? 'Admin Dashboard' : 'Profile & Settings'}
         </DropdownMenuItem>
         <DropdownMenuItem className="cursor-pointer">
           <Building className="mr-2 h-4 w-4" />

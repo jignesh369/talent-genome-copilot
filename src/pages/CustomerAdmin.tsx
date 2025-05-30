@@ -29,8 +29,8 @@ import {
   Shield
 } from 'lucide-react';
 import TeamAnalytics from '@/components/admin/TeamAnalytics';
-import InterviewScheduling from '@/components/admin/InterviewScheduling';
 import CandidatePipeline from '@/components/admin/CandidatePipeline';
+import IntegrationSettings from '@/components/admin/IntegrationSettings';
 
 const CustomerAdmin = () => {
   const { user } = useAuth();
@@ -196,7 +196,7 @@ const CustomerAdmin = () => {
             <TabsTrigger value="roles">Role Management</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="pipeline">Pipeline</TabsTrigger>
-            <TabsTrigger value="interviews">Interviews</TabsTrigger>
+            <TabsTrigger value="integrations">Integrations</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -330,8 +330,8 @@ const CustomerAdmin = () => {
             <CandidatePipeline />
           </TabsContent>
 
-          <TabsContent value="interviews">
-            <InterviewScheduling />
+          <TabsContent value="integrations">
+            <IntegrationSettings />
           </TabsContent>
         </Tabs>
       </main>
