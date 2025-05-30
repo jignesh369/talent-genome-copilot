@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -60,6 +59,43 @@ const Settings = () => {
     description: 'Leading technology company focused on innovation.'
   });
 
+  // Helper function to determine visible tabs based on user role
+  const getVisibleTabs = (userRole: string | null) => {
+    const baseTabs = [
+      { id: 'profile', label: 'Profile', icon: User },
+      { id: 'notifications', label: 'Notifications', icon: Bell },
+      { id: 'security', label: 'Security', icon: Shield }
+    ];
+
+    // Only customer_admin gets access to organization and billing tabs
+    if (userRole === 'customer_admin') {
+      return [
+        { id: 'profile', label: 'Profile', icon: User },
+        { id: 'organization', label: 'Organization', icon: Building },
+        { id: 'notifications', label: 'Notifications', icon: Bell },
+        { id: 'security', label: 'Security', icon: Shield },
+        { id: 'billing', label: 'Billing', icon: CreditCard }
+      ];
+    }
+
+    // startup_admin gets all tabs (though they should typically use their dedicated dashboard)
+    if (userRole === 'startup_admin') {
+      return [
+        { id: 'profile', label: 'Profile', icon: User },
+        { id: 'organization', label: 'Organization', icon: Building },
+        { id: 'notifications', label: 'Notifications', icon: Bell },
+        { id: 'security', label: 'Security', icon: Shield },
+        { id: 'billing', label: 'Billing', icon: CreditCard }
+      ];
+    }
+
+    // All other roles (candidate, recruiter, hiring_manager) get base tabs only
+    return baseTabs;
+  };
+
+  const visibleTabs = getVisibleTabs(userRole);
+  const gridCols = `grid-cols-${visibleTabs.length}`;
+
   const handleSaveProfile = async () => {
     setLoading(true);
     // TODO: Integrate with Supabase
@@ -100,27 +136,13 @@ const Settings = () => {
       </div>
 
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="profile">
-            <User className="h-4 w-4 mr-2" />
-            Profile
-          </TabsTrigger>
-          <TabsTrigger value="organization">
-            <Building className="h-4 w-4 mr-2" />
-            Organization
-          </TabsTrigger>
-          <TabsTrigger value="notifications">
-            <Bell className="h-4 w-4 mr-2" />
-            Notifications
-          </TabsTrigger>
-          <TabsTrigger value="security">
-            <Shield className="h-4 w-4 mr-2" />
-            Security
-          </TabsTrigger>
-          <TabsTrigger value="billing">
-            <CreditCard className="h-4 w-4 mr-2" />
-            Billing
-          </TabsTrigger>
+        <TabsList className={`grid w-full ${gridCols}`}>
+          {visibleTabs.map((tab) => (
+            <TabsTrigger key={tab.id} value={tab.id}>
+              <tab.icon className="h-4 w-4 mr-2" />
+              {tab.label}
+            </TabsTrigger>
+          ))}
         </TabsList>
 
         <TabsContent value="profile" className="space-y-6">
@@ -213,59 +235,61 @@ const Settings = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="organization" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Organization Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="orgName">Organization Name</Label>
-                <Input
-                  id="orgName"
-                  value={organization.name}
-                  onChange={(e) => setOrganization({...organization, name: e.target.value})}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
+        {visibleTabs.some(tab => tab.id === 'organization') && (
+          <TabsContent value="organization" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Organization Details</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="website">Website</Label>
+                  <Label htmlFor="orgName">Organization Name</Label>
                   <Input
-                    id="website"
-                    value={organization.website}
-                    onChange={(e) => setOrganization({...organization, website: e.target.value})}
+                    id="orgName"
+                    value={organization.name}
+                    onChange={(e) => setOrganization({...organization, name: e.target.value})}
                   />
                 </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="website">Website</Label>
+                    <Input
+                      id="website"
+                      value={organization.website}
+                      onChange={(e) => setOrganization({...organization, website: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="industry">Industry</Label>
+                    <Input
+                      id="industry"
+                      value={organization.industry}
+                      onChange={(e) => setOrganization({...organization, industry: e.target.value})}
+                    />
+                  </div>
+                </div>
+
                 <div>
-                  <Label htmlFor="industry">Industry</Label>
-                  <Input
-                    id="industry"
-                    value={organization.industry}
-                    onChange={(e) => setOrganization({...organization, industry: e.target.value})}
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={organization.description}
+                    onChange={(e) => setOrganization({...organization, description: e.target.value})}
+                    rows={3}
                   />
                 </div>
-              </div>
 
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={organization.description}
-                  onChange={(e) => setOrganization({...organization, description: e.target.value})}
-                  rows={3}
-                />
-              </div>
-
-              <div className="flex justify-end">
-                <Button>
-                  <Save className="h-4 w-4 mr-2" />
-                  Save Organization
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+                <div className="flex justify-end">
+                  <Button>
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Organization
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
 
         <TabsContent value="notifications" className="space-y-6">
           <Card>
@@ -396,51 +420,53 @@ const Settings = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="billing" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Billing & Subscription</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <h4 className="font-medium text-blue-900">Pro Plan</h4>
-                <p className="text-blue-700">$99/month • Unlimited jobs and candidates</p>
-              </div>
+        {visibleTabs.some(tab => tab.id === 'billing') && (
+          <TabsContent value="billing" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Billing & Subscription</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <h4 className="font-medium text-blue-900">Pro Plan</h4>
+                  <p className="text-blue-700">$99/month • Unlimited jobs and candidates</p>
+                </div>
 
-              <div className="space-y-4">
-                <h4 className="font-medium">Payment Method</h4>
-                <div className="p-4 border rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <CreditCard className="h-8 w-8 text-gray-400" />
+                <div className="space-y-4">
+                  <h4 className="font-medium">Payment Method</h4>
+                  <div className="p-4 border rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <CreditCard className="h-8 w-8 text-gray-400" />
+                        <div>
+                          <p className="font-medium">•••• •••• •••• 4242</p>
+                          <p className="text-sm text-gray-600">Expires 12/25</p>
+                        </div>
+                      </div>
+                      <Button variant="outline">Update</Button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="font-medium">Billing History</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center p-3 border rounded">
                       <div>
-                        <p className="font-medium">•••• •••• •••• 4242</p>
-                        <p className="text-sm text-gray-600">Expires 12/25</p>
+                        <p className="font-medium">December 2024</p>
+                        <p className="text-sm text-gray-600">Pro Plan</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-medium">$99.00</p>
+                        <Button variant="ghost" size="sm">Download</Button>
                       </div>
                     </div>
-                    <Button variant="outline">Update</Button>
                   </div>
                 </div>
-              </div>
-
-              <div className="space-y-4">
-                <h4 className="font-medium">Billing History</h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center p-3 border rounded">
-                    <div>
-                      <p className="font-medium">December 2024</p>
-                      <p className="text-sm text-gray-600">Pro Plan</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium">$99.00</p>
-                      <Button variant="ghost" size="sm">Download</Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );
