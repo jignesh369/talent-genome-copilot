@@ -28,6 +28,9 @@ import {
   Trash2,
   Shield
 } from 'lucide-react';
+import TeamAnalytics from '@/components/admin/TeamAnalytics';
+import InterviewScheduling from '@/components/admin/InterviewScheduling';
+import CandidatePipeline from '@/components/admin/CandidatePipeline';
 
 const CustomerAdmin = () => {
   const { user } = useAuth();
@@ -187,10 +190,13 @@ const CustomerAdmin = () => {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="team">Team Management</TabsTrigger>
             <TabsTrigger value="roles">Role Management</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="pipeline">Pipeline</TabsTrigger>
+            <TabsTrigger value="interviews">Interviews</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -314,6 +320,18 @@ const CustomerAdmin = () => {
               users={teamMembers}
               onUpdateRole={handleUpdateRole}
             />
+          </TabsContent>
+
+          <TabsContent value="analytics">
+            <TeamAnalytics />
+          </TabsContent>
+
+          <TabsContent value="pipeline">
+            <CandidatePipeline />
+          </TabsContent>
+
+          <TabsContent value="interviews">
+            <InterviewScheduling />
           </TabsContent>
         </Tabs>
       </main>
