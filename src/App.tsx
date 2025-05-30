@@ -16,6 +16,10 @@ import CandidatePortal from "./pages/CandidatePortal";
 import CandidateDashboard from "./pages/CandidateDashboard";
 import CandidateApplication from "./pages/CandidateApplication";
 import CandidateJobs from "./pages/CandidateJobs";
+import CandidateInterviews from "./pages/CandidateInterviews";
+import CandidateMessages from "./pages/CandidateMessages";
+import CandidateOffers from "./pages/CandidateOffers";
+import CandidateProfile from "./pages/CandidateProfile";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +34,10 @@ const App = () => (
           <Route path="/candidate-portal" element={<CandidatePortal />} />
           <Route path="/candidate-dashboard" element={<CandidateDashboard />} />
           <Route path="/candidate-jobs" element={<CandidateJobs />} />
+          <Route path="/candidate-interviews" element={<CandidateInterviews />} />
+          <Route path="/candidate-messages" element={<CandidateMessages />} />
+          <Route path="/candidate-offers" element={<CandidateOffers />} />
+          <Route path="/candidate-profile" element={<CandidateProfile />} />
           <Route path="/apply/:jobId" element={<CandidateApplication />} />
           
           {/* Main App Routes */}
@@ -81,7 +89,6 @@ const App = () => (
               </main>
             </div>
           } />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
