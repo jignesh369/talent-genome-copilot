@@ -41,26 +41,26 @@ const CreateJobForm: React.FC<CreateJobFormProps> = ({ onSubmit, onCancel }) => 
     }));
   };
 
-  const handleArrayChange = (field: string, index: number, value: string) => {
+  const handleArrayChange = (field: 'requirements' | 'responsibilities' | 'benefits', index: number, value: string) => {
     setFormData(prev => ({
       ...prev,
-      [field]: prev[field as keyof typeof prev].map((item: string, i: number) => 
+      [field]: prev[field].map((item: string, i: number) => 
         i === index ? value : item
       )
     }));
   };
 
-  const addArrayItem = (field: string) => {
+  const addArrayItem = (field: 'requirements' | 'responsibilities' | 'benefits') => {
     setFormData(prev => ({
       ...prev,
-      [field]: [...prev[field as keyof typeof prev], '']
+      [field]: [...prev[field], '']
     }));
   };
 
-  const removeArrayItem = (field: string, index: number) => {
+  const removeArrayItem = (field: 'requirements' | 'responsibilities' | 'benefits', index: number) => {
     setFormData(prev => ({
       ...prev,
-      [field]: prev[field as keyof typeof prev].filter((_: string, i: number) => i !== index)
+      [field]: prev[field].filter((_: string, i: number) => i !== index)
     }));
   };
 
@@ -69,10 +69,10 @@ const CreateJobForm: React.FC<CreateJobFormProps> = ({ onSubmit, onCancel }) => 
     onSubmit(formData);
   };
 
-  const renderArrayField = (field: string, label: string, placeholder: string) => (
+  const renderArrayField = (field: 'requirements' | 'responsibilities' | 'benefits', label: string, placeholder: string) => (
     <div>
       <Label className="text-sm font-medium">{label}</Label>
-      {formData[field as keyof typeof formData].map((item: string, index: number) => (
+      {formData[field].map((item: string, index: number) => (
         <div key={index} className="flex items-center space-x-2 mt-2">
           <Input
             value={item}
@@ -80,7 +80,7 @@ const CreateJobForm: React.FC<CreateJobFormProps> = ({ onSubmit, onCancel }) => 
             placeholder={placeholder}
             className="flex-1"
           />
-          {formData[field as keyof typeof formData].length > 1 && (
+          {formData[field].length > 1 && (
             <Button
               type="button"
               variant="outline"
