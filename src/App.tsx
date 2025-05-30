@@ -15,6 +15,7 @@ import NotFound from "./pages/NotFound";
 import CandidatePortal from "./pages/CandidatePortal";
 import CandidateDashboard from "./pages/CandidateDashboard";
 import CandidateApplication from "./pages/CandidateApplication";
+import CandidateJobs from "./pages/CandidateJobs";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
           {/* Candidate Portal Routes */}
           <Route path="/candidate-portal" element={<CandidatePortal />} />
           <Route path="/candidate-dashboard" element={<CandidateDashboard />} />
+          <Route path="/candidate-jobs" element={<CandidateJobs />} />
           <Route path="/apply/:jobId" element={<CandidateApplication />} />
           
           {/* Main App Routes */}
