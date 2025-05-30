@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,11 +27,16 @@ import {
   MoreHorizontal,
   Edit,
   Trash2,
-  Shield
+  Shield,
+  CreditCard,
+  Activity,
+  Database,
+  PieChart
 } from 'lucide-react';
 import TeamAnalytics from '@/components/admin/TeamAnalytics';
 import CandidatePipeline from '@/components/admin/CandidatePipeline';
 import IntegrationSettings from '@/components/admin/IntegrationSettings';
+import SystemConfiguration from '@/components/admin/SystemConfiguration';
 
 const CustomerAdmin = () => {
   const { user } = useAuth();
@@ -42,9 +48,9 @@ const CustomerAdmin = () => {
 
   const stats = [
     { label: 'Team Members', value: '24', icon: Users, color: 'text-blue-600', change: '+2 this month' },
-    { label: 'Active Jobs', value: '8', icon: Briefcase, color: 'text-green-600', change: '+3 this week' },
-    { label: 'Applications', value: '156', icon: UserPlus, color: 'text-purple-600', change: '+23 today' },
-    { label: 'Hire Rate', value: '18%', icon: TrendingUp, color: 'text-orange-600', change: '+2% vs last month' }
+    { label: 'Monthly Usage', value: '85%', icon: Activity, color: 'text-green-600', change: 'Within limits' },
+    { label: 'Integration Health', value: '98%', icon: Shield, color: 'text-purple-600', change: 'All systems operational' },
+    { label: 'Monthly Cost', value: '$2,450', icon: CreditCard, color: 'text-orange-600', change: '+5% vs last month' }
   ];
 
   const [teamMembers, setTeamMembers] = useState([
@@ -109,25 +115,25 @@ const CustomerAdmin = () => {
 
   const quickActions = [
     {
-      title: 'Job Management',
-      description: 'Create and manage job postings for your organization.',
-      icon: Briefcase,
+      title: 'System Configuration',
+      description: 'Configure platform settings, security, and feature flags.',
+      icon: Settings,
       color: 'text-blue-600',
-      action: () => setShowCreateJobModal(true)
+      action: () => {}
     },
     {
-      title: 'Team Management', 
-      description: 'Invite and manage your recruitment team members.',
-      icon: Users,
+      title: 'Integration Management', 
+      description: 'Manage calendar, email, and ATS integrations.',
+      icon: Database,
       color: 'text-green-600',
-      action: () => setShowInviteModal(true)
+      action: () => {}
     },
     {
-      title: 'AI-Powered Search',
-      description: 'Find the perfect candidates using our AI search engine.',
-      icon: Search,
+      title: 'Usage Analytics',
+      description: 'Monitor platform usage, costs, and performance metrics.',
+      icon: PieChart,
       color: 'text-purple-600',
-      action: () => window.location.href = '/search'
+      action: () => {}
     }
   ];
 
@@ -142,8 +148,8 @@ const CustomerAdmin = () => {
                 <Building className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Organization Dashboard</h1>
-                <p className="text-sm text-gray-600">Customer Administration Panel</p>
+                <h1 className="text-2xl font-bold text-gray-900">Customer Admin Dashboard</h1>
+                <p className="text-sm text-gray-600">Technical Configuration & Organization Management</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -165,7 +171,7 @@ const CustomerAdmin = () => {
             Welcome back, {user?.user_metadata?.first_name || 'Admin'}! 👋
           </h2>
           <p className="text-gray-600">
-            Manage your organization's recruitment activities and team.
+            Manage your organization's technical integrations, monitor usage, and configure platform settings.
           </p>
         </div>
 
@@ -194,9 +200,9 @@ const CustomerAdmin = () => {
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="team">Team Management</TabsTrigger>
             <TabsTrigger value="roles">Role Management</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="pipeline">Pipeline</TabsTrigger>
+            <TabsTrigger value="system">System Config</TabsTrigger>
             <TabsTrigger value="integrations">Integrations</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -213,14 +219,16 @@ const CustomerAdmin = () => {
                   <CardContent>
                     <p className="text-gray-600 mb-4">{action.description}</p>
                     <Button className="w-full">
-                      <Plus className="w-4 h-4 mr-2" />
-                      {action.title === 'Job Management' ? 'Create Job' : 
-                       action.title === 'Team Management' ? 'Invite Member' : 'Start Searching'}
+                      <Settings className="w-4 h-4 mr-2" />
+                      Configure
                     </Button>
                   </CardContent>
                 </Card>
               ))}
             </div>
+
+            {/* Pipeline Overview - No Candidates */}
+            <CandidatePipeline showCandidates={false} />
           </TabsContent>
 
           <TabsContent value="team">
@@ -322,16 +330,16 @@ const CustomerAdmin = () => {
             />
           </TabsContent>
 
-          <TabsContent value="analytics">
-            <TeamAnalytics />
-          </TabsContent>
-
-          <TabsContent value="pipeline">
-            <CandidatePipeline />
+          <TabsContent value="system">
+            <SystemConfiguration />
           </TabsContent>
 
           <TabsContent value="integrations">
             <IntegrationSettings />
+          </TabsContent>
+
+          <TabsContent value="analytics">
+            <TeamAnalytics />
           </TabsContent>
         </Tabs>
       </main>

@@ -10,7 +10,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Bell, UserPlus, Briefcase, MessageSquare, Calendar } from 'lucide-react';
+import { Bell, UserPlus, Briefcase, MessageSquare, Calendar, CheckCircle2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface Notification {
   id: string;
@@ -22,7 +23,8 @@ interface Notification {
 }
 
 const NotificationDropdown = () => {
-  const [notifications] = useState<Notification[]>([
+  const { toast } = useToast();
+  const [notifications, setNotifications] = useState<Notification[]>([
     {
       id: '1',
       type: 'application',
@@ -46,10 +48,77 @@ const NotificationDropdown = () => {
       message: 'Emily Davis sent you a message about the Frontend role',
       timestamp: '3 hours ago',
       unread: false
+    },
+    {
+      id: '4',
+      type: 'system',
+      title: 'Integration Update',
+      message: 'Google Calendar integration has been successfully updated',
+      timestamp: '1 day ago',
+      unread: false
     }
   ]);
 
   const unreadCount = notifications.filter(n => n.unread).length;
+
+  const markAsRead = (notificationId: string) => {
+    setNotifications(prev => 
+      prev.map(notification => 
+        notification.id === notificationId 
+          ? { ...notification, unread: false }
+          : notification
+      )
+    );
+    
+    toast({
+      title: "Notification marked as read",
+      description: "The notification has been marked as read.",
+    });
+  };
+
+  const markAllAsRead = () => {
+    setNotifications(prev => 
+      prev.map(notification => ({ ...notification, unread: false }))
+    );
+    
+    toast({
+      title: "All notifications marked as read",
+      description: "All notifications have been marked as read.",
+    });
+  };
+
+  const handleNotificationClick = (notification: Notification) => {
+    if (notification.unread) {
+      markAsRead(notification.id);
+    }
+    
+    // Handle navigation based on notification type
+    switch (notification.type) {
+      case 'application':
+        toast({
+          title: "Opening Applications",
+          description: "Redirecting to applications page...",
+        });
+        // window.location.href = '/candidates';
+        break;
+      case 'interview':
+        toast({
+          title: "Opening Calendar",
+          description: "Redirecting to interview calendar...",
+        });
+        // window.location.href = '/calendar';
+        break;
+      case 'message':
+        toast({
+          title: "Opening Messages",
+          description: "Redirecting to messages...",
+        });
+        // window.location.href = '/messages';
+        break;
+      default:
+        break;
+    }
+  };
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -59,6 +128,8 @@ const NotificationDropdown = () => {
         return <Calendar className="h-4 w-4 text-green-600" />;
       case 'message':
         return <MessageSquare className="h-4 w-4 text-purple-600" />;
+      case 'system':
+        return <CheckCircle2 className="h-4 w-4 text-orange-600" />;
       default:
         return <Briefcase className="h-4 w-4 text-gray-600" />;
     }
@@ -70,18 +141,25 @@ const NotificationDropdown = () => {
         <Button variant="ghost" size="sm" className="relative">
           <Bell className="h-4 w-4" />
           {unreadCount > 0 && (
-            <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+            <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500">
               {unreadCount}
             </Badge>
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-80 bg-white border shadow-lg" align="end">
+      <DropdownMenuContent className="w-80 bg-white border shadow-lg z-50" align="end">
         <DropdownMenuLabel className="flex items-center justify-between">
           <span>Notifications</span>
-          <Button variant="ghost" size="sm" className="text-xs">
-            Mark all read
-          </Button>
+          {unreadCount > 0 && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-xs"
+              onClick={markAllAsRead}
+            >
+              Mark all read
+            </Button>
+          )}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {notifications.length === 0 ? (
@@ -92,7 +170,11 @@ const NotificationDropdown = () => {
         ) : (
           <div className="max-h-96 overflow-y-auto">
             {notifications.map((notification) => (
-              <DropdownMenuItem key={notification.id} className="cursor-pointer p-4 flex-col items-start">
+              <DropdownMenuItem 
+                key={notification.id} 
+                className="cursor-pointer p-4 flex-col items-start hover:bg-gray-50"
+                onClick={() => handleNotificationClick(notification)}
+              >
                 <div className="flex items-start space-x-3 w-full">
                   <div className="flex-shrink-0 mt-1">
                     {getIcon(notification.type)}

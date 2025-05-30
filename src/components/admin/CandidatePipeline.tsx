@@ -3,407 +3,215 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
+import { Progress } from '@/components/ui/progress';
 import { 
   Users, 
-  Search, 
-  Filter, 
-  ArrowRight, 
-  ArrowLeft,
-  MoreHorizontal,
-  Eye,
-  MessageSquare,
-  Calendar,
-  FileText,
-  Star
+  TrendingUp, 
+  Clock, 
+  CheckCircle,
+  AlertCircle,
+  ArrowRight,
+  Filter,
+  Calendar
 } from 'lucide-react';
 
-interface Candidate {
-  id: string;
-  name: string;
-  email: string;
-  position: string;
-  stage: string;
-  score: number;
-  experience: string;
-  location: string;
-  salary: string;
-  appliedDate: string;
-  status: 'active' | 'on-hold' | 'rejected';
-  avatar?: string;
-  skills: string[];
+interface CandidatePipelineProps {
+  showCandidates?: boolean;
 }
 
-interface PipelineStage {
-  id: string;
-  name: string;
-  count: number;
-  color: string;
-}
+const CandidatePipeline: React.FC<CandidatePipelineProps> = ({ showCandidates = true }) => {
+  const [selectedJob, setSelectedJob] = useState('all');
 
-const CandidatePipeline: React.FC = () => {
-  const { toast } = useToast();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedStage, setSelectedStage] = useState('all');
-  const [selectedPosition, setSelectedPosition] = useState('all');
-
-  const stages: PipelineStage[] = [
-    { id: 'applied', name: 'Applied', count: 24, color: 'bg-blue-100 text-blue-800' },
-    { id: 'screening', name: 'Screening', count: 16, color: 'bg-yellow-100 text-yellow-800' },
-    { id: 'interview', name: 'Interview', count: 8, color: 'bg-purple-100 text-purple-800' },
-    { id: 'technical', name: 'Technical', count: 5, color: 'bg-orange-100 text-orange-800' },
-    { id: 'final', name: 'Final Round', count: 3, color: 'bg-green-100 text-green-800' },
-    { id: 'offer', name: 'Offer', count: 2, color: 'bg-emerald-100 text-emerald-800' }
+  const pipelineStats = [
+    { stage: 'Applied', count: 156, percentage: 100, color: 'bg-blue-500' },
+    { stage: 'Screening', count: 89, percentage: 57, color: 'bg-yellow-500' },
+    { stage: 'Interview', count: 34, percentage: 22, color: 'bg-orange-500' },
+    { stage: 'Final', count: 12, percentage: 8, color: 'bg-purple-500' },
+    { stage: 'Offer', count: 5, percentage: 3, color: 'bg-green-500' }
   ];
 
-  const [candidates, setCandidates] = useState<Candidate[]>([
+  const candidates = [
     {
-      id: '1',
-      name: 'Alice Johnson',
-      email: 'alice@email.com',
-      position: 'Senior Developer',
-      stage: 'interview',
-      score: 4.5,
-      experience: '5 years',
-      location: 'New York',
-      salary: '$120k',
-      appliedDate: '2025-01-01',
-      status: 'active',
-      skills: ['React', 'TypeScript', 'Node.js']
+      id: 1,
+      name: 'Alex Kumar',
+      role: 'Senior Frontend Developer',
+      stage: 'Interview',
+      score: 85,
+      avatar: 'AK',
+      status: 'scheduled',
+      nextAction: 'Technical Interview - Tomorrow 2 PM'
     },
     {
-      id: '2',
-      name: 'Bob Smith',
-      email: 'bob@email.com',
-      position: 'Product Manager',
-      stage: 'screening',
-      score: 4.2,
-      experience: '7 years',
-      location: 'San Francisco',
-      salary: '$140k',
-      appliedDate: '2024-12-28',
-      status: 'active',
-      skills: ['Product Strategy', 'Analytics', 'Leadership']
+      id: 2,
+      name: 'Sarah Johnson',
+      role: 'Product Manager',
+      stage: 'Final',
+      score: 92,
+      avatar: 'SJ',
+      status: 'pending',
+      nextAction: 'Final Interview - Pending Schedule'
     },
     {
-      id: '3',
-      name: 'Carol Davis',
-      email: 'carol@email.com',
-      position: 'UX Designer',
-      stage: 'technical',
-      score: 4.8,
-      experience: '4 years',
-      location: 'Austin',
-      salary: '$95k',
-      appliedDate: '2024-12-30',
-      status: 'active',
-      skills: ['Figma', 'User Research', 'Prototyping']
-    },
-    {
-      id: '4',
-      name: 'David Wilson',
-      email: 'david@email.com',
-      position: 'Senior Developer',
-      stage: 'final',
-      score: 4.6,
-      experience: '6 years',
-      location: 'Seattle',
-      salary: '$130k',
-      appliedDate: '2024-12-25',
-      status: 'active',
-      skills: ['Python', 'AWS', 'Machine Learning']
-    },
-    {
-      id: '5',
-      name: 'Emma Brown',
-      email: 'emma@email.com',
-      position: 'Marketing Manager',
-      stage: 'offer',
-      score: 4.9,
-      experience: '5 years',
-      location: 'Chicago',
-      salary: '$85k',
-      appliedDate: '2024-12-20',
-      status: 'active',
-      skills: ['Digital Marketing', 'SEO', 'Content Strategy']
+      id: 3,
+      name: 'Mike Chen',
+      role: 'UX Designer',
+      stage: 'Offer',
+      score: 88,
+      avatar: 'MC',
+      status: 'offer-sent',
+      nextAction: 'Offer Sent - Awaiting Response'
     }
-  ]);
+  ];
 
-  const filteredCandidates = candidates.filter(candidate => {
-    const matchesSearch = candidate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         candidate.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         candidate.position.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStage = selectedStage === 'all' || candidate.stage === selectedStage;
-    const matchesPosition = selectedPosition === 'all' || candidate.position === selectedPosition;
-    return matchesSearch && matchesStage && matchesPosition;
-  });
+  const jobs = [
+    { id: 'all', title: 'All Positions', count: 156 },
+    { id: '1', title: 'Senior Frontend Developer', count: 67 },
+    { id: '2', title: 'Product Manager', count: 45 },
+    { id: '3', title: 'UX Designer', count: 34 },
+    { id: '4', title: 'Backend Engineer', count: 10 }
+  ];
 
-  const handleMoveCandidate = (candidateId: string, newStage: string) => {
-    setCandidates(prev =>
-      prev.map(candidate =>
-        candidate.id === candidateId ? { ...candidate, stage: newStage } : candidate
-      )
-    );
-    toast({
-      title: "Candidate Moved",
-      description: `Candidate has been moved to ${newStage} stage.`,
-    });
+  const getStageIcon = (stage: string) => {
+    switch (stage) {
+      case 'Interview':
+        return <Calendar className="w-4 h-4" />;
+      case 'Final':
+        return <Clock className="w-4 h-4" />;
+      case 'Offer':
+        return <CheckCircle className="w-4 h-4" />;
+      default:
+        return <Users className="w-4 h-4" />;
+    }
   };
 
-  const handleRejectCandidate = (candidateId: string) => {
-    setCandidates(prev =>
-      prev.map(candidate =>
-        candidate.id === candidateId ? { ...candidate, status: 'rejected' } : candidate
-      )
-    );
-    toast({
-      title: "Candidate Rejected",
-      description: "Candidate has been moved to rejected status.",
-    });
-  };
-
-  const getCandidatesByStage = (stageId: string) => {
-    return filteredCandidates.filter(candidate => candidate.stage === stageId);
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'scheduled':
+        return 'bg-blue-100 text-blue-800';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'offer-sent':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">Candidate Pipeline</h2>
-        <div className="flex items-center space-x-4">
-          <Input
-            placeholder="Search candidates..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-64"
-          />
-          <Select value={selectedPosition} onValueChange={setSelectedPosition}>
-            <SelectTrigger className="w-48">
-              <Filter className="w-4 h-4 mr-2" />
-              <SelectValue placeholder="All Positions" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Positions</SelectItem>
-              <SelectItem value="Senior Developer">Senior Developer</SelectItem>
-              <SelectItem value="Product Manager">Product Manager</SelectItem>
-              <SelectItem value="UX Designer">UX Designer</SelectItem>
-              <SelectItem value="Marketing Manager">Marketing Manager</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
       {/* Pipeline Overview */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {stages.map((stage) => (
-          <Card key={stage.id} className="cursor-pointer hover:shadow-md transition-shadow"
-                onClick={() => setSelectedStage(stage.id)}>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-gray-900">{stage.count}</div>
-              <div className="text-sm text-gray-600 mt-1">{stage.name}</div>
-              <Badge className={`${stage.color} mt-2`}>
-                {stage.id === selectedStage ? 'Selected' : 'View'}
-              </Badge>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Pipeline Board */}
-      <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
-        {stages.map((stage) => (
-          <Card key={stage.id} className="h-fit">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium flex items-center justify-between">
-                <span>{stage.name}</span>
-                <Badge variant="outline" className="text-xs">
-                  {getCandidatesByStage(stage.id).length}
-                </Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {getCandidatesByStage(stage.id).map((candidate) => (
-                <div key={candidate.id} className="p-3 bg-white border rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-semibold">
-                        {candidate.name.split(' ').map(n => n[0]).join('')}
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-sm">{candidate.name}</h4>
-                        <p className="text-xs text-gray-600">{candidate.position}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                      <span className="text-xs">{candidate.score}</span>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center">
+              <TrendingUp className="w-5 h-5 mr-2" />
+              Hiring Pipeline Overview
+            </CardTitle>
+            {showCandidates && (
+              <div className="flex items-center space-x-2">
+                <Button variant="outline" size="sm">
+                  <Filter className="w-4 h-4 mr-2" />
+                  Filter
+                </Button>
+                <select 
+                  className="text-sm border rounded px-2 py-1"
+                  value={selectedJob}
+                  onChange={(e) => setSelectedJob(e.target.value)}
+                >
+                  {jobs.map(job => (
+                    <option key={job.id} value={job.id}>
+                      {job.title} ({job.count})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-5 gap-4">
+            {pipelineStats.map((stage, index) => (
+              <div key={stage.stage} className="text-center">
+                <div className="relative">
+                  <div className="w-16 h-16 mx-auto rounded-full bg-gray-100 flex items-center justify-center mb-2">
+                    <div className={`w-12 h-12 rounded-full ${stage.color} flex items-center justify-center text-white font-bold text-lg`}>
+                      {stage.count}
                     </div>
                   </div>
-
-                  <div className="space-y-1 text-xs text-gray-600 mb-3">
-                    <div>📍 {candidate.location}</div>
-                    <div>💰 {candidate.salary}</div>
-                    <div>⏱️ {candidate.experience}</div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-1 mb-3">
-                    {candidate.skills.slice(0, 2).map((skill) => (
-                      <Badge key={skill} variant="outline" className="text-xs px-1 py-0">
-                        {skill}
-                      </Badge>
-                    ))}
-                    {candidate.skills.length > 2 && (
-                      <Badge variant="outline" className="text-xs px-1 py-0">
-                        +{candidate.skills.length - 2}
-                      </Badge>
-                    )}
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex space-x-1">
-                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                        <Eye className="w-3 h-3" />
-                      </Button>
-                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                        <MessageSquare className="w-3 h-3" />
-                      </Button>
-                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                        <Calendar className="w-3 h-3" />
-                      </Button>
-                    </div>
-                    
-                    <div className="flex space-x-1">
-                      {stage.id !== 'offer' && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="h-6 w-6 p-0"
-                          onClick={() => {
-                            const currentIndex = stages.findIndex(s => s.id === stage.id);
-                            if (currentIndex < stages.length - 1) {
-                              handleMoveCandidate(candidate.id, stages[currentIndex + 1].id);
-                            }
-                          }}
-                        >
-                          <ArrowRight className="w-3 h-3" />
-                        </Button>
-                      )}
-                      {stage.id !== 'applied' && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="h-6 w-6 p-0"
-                          onClick={() => {
-                            const currentIndex = stages.findIndex(s => s.id === stage.id);
-                            if (currentIndex > 0) {
-                              handleMoveCandidate(candidate.id, stages[currentIndex - 1].id);
-                            }
-                          }}
-                        >
-                          <ArrowLeft className="w-3 h-3" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
+                  {index < pipelineStats.length - 1 && (
+                    <ArrowRight className="absolute top-6 -right-8 w-4 h-4 text-gray-400" />
+                  )}
                 </div>
-              ))}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                <h4 className="font-medium text-gray-900">{stage.stage}</h4>
+                <p className="text-sm text-gray-600">{stage.percentage}%</p>
+                <div className="mt-2">
+                  <Progress value={stage.percentage} className="h-2" />
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-medium text-blue-900">Pipeline Health</h4>
+                <p className="text-sm text-blue-700">Conversion rate: 3.2% (Industry avg: 2.8%)</p>
+              </div>
+              <Badge className="bg-green-100 text-green-800">Healthy</Badge>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* Detailed View */}
-      {selectedStage !== 'all' && (
+      {/* Active Candidates - Only show if showCandidates is true */}
+      {showCandidates && (
         <Card>
           <CardHeader>
-            <CardTitle>
-              {stages.find(s => s.id === selectedStage)?.name} Stage Details
+            <CardTitle className="flex items-center">
+              <Users className="w-5 h-5 mr-2" />
+              Active Candidates
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {getCandidatesByStage(selectedStage).map((candidate) => (
-                <div key={candidate.id} className="p-4 border rounded-lg">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
-                        {candidate.name.split(' ').map(n => n[0]).join('')}
+              {candidates.map((candidate) => (
+                <div key={candidate.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                      {candidate.avatar}
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-900">{candidate.name}</h4>
+                      <p className="text-sm text-gray-600">{candidate.role}</p>
+                      <p className="text-xs text-gray-500">{candidate.nextAction}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-4">
+                    <div className="text-center">
+                      <div className="flex items-center space-x-2">
+                        {getStageIcon(candidate.stage)}
+                        <span className="text-sm font-medium">{candidate.stage}</span>
                       </div>
-                      <div>
-                        <h3 className="font-semibold">{candidate.name}</h3>
-                        <p className="text-sm text-gray-600">{candidate.email}</p>
-                        <p className="text-sm text-gray-600">{candidate.position}</p>
-                      </div>
+                      <p className="text-xs text-gray-600">Score: {candidate.score}%</p>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Badge className="bg-yellow-100 text-yellow-800">
-                        ⭐ {candidate.score}/5.0
-                      </Badge>
-                      <Badge variant="outline">
-                        {candidate.status}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                    <div>
-                      <p className="text-sm text-gray-600">Experience</p>
-                      <p className="font-medium">{candidate.experience}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Location</p>
-                      <p className="font-medium">{candidate.location}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Expected Salary</p>
-                      <p className="font-medium">{candidate.salary}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Applied</p>
-                      <p className="font-medium">{new Date(candidate.appliedDate).toLocaleDateString()}</p>
-                    </div>
-                  </div>
-
-                  <div className="mb-4">
-                    <p className="text-sm text-gray-600 mb-2">Skills</p>
-                    <div className="flex flex-wrap gap-2">
-                      {candidate.skills.map((skill) => (
-                        <Badge key={skill} variant="outline">{skill}</Badge>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Button variant="outline" size="sm">
-                      <Eye className="w-4 h-4 mr-1" />
+                    
+                    <Badge className={getStatusColor(candidate.status)}>
+                      {candidate.status.replace('-', ' ')}
+                    </Badge>
+                    
+                    <Button size="sm">
                       View Profile
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <MessageSquare className="w-4 h-4 mr-1" />
-                      Message
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <Calendar className="w-4 h-4 mr-1" />
-                      Schedule
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <FileText className="w-4 h-4 mr-1" />
-                      Resume
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="text-red-600 hover:text-red-700"
-                      onClick={() => handleRejectCandidate(candidate.id)}
-                    >
-                      Reject
                     </Button>
                   </div>
                 </div>
               ))}
+            </div>
+            
+            <div className="mt-4 text-center">
+              <Button variant="outline">
+                View All Candidates
+              </Button>
             </div>
           </CardContent>
         </Card>
