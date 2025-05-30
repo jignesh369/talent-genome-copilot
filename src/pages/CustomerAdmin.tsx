@@ -1,9 +1,17 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/components/auth/AuthProvider';
+import UserProfileDropdown from '@/components/navigation/UserProfileDropdown';
+import NotificationDropdown from '@/components/navigation/NotificationDropdown';
+import InviteMemberModal from '@/components/modals/InviteMemberModal';
+import CreateJobForm from '@/components/forms/CreateJobForm';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
 import { 
   Users, 
   Briefcase, 
@@ -12,24 +20,101 @@ import {
   Plus,
   TrendingUp,
   Building,
-  Search
+  Search,
+  Filter,
+  MoreHorizontal,
+  Edit,
+  Trash2
 } from 'lucide-react';
 
 const CustomerAdmin = () => {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showCreateJobModal, setShowCreateJobModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterRole, setFilterRole] = useState('all');
 
   const stats = [
-    { label: 'Team Members', value: '24', icon: Users, color: 'text-blue-600' },
-    { label: 'Active Jobs', value: '8', icon: Briefcase, color: 'text-green-600' },
-    { label: 'Applications', value: '156', icon: UserPlus, color: 'text-purple-600' },
-    { label: 'Hire Rate', value: '18%', icon: TrendingUp, color: 'text-orange-600' }
+    { label: 'Team Members', value: '24', icon: Users, color: 'text-blue-600', change: '+2 this month' },
+    { label: 'Active Jobs', value: '8', icon: Briefcase, color: 'text-green-600', change: '+3 this week' },
+    { label: 'Applications', value: '156', icon: UserPlus, color: 'text-purple-600', change: '+23 today' },
+    { label: 'Hire Rate', value: '18%', icon: TrendingUp, color: 'text-orange-600', change: '+2% vs last month' }
   ];
 
-  const teamMembers = [
-    { name: 'Sarah Johnson', role: 'Recruiter', status: 'Active', jobs: 3 },
-    { name: 'Mike Chen', role: 'Hiring Manager', status: 'Active', jobs: 2 },
-    { name: 'Emily Davis', role: 'Recruiter', status: 'Active', jobs: 3 },
-    { name: 'Alex Wilson', role: 'Hiring Manager', status: 'Inactive', jobs: 0 }
+  const [teamMembers, setTeamMembers] = useState([
+    { id: '1', name: 'Sarah Johnson', email: 'sarah@company.com', role: 'Recruiter', status: 'Active', jobs: 3, department: 'HR' },
+    { id: '2', name: 'Mike Chen', email: 'mike@company.com', role: 'Hiring Manager', status: 'Active', jobs: 2, department: 'Engineering' },
+    { id: '3', name: 'Emily Davis', email: 'emily@company.com', role: 'Recruiter', status: 'Active', jobs: 3, department: 'HR' },
+    { id: '4', name: 'Alex Wilson', email: 'alex@company.com', role: 'Hiring Manager', status: 'Inactive', jobs: 0, department: 'Product' }
+  ]);
+
+  const handleInviteMember = (memberData: any) => {
+    const newMember = {
+      id: Date.now().toString(),
+      name: `${memberData.firstName} ${memberData.lastName}`,
+      email: memberData.email,
+      role: memberData.role,
+      status: 'Pending',
+      jobs: 0,
+      department: memberData.department || 'Unassigned'
+    };
+    setTeamMembers(prev => [...prev, newMember]);
+  };
+
+  const handleCreateJob = (jobData: any) => {
+    toast({
+      title: "Job Created",
+      description: `${jobData.title} has been posted successfully.`,
+    });
+    console.log('Creating job:', jobData);
+    setShowCreateJobModal(false);
+  };
+
+  const handleEditMember = (memberId: string) => {
+    toast({
+      title: "Edit Member",
+      description: "Member editing functionality will be implemented.",
+    });
+  };
+
+  const handleRemoveMember = (memberId: string) => {
+    setTeamMembers(prev => prev.filter(member => member.id !== memberId));
+    toast({
+      title: "Member Removed",
+      description: "Team member has been removed successfully.",
+    });
+  };
+
+  const filteredMembers = teamMembers.filter(member => {
+    const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         member.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRole = filterRole === 'all' || member.role.toLowerCase().includes(filterRole.toLowerCase());
+    return matchesSearch && matchesRole;
+  });
+
+  const quickActions = [
+    {
+      title: 'Job Management',
+      description: 'Create and manage job postings for your organization.',
+      icon: Briefcase,
+      color: 'text-blue-600',
+      action: () => setShowCreateJobModal(true)
+    },
+    {
+      title: 'Team Management', 
+      description: 'Invite and manage your recruitment team members.',
+      icon: Users,
+      color: 'text-green-600',
+      action: () => setShowInviteModal(true)
+    },
+    {
+      title: 'AI-Powered Search',
+      description: 'Find the perfect candidates using our AI search engine.',
+      icon: Search,
+      color: 'text-purple-600',
+      action: () => window.location.href = '/search'
+    }
   ];
 
   return (
@@ -48,13 +133,12 @@ const CustomerAdmin = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <Button>
+              <Button onClick={() => window.location.href = '/search'}>
                 <Search className="w-4 h-4 mr-2" />
                 AI Search
               </Button>
-              <Button variant="outline" onClick={signOut}>
-                Sign Out
-              </Button>
+              <NotificationDropdown />
+              <UserProfileDropdown />
             </div>
           </div>
         </div>
@@ -74,12 +158,13 @@ const CustomerAdmin = () => {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {stats.map((stat, index) => (
-            <Card key={index} className="hover:shadow-lg transition-shadow">
+            <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">{stat.label}</p>
                     <p className="text-3xl font-bold text-gray-900 mt-1">{stat.value}</p>
+                    <p className="text-xs text-green-600 mt-1">{stat.change}</p>
                   </div>
                   <div className={`w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center ${stat.color}`}>
                     <stat.icon className="w-6 h-6" />
@@ -92,95 +177,109 @@ const CustomerAdmin = () => {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Briefcase className="w-5 h-5 mr-2 text-blue-600" />
-                Job Management
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 mb-4">
-                Create and manage job postings for your organization.
-              </p>
-              <Button className="w-full">
-                <Plus className="w-4 h-4 mr-2" />
-                Create Job
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Users className="w-5 h-5 mr-2 text-green-600" />
-                Team Management
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 mb-4">
-                Invite and manage your recruitment team members.
-              </p>
-              <Button variant="outline" className="w-full">
-                <UserPlus className="w-4 h-4 mr-2" />
-                Invite Member
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Search className="w-5 h-5 mr-2 text-purple-600" />
-                AI-Powered Search
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 mb-4">
-                Find the perfect candidates using our AI search engine.
-              </p>
-              <Button variant="outline" className="w-full">
-                Start Searching
-              </Button>
-            </CardContent>
-          </Card>
+          {quickActions.map((action, index) => (
+            <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={action.action}>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <action.icon className={`w-5 h-5 mr-2 ${action.color}`} />
+                  {action.title}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 mb-4">{action.description}</p>
+                <Button className="w-full">
+                  <Plus className="w-4 h-4 mr-2" />
+                  {action.title === 'Job Management' ? 'Create Job' : 
+                   action.title === 'Team Management' ? 'Invite Member' : 'Start Searching'}
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         {/* Team Members */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span className="flex items-center">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center">
                 <Users className="w-5 h-5 mr-2" />
-                Team Members
-              </span>
-              <Button size="sm">
+                Team Members ({filteredMembers.length})
+              </CardTitle>
+              <Button size="sm" onClick={() => setShowInviteModal(true)}>
                 <UserPlus className="w-4 h-4 mr-2" />
                 Invite
               </Button>
-            </CardTitle>
+            </div>
+            
+            {/* Filters and Search */}
+            <div className="flex items-center space-x-4 mt-4">
+              <div className="flex-1">
+                <Input
+                  placeholder="Search team members..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="max-w-sm"
+                />
+              </div>
+              <Select value={filterRole} onValueChange={setFilterRole}>
+                <SelectTrigger className="w-48">
+                  <Filter className="w-4 h-4 mr-2" />
+                  <SelectValue placeholder="Filter by role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Roles</SelectItem>
+                  <SelectItem value="recruiter">Recruiters</SelectItem>
+                  <SelectItem value="hiring">Hiring Managers</SelectItem>
+                  <SelectItem value="admin">Admins</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {teamMembers.map((member, index) => (
-                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              {filteredMembers.map((member) => (
+                <div key={member.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
                       {member.name.split(' ').map(n => n[0]).join('')}
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">{member.name}</p>
-                      <p className="text-sm text-gray-600">{member.role}</p>
+                      <p className="text-sm text-gray-600">{member.email}</p>
+                      <p className="text-xs text-gray-500">{member.department}</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-4">
-                    <span className="text-sm text-gray-600">{member.jobs} active jobs</span>
+                    <div className="text-center">
+                      <p className="text-sm font-medium text-gray-900">{member.role}</p>
+                      <p className="text-xs text-gray-600">{member.jobs} active jobs</p>
+                    </div>
                     <Badge 
-                      variant={member.status === 'Active' ? 'default' : 'secondary'}
-                      className={member.status === 'Active' ? 'bg-green-100 text-green-800' : ''}
+                      variant={member.status === 'Active' ? 'default' : member.status === 'Pending' ? 'secondary' : 'outline'}
+                      className={
+                        member.status === 'Active' ? 'bg-green-100 text-green-800' : 
+                        member.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : ''
+                      }
                     >
                       {member.status}
                     </Badge>
+                    <div className="flex items-center space-x-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleEditMember(member.id)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleRemoveMember(member.id)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -188,6 +287,25 @@ const CustomerAdmin = () => {
           </CardContent>
         </Card>
       </main>
+
+      {/* Modals */}
+      <InviteMemberModal
+        isOpen={showInviteModal}
+        onClose={() => setShowInviteModal(false)}
+        onInvite={handleInviteMember}
+      />
+
+      <Dialog open={showCreateJobModal} onOpenChange={setShowCreateJobModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create New Job</DialogTitle>
+          </DialogHeader>
+          <CreateJobForm
+            onSubmit={handleCreateJob}
+            onCancel={() => setShowCreateJobModal(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
