@@ -1,16 +1,15 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Clock, CheckCircle, AlertCircle, Play, FileText, Brain } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 import CandidateLayout from "@/components/candidate/CandidateLayout";
 
 const CandidateAssessments = () => {
   const [selectedAssessment, setSelectedAssessment] = useState<number | null>(null);
-
-  const assessments = [
+  const [assessments, setAssessments] = useState([
     {
       id: 1,
       title: "React Technical Assessment",
@@ -48,7 +47,35 @@ const CandidateAssessments = () => {
       dueDate: "1 week",
       description: "Personality and work style assessment"
     }
-  ];
+  ]);
+
+  const handleStartAssessment = (assessmentId: number) => {
+    setAssessments(prev => prev.map(assessment => 
+      assessment.id === assessmentId 
+        ? { ...assessment, status: "pending" }
+        : assessment
+    ));
+    
+    toast({
+      title: "Assessment Started!",
+      description: "Your assessment has been initiated. Good luck!",
+    });
+  };
+
+  const handleContinueAssessment = (assessmentId: number) => {
+    toast({
+      title: "Continuing Assessment",
+      description: "Resuming your assessment where you left off...",
+    });
+  };
+
+  const handleViewResults = (assessmentId: number) => {
+    const assessment = assessments.find(a => a.id === assessmentId);
+    toast({
+      title: "Assessment Results",
+      description: `You scored ${assessment?.score}% on this assessment. Great job!`,
+    });
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -157,19 +184,36 @@ const CandidateAssessments = () => {
 
                 <div className="pt-2">
                   {assessment.status === 'available' && (
-                    <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+                    <Button 
+                      className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStartAssessment(assessment.id);
+                      }}
+                    >
                       <Play className="w-4 h-4 mr-2" />
                       Start Assessment
                     </Button>
                   )}
                   {assessment.status === 'pending' && (
-                    <Button className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white">
+                    <Button 
+                      className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleContinueAssessment(assessment.id);
+                      }}
+                    >
                       <Clock className="w-4 h-4 mr-2" />
                       Continue Assessment
                     </Button>
                   )}
                   {assessment.status === 'completed' && (
-                    <Button variant="outline" className="w-full">
+                    <Button variant="outline" className="w-full"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleViewResults(assessment.id);
+                      }}
+                    >
                       <FileText className="w-4 h-4 mr-2" />
                       View Results
                     </Button>

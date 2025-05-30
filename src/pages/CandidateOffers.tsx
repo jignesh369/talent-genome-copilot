@@ -1,12 +1,14 @@
 
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DollarSign, TrendingUp, Calendar, MapPin } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 import CandidateLayout from "@/components/candidate/CandidateLayout";
 
 const CandidateOffers = () => {
-  const offers = [
+  const [offers, setOffers] = useState([
     {
       id: 1,
       company: "TechCorp",
@@ -18,7 +20,49 @@ const CandidateOffers = () => {
       location: "Remote",
       status: "pending"
     }
-  ];
+  ]);
+
+  const handleAcceptOffer = (offerId: number) => {
+    setOffers(prev => prev.map(offer => 
+      offer.id === offerId 
+        ? { ...offer, status: "accepted" }
+        : offer
+    ));
+    
+    toast({
+      title: "Offer Accepted! 🎉",
+      description: "Congratulations! You've accepted the job offer. The company will be notified.",
+    });
+  };
+
+  const handleDeclineOffer = (offerId: number) => {
+    setOffers(prev => prev.map(offer => 
+      offer.id === offerId 
+        ? { ...offer, status: "declined" }
+        : offer
+    ));
+    
+    toast({
+      title: "Offer Declined",
+      description: "You've declined the job offer. The company will be notified.",
+    });
+  };
+
+  const handleNegotiateOffer = (offerId: number) => {
+    toast({
+      title: "Negotiation Started",
+      description: "Opening negotiation interface...",
+    });
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "accepted": return "bg-green-100 text-green-800";
+      case "declined": return "bg-red-100 text-red-800";
+      case "pending": return "bg-yellow-100 text-yellow-800";
+      default: return "bg-gray-100 text-gray-800";
+    }
+  };
 
   return (
     <CandidateLayout>
@@ -26,7 +70,7 @@ const CandidateOffers = () => {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Offers</h1>
           <Badge className="bg-green-100 text-green-800 border-green-200">
-            {offers.length} Active Offer
+            {offers.length} Active Offer{offers.length !== 1 ? 's' : ''}
           </Badge>
         </div>
 
@@ -38,8 +82,14 @@ const CandidateOffers = () => {
                   <div>
                     <CardTitle className="text-xl font-bold">{offer.role}</CardTitle>
                     <p className="text-lg text-purple-600 font-medium">{offer.company}</p>
+                    <div className="flex items-center mt-2 text-sm text-gray-600">
+                      <MapPin className="w-4 h-4 mr-1" />
+                      {offer.location}
+                    </div>
                   </div>
-                  <Badge className="bg-yellow-100 text-yellow-800">{offer.status}</Badge>
+                  <Badge className={getStatusColor(offer.status)}>
+                    {offer.status}
+                  </Badge>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -74,17 +124,65 @@ const CandidateOffers = () => {
                   </div>
                 </div>
 
-                <div className="flex justify-end space-x-2 pt-4 border-t">
-                  <Button variant="outline" size="sm">Decline</Button>
-                  <Button variant="outline" size="sm">Negotiate</Button>
-                  <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
-                    Accept
-                  </Button>
-                </div>
+                {offer.status === "pending" && (
+                  <div className="flex justify-end space-x-2 pt-4 border-t">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleDeclineOffer(offer.id)}
+                    >
+                      Decline
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleNegotiateOffer(offer.id)}
+                    >
+                      Negotiate
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                      onClick={() => handleAcceptOffer(offer.id)}
+                    >
+                      Accept
+                    </Button>
+                  </div>
+                )}
+
+                {offer.status === "accepted" && (
+                  <div className="pt-4 border-t">
+                    <div className="bg-green-50 rounded-lg p-4">
+                      <p className="text-green-800 font-medium">🎉 Congratulations! You've accepted this offer.</p>
+                      <p className="text-green-700 text-sm mt-1">Next steps will be communicated by the company.</p>
+                    </div>
+                  </div>
+                )}
+
+                {offer.status === "declined" && (
+                  <div className="pt-4 border-t">
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <p className="text-gray-700 font-medium">This offer has been declined.</p>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}
         </div>
+
+        {offers.length === 0 && (
+          <Card className="text-center py-12">
+            <CardContent>
+              <DollarSign className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No Job Offers Yet</h3>
+              <p className="text-gray-600 mb-4">Keep applying and interviewing - your dream offer is coming!</p>
+              <Button className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+                Browse Jobs
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </CandidateLayout>
   );

@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Search, MapPin, Clock, Bookmark } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "@/hooks/use-toast";
 import CandidateLayout from "@/components/candidate/CandidateLayout";
 
 const CandidateJobs = () => {
   const [searchQuery, setSearchQuery] = useState("");
-
-  const jobs = [
+  const navigate = useNavigate();
+  const [jobs, setJobs] = useState([
     {
       id: 1,
       title: "Senior Frontend Developer",
@@ -35,7 +37,41 @@ const CandidateJobs = () => {
       skills: ["Node.js", "React", "MongoDB"],
       saved: true
     }
-  ];
+  ]);
+
+  const handleSearch = () => {
+    toast({
+      title: "Searching Jobs",
+      description: `Searching for "${searchQuery}"...`,
+    });
+  };
+
+  const handleSaveJob = (jobId: number) => {
+    setJobs(prev => prev.map(job => 
+      job.id === jobId 
+        ? { ...job, saved: !job.saved }
+        : job
+    ));
+    
+    const job = jobs.find(j => j.id === jobId);
+    toast({
+      title: job?.saved ? "Job Unsaved" : "Job Saved",
+      description: job?.saved 
+        ? "Job removed from your saved list" 
+        : "Job added to your saved list",
+    });
+  };
+
+  const handleApplyNow = (jobId: number) => {
+    navigate(`/apply/${jobId}`);
+  };
+
+  const handleViewDetails = (jobId: number) => {
+    toast({
+      title: "Job Details",
+      description: "Opening detailed job information...",
+    });
+  };
 
   return (
     <CandidateLayout>
@@ -50,10 +86,14 @@ const CandidateJobs = () => {
                 placeholder="Search jobs, companies, skills..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                 className="pl-10"
               />
             </div>
-            <Button className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+            <Button 
+              className="bg-gradient-to-r from-purple-600 to-pink-600 text-white"
+              onClick={handleSearch}
+            >
               Search
             </Button>
           </div>
@@ -68,7 +108,12 @@ const CandidateJobs = () => {
                   <div className="flex-1">
                     <div className="flex items-center space-x-2 mb-2">
                       <h3 className="text-xl font-bold text-gray-900">{job.title}</h3>
-                      <Button variant="ghost" size="sm" className="p-1">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="p-1"
+                        onClick={() => handleSaveJob(job.id)}
+                      >
                         <Bookmark className={`w-4 h-4 ${job.saved ? 'fill-current text-yellow-500' : 'text-gray-400'}`} />
                       </Button>
                     </div>
@@ -96,10 +141,17 @@ const CandidateJobs = () => {
                   <div className="text-right ml-6">
                     <p className="text-lg font-bold text-green-600 mb-2">{job.salary}</p>
                     <div className="space-y-2">
-                      <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+                      <Button 
+                        className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white"
+                        onClick={() => handleApplyNow(job.id)}
+                      >
                         Apply Now
                       </Button>
-                      <Button variant="outline" className="w-full">
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => handleViewDetails(job.id)}
+                      >
                         View Details
                       </Button>
                     </div>

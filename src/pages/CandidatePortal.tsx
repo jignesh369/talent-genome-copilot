@@ -1,14 +1,14 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Search, Sparkles, MapPin, Clock, Star, Heart, Zap, TrendingUp } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const CandidatePortal = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
 
   const featuredJobs = [
     {
@@ -46,6 +46,18 @@ const CandidatePortal = () => {
     }
   ];
 
+  const handleGetStarted = () => {
+    navigate('/candidate-dashboard');
+  };
+
+  const handleBrowseJobs = () => {
+    navigate('/candidate-jobs');
+  };
+
+  const handleExploreJobs = () => {
+    navigate('/candidate-jobs');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
       {/* Hero Section */}
@@ -70,11 +82,20 @@ const CandidatePortal = () => {
               We're not just another job board. We're your personal career wingman, using AI to match you with opportunities that actually fit your vibe! 🚀
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-              <Button size="lg" className="bg-white text-purple-600 hover:bg-gray-100 font-semibold px-8 py-4 text-lg rounded-full">
+              <Button 
+                size="lg" 
+                onClick={handleGetStarted}
+                className="bg-white text-purple-600 hover:bg-gray-100 font-semibold px-8 py-4 text-lg rounded-full"
+              >
                 <Zap className="w-5 h-5 mr-2" />
                 Get Started Now
               </Button>
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 font-semibold px-8 py-4 text-lg rounded-full">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                onClick={handleBrowseJobs}
+                className="border-white text-white hover:bg-white/10 font-semibold px-8 py-4 text-lg rounded-full"
+              >
                 Browse Jobs
               </Button>
             </div>
@@ -200,7 +221,12 @@ const CandidatePortal = () => {
         </div>
 
         <div className="text-center mt-12">
-          <Button size="lg" variant="outline" className="px-8 py-4 text-lg rounded-full border-2 border-purple-300 text-purple-600 hover:bg-purple-50">
+          <Button 
+            size="lg" 
+            variant="outline" 
+            onClick={handleExploreJobs}
+            className="px-8 py-4 text-lg rounded-full border-2 border-purple-300 text-purple-600 hover:bg-purple-50"
+          >
             <Search className="w-5 h-5 mr-2" />
             Explore All Jobs
           </Button>

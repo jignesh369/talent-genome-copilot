@@ -6,47 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Send, Search, Phone, Video, MoreHorizontal, Paperclip } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 import CandidateLayout from "@/components/candidate/CandidateLayout";
 
 const CandidateMessages = () => {
   const [selectedConversation, setSelectedConversation] = useState(1);
   const [newMessage, setNewMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-
-  const conversations = [
-    {
-      id: 1,
-      recruiter: "Sarah Johnson",
-      company: "TechCorp",
-      role: "Frontend Developer",
-      lastMessage: "Great! Interview confirmed for tomorrow at 2 PM",
-      timestamp: "2 hours ago",
-      unread: 2,
-      online: true
-    },
-    {
-      id: 2,
-      recruiter: "Mike Chen",
-      company: "StartupXYZ",
-      role: "Full Stack Engineer",
-      lastMessage: "Looking forward to our call tomorrow!",
-      timestamp: "1 day ago",
-      unread: 0,
-      online: false
-    },
-    {
-      id: 3,
-      recruiter: "Emily Davis",
-      company: "DesignCorp",
-      role: "UI/UX Designer",
-      lastMessage: "Could you share your portfolio?",
-      timestamp: "3 days ago",
-      unread: 1,
-      online: true
-    }
-  ];
-
-  const messages = [
+  const [messages, setMessages] = useState([
     {
       id: 1,
       sender: "recruiter",
@@ -82,16 +49,82 @@ const CandidateMessages = () => {
       timestamp: "2 hours ago",
       avatar: "SJ"
     }
+  ]);
+
+  const conversations = [
+    {
+      id: 1,
+      recruiter: "Sarah Johnson",
+      company: "TechCorp",
+      role: "Frontend Developer",
+      lastMessage: "Great! Interview confirmed for tomorrow at 2 PM",
+      timestamp: "2 hours ago",
+      unread: 2,
+      online: true
+    },
+    {
+      id: 2,
+      recruiter: "Mike Chen",
+      company: "StartupXYZ",
+      role: "Full Stack Engineer",
+      lastMessage: "Looking forward to our call tomorrow!",
+      timestamp: "1 day ago",
+      unread: 0,
+      online: false
+    },
+    {
+      id: 3,
+      recruiter: "Emily Davis",
+      company: "DesignCorp",
+      role: "UI/UX Designer",
+      lastMessage: "Could you share your portfolio?",
+      timestamp: "3 days ago",
+      unread: 1,
+      online: true
+    }
   ];
 
   const currentConversation = conversations.find(conv => conv.id === selectedConversation);
 
   const handleSendMessage = () => {
     if (newMessage.trim()) {
-      // Here you would typically send the message to your backend
-      console.log("Sending message:", newMessage);
+      const newMsg = {
+        id: messages.length + 1,
+        sender: "candidate" as const,
+        content: newMessage,
+        timestamp: "Just now",
+        avatar: "AK"
+      };
+      
+      setMessages(prev => [...prev, newMsg]);
       setNewMessage("");
+      
+      toast({
+        title: "Message Sent",
+        description: "Your message has been delivered successfully.",
+      });
     }
+  };
+
+  const handlePhoneCall = () => {
+    toast({
+      title: "Phone Call",
+      description: "Initiating phone call with recruiter...",
+    });
+  };
+
+  const handleVideoCall = () => {
+    toast({
+      title: "Video Call",
+      description: "Starting video call with recruiter...",
+    });
+  };
+
+  const handleAttachFile = () => {
+    toast({
+      title: "File Attachment",
+      description: "File attachment feature coming soon!",
+    });
   };
 
   const filteredConversations = conversations.filter(conv =>
@@ -186,10 +219,10 @@ const CandidateMessages = () => {
                       </div>
                     </div>
                     <div className="flex space-x-2">
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={handlePhoneCall}>
                         <Phone className="w-4 h-4" />
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={handleVideoCall}>
                         <Video className="w-4 h-4" />
                       </Button>
                       <Button variant="outline" size="sm">
@@ -238,7 +271,7 @@ const CandidateMessages = () => {
                 {/* Message Input */}
                 <div className="border-t p-4">
                   <div className="flex items-center space-x-2">
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={handleAttachFile}>
                       <Paperclip className="w-4 h-4" />
                     </Button>
                     <Input
