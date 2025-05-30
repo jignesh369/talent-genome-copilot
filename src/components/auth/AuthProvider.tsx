@@ -37,10 +37,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Defer profile fetching to prevent deadlock
-          setTimeout(() => {
-            fetchUserProfile(session.user.id);
-          }, 0);
+          // For now, set default role based on email or user metadata
+          // This will be replaced with database lookup once tables are created
+          setDefaultUserRole(session.user);
         } else {
           setUserRole(null);
           setOrganizationId(null);
@@ -55,7 +54,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        fetchUserProfile(session.user.id);
+        setDefaultUserRole(session.user);
       } else {
         setLoading(false);
       }
@@ -64,25 +63,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchUserProfile = async (userId: string) => {
-    try {
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('role, organization_id')
-        .eq('id', userId)
-        .single();
-
-      if (error) {
-        console.error('Error fetching profile:', error);
-      } else if (profile) {
-        setUserRole(profile.role);
-        setOrganizationId(profile.organization_id);
-      }
-    } catch (error) {
-      console.error('Error fetching user profile:', error);
-    } finally {
-      setLoading(false);
+  const setDefaultUserRole = (user: User) => {
+    // Temporary role assignment logic until database is set up
+    // You can customize this based on email domains or user metadata
+    const email = user.email || '';
+    
+    if (email.includes('admin@') || user.user_metadata?.role === 'startup_admin') {
+      setUserRole('startup_admin');
+    } else if (email.includes('customer@') || user.user_metadata?.role === 'customer_admin') {
+      setUserRole('customer_admin');
+    } else if (email.includes('recruiter@') || user.user_metadata?.role === 'recruiter') {
+      setUserRole('recruiter');
+    } else if (email.includes('hiring@') || user.user_metadata?.role === 'hiring_manager') {
+      setUserRole('hiring_manager');
+    } else {
+      setUserRole('candidate'); // Default role
     }
+    
+    setOrganizationId('default-org'); // Temporary organization ID
+    setLoading(false);
   };
 
   const signOut = async () => {
