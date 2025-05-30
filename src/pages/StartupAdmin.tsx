@@ -1,9 +1,12 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/components/auth/AuthProvider';
+import OrganizationModal from '@/components/modals/OrganizationModal';
+import BillingManagement from '@/components/admin/BillingManagement';
+import SystemConfiguration from '@/components/admin/SystemConfiguration';
 import { 
   Building, 
   Users, 
@@ -13,11 +16,51 @@ import {
   Plus,
   BarChart3,
   UserCheck,
-  FileText
+  FileText,
+  CreditCard,
+  Cog
 } from 'lucide-react';
 
 const StartupAdmin = () => {
   const { user, signOut } = useAuth();
+  const [showOrgModal, setShowOrgModal] = useState(false);
+  const [selectedOrg, setSelectedOrg] = useState(null);
+  const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create');
+
+  const [organizations, setOrganizations] = useState([
+    { 
+      id: '1', 
+      name: 'TechCorp Inc.', 
+      domain: 'techcorp.com', 
+      industry: 'technology',
+      size: '51-200',
+      plan: 'professional',
+      status: 'active',
+      contactEmail: 'admin@techcorp.com',
+      contactName: 'John Smith',
+      userLimit: 50,
+      jobLimit: 20,
+      monthlyAmount: 299,
+      billingStatus: 'active',
+      nextBilling: 'Jan 15, 2024'
+    },
+    { 
+      id: '2', 
+      name: 'StartupXYZ', 
+      domain: 'startupxyz.com', 
+      industry: 'finance',
+      size: '11-50',
+      plan: 'starter',
+      status: 'active',
+      contactEmail: 'founder@startupxyz.com',
+      contactName: 'Sarah Johnson',
+      userLimit: 10,
+      jobLimit: 5,
+      monthlyAmount: 99,
+      billingStatus: 'active',
+      nextBilling: 'Jan 20, 2024'
+    }
+  ]);
 
   const stats = [
     { label: 'Customer Organizations', value: '12', icon: Building, color: 'text-blue-600' },
@@ -32,6 +75,41 @@ const StartupAdmin = () => {
     { action: 'New job posted', organization: 'DesignStudio', time: '6 hours ago' },
     { action: 'User limit increased', organization: 'InnovateLab', time: '1 day ago' }
   ];
+
+  const handleCreateOrganization = () => {
+    setSelectedOrg(null);
+    setModalMode('create');
+    setShowOrgModal(true);
+  };
+
+  const handleEditOrganization = (org: any) => {
+    setSelectedOrg(org);
+    setModalMode('edit');
+    setShowOrgModal(true);
+  };
+
+  const handleViewOrganization = (org: any) => {
+    setSelectedOrg(org);
+    setModalMode('view');
+    setShowOrgModal(true);
+  };
+
+  const handleSaveOrganization = (data: any) => {
+    if (modalMode === 'create') {
+      const newOrg = { ...data, id: Date.now().toString() };
+      setOrganizations(prev => [...prev, newOrg]);
+    } else {
+      setOrganizations(prev => 
+        prev.map(org => org.id === selectedOrg?.id ? { ...org, ...data } : org)
+      );
+    }
+  };
+
+  const handleUpdateBilling = (orgId: string, data: any) => {
+    setOrganizations(prev =>
+      prev.map(org => org.id === orgId ? { ...org, ...data } : org)
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -92,7 +170,7 @@ const StartupAdmin = () => {
 
         {/* Action Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={handleCreateOrganization}>
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Building className="w-5 h-5 mr-2 text-blue-600" />
@@ -173,6 +251,15 @@ const StartupAdmin = () => {
           </CardContent>
         </Card>
       </main>
+
+      {/* Organization Modal */}
+      <OrganizationModal
+        isOpen={showOrgModal}
+        onClose={() => setShowOrgModal(false)}
+        organization={selectedOrg}
+        onSave={handleSaveOrganization}
+        mode={modalMode}
+      />
     </div>
   );
 };
