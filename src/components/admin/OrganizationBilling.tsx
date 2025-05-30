@@ -86,7 +86,7 @@ const OrganizationBilling: React.FC<OrganizationBillingProps> = ({ organization 
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center">
-              <Badge className={getPlanColor(organization.plan)} size="lg">
+              <Badge className={`${getPlanColor(organization.plan)} px-3 py-1 text-sm`}>
                 {organization.plan.charAt(0).toUpperCase() + organization.plan.slice(1)}
               </Badge>
               <p className="text-2xl font-bold mt-2">${organization.monthlyAmount}/month</p>
