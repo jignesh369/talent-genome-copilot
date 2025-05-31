@@ -1,11 +1,11 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, Brain, Mic, ThumbsUp, ThumbsDown, ExternalLink, User, Lightbulb } from "lucide-react";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { Search, Brain, Mic, ThumbsUp, ThumbsDown, ExternalLink, User, Lightbulb, Github, Star, GitFork, Calendar, Clock, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const MindReaderSearch = () => {
@@ -16,7 +16,7 @@ const MindReaderSearch = () => {
   const [isListening, setIsListening] = useState(false);
   const { toast } = useToast();
 
-  // Enhanced mock search results
+  // Enhanced mock search results with OSINT data
   const mockResults = [
     {
       id: 1,
@@ -28,6 +28,29 @@ const MindReaderSearch = () => {
       linkedin: "https://linkedin.com/in/sarahchen",
       matchScore: 95,
       avatar: null,
+      osint: {
+        github: {
+          isLoading: false,
+          repos: [
+            { name: "ml-pipeline", stars: 234, language: "Python" },
+            { name: "react-components", stars: 89, language: "TypeScript" },
+            { name: "data-viz", stars: 156, language: "JavaScript" }
+          ],
+          totalStars: 479,
+          languages: ["Python", "TypeScript", "JavaScript"],
+          lastActive: "2 days ago"
+        },
+        stackoverflow: {
+          isLoading: false,
+          score: 2847,
+          badges: { gold: 2, silver: 8, bronze: 15 },
+          topTags: ["python", "machine-learning", "react"],
+          lastActive: "1 week ago"
+        },
+        techRadar: ["TypeScript 🔥", "Python 🧠", "AWS ⚡", "ML 🚀"],
+        bio: "Full-stack engineer passionate about ML infrastructure",
+        lastUpdated: "2 hours ago"
+      }
     },
     {
       id: 2,
@@ -39,6 +62,28 @@ const MindReaderSearch = () => {
       linkedin: "https://linkedin.com/in/michaelr",
       matchScore: 87,
       avatar: null,
+      osint: {
+        github: {
+          isLoading: false,
+          repos: [
+            { name: "k8s-deploy", stars: 567, language: "Go" },
+            { name: "microservices", stars: 234, language: "Python" }
+          ],
+          totalStars: 801,
+          languages: ["Go", "Python", "Shell"],
+          lastActive: "1 day ago"
+        },
+        stackoverflow: {
+          isLoading: true,
+          score: 0,
+          badges: { gold: 0, silver: 0, bronze: 0 },
+          topTags: [],
+          lastActive: ""
+        },
+        techRadar: ["Kubernetes 🎯", "Go 💪", "DevOps 🔧"],
+        bio: "DevOps engineer scaling distributed systems",
+        lastUpdated: "1 hour ago"
+      }
     },
     {
       id: 3,
@@ -50,6 +95,28 @@ const MindReaderSearch = () => {
       linkedin: null,
       matchScore: 82,
       avatar: null,
+      osint: {
+        github: {
+          isLoading: false,
+          repos: [
+            { name: "design-system", stars: 123, language: "TypeScript" },
+            { name: "animation-lib", stars: 67, language: "CSS" }
+          ],
+          totalStars: 190,
+          languages: ["TypeScript", "CSS", "JavaScript"],
+          lastActive: "3 hours ago"
+        },
+        stackoverflow: {
+          isLoading: false,
+          score: 1234,
+          badges: { gold: 1, silver: 4, bronze: 8 },
+          topTags: ["css", "react", "design"],
+          lastActive: "3 days ago"
+        },
+        techRadar: ["CSS 🎨", "React ⚛️", "Design 💫"],
+        bio: "UI/UX engineer crafting delightful experiences",
+        lastUpdated: "30 minutes ago"
+      }
     }
   ];
 
@@ -113,6 +180,130 @@ const MindReaderSearch = () => {
       description: isPositive ? "We'll find more candidates like this" : "We'll adjust future recommendations",
     });
   };
+
+  const GitHubHoverCard = ({ github, osint }: { github: string, osint: any }) => (
+    <HoverCard>
+      <HoverCardTrigger asChild>
+        <Button variant="ghost" size="sm" className="p-1 h-auto">
+          <Github className="h-4 w-4 text-gray-600 hover:text-gray-900" />
+        </Button>
+      </HoverCardTrigger>
+      <HoverCardContent className="w-80">
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-semibold">GitHub Activity</h4>
+            <Badge variant="outline" className="text-xs">
+              <Star className="h-3 w-3 mr-1" />
+              {osint.github.totalStars}
+            </Badge>
+          </div>
+          
+          {osint.github.isLoading ? (
+            <div className="flex items-center space-x-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm text-gray-600">Loading GitHub data...</span>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-2">
+                <p className="text-xs text-gray-600">Top Repositories:</p>
+                {osint.github.repos.slice(0, 3).map((repo: any, index: number) => (
+                  <div key={index} className="flex items-center justify-between text-xs">
+                    <span className="font-medium">{repo.name}</span>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant="outline" className="text-xs px-1">
+                        {repo.language}
+                      </Badge>
+                      <span className="text-gray-500 flex items-center">
+                        <Star className="h-3 w-3 mr-1" />
+                        {repo.stars}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <div>
+                <p className="text-xs text-gray-600 mb-1">Main Languages:</p>
+                <div className="flex flex-wrap gap-1">
+                  {osint.github.languages.map((lang: string, index: number) => (
+                    <Badge key={index} variant="outline" className="text-xs">
+                      {lang}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="text-xs text-gray-500 flex items-center">
+                <Calendar className="h-3 w-3 mr-1" />
+                Last active: {osint.github.lastActive}
+              </div>
+            </>
+          )}
+        </div>
+      </HoverCardContent>
+    </HoverCard>
+  );
+
+  const StackOverflowBadge = ({ osint }: { osint: any }) => (
+    <div className="flex items-center space-x-1">
+      {osint.stackoverflow.isLoading ? (
+        <div className="flex items-center space-x-1">
+          <Loader2 className="h-3 w-3 animate-spin text-orange-500" />
+          <span className="text-xs text-gray-500">SO Loading...</span>
+        </div>
+      ) : (
+        <HoverCard>
+          <HoverCardTrigger asChild>
+            <Button variant="ghost" size="sm" className="p-1 h-auto">
+              <div className="flex items-center space-x-1">
+                <div className="w-4 h-4 bg-orange-500 rounded flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">SO</span>
+                </div>
+                <span className="text-xs font-medium">{osint.stackoverflow.score}</span>
+              </div>
+            </Button>
+          </HoverCardTrigger>
+          <HoverCardContent className="w-64">
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold">Stack Overflow Profile</h4>
+              
+              <div className="flex items-center space-x-4 text-xs">
+                <div className="flex items-center space-x-1">
+                  <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                  <span>{osint.stackoverflow.badges.gold}</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                  <span>{osint.stackoverflow.badges.silver}</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <div className="w-2 h-2 bg-amber-600 rounded-full"></div>
+                  <span>{osint.stackoverflow.badges.bronze}</span>
+                </div>
+              </div>
+              
+              <div>
+                <p className="text-xs text-gray-600 mb-1">Top Tags:</p>
+                <div className="flex flex-wrap gap-1">
+                  {osint.stackoverflow.topTags.map((tag: string, index: number) => (
+                    <Badge key={index} variant="outline" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="text-xs text-gray-500 flex items-center">
+                <Calendar className="h-3 w-3 mr-1" />
+                Last active: {osint.stackoverflow.lastActive}
+              </div>
+            </div>
+          </HoverCardContent>
+        </HoverCard>
+      )}
+    </div>
+  );
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -228,12 +419,45 @@ const MindReaderSearch = () => {
                           
                           <p className="text-gray-700 mb-3 leading-relaxed">{candidate.aiSummary}</p>
                           
+                          {/* Bio */}
+                          {candidate.osint.bio && (
+                            <p className="text-sm text-gray-600 mb-3 italic">"{candidate.osint.bio}"</p>
+                          )}
+                          
+                          {/* Tech Radar Strip */}
+                          <div className="mb-3">
+                            <div className="flex flex-wrap gap-1">
+                              {candidate.osint.techRadar.map((tech: string, index: number) => (
+                                <Badge key={index} variant="outline" className="text-xs bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 border-purple-200">
+                                  {tech}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                          
                           <div className="flex flex-wrap gap-1 mb-3">
                             {candidate.skills.map((skill: string, index: number) => (
                               <Badge key={index} variant="outline" className="text-xs">
                                 {skill}
                               </Badge>
                             ))}
+                          </div>
+
+                          {/* OSINT Data Row */}
+                          <div className="flex items-center space-x-4 mb-3 p-2 bg-gray-50 rounded-lg">
+                            {/* GitHub */}
+                            {candidate.github && (
+                              <GitHubHoverCard github={candidate.github} osint={candidate.osint} />
+                            )}
+                            
+                            {/* Stack Overflow */}
+                            <StackOverflowBadge osint={candidate.osint} />
+                            
+                            {/* Last Updated */}
+                            <div className="flex items-center space-x-1 text-xs text-gray-500">
+                              <Clock className="h-3 w-3" />
+                              <span>Updated {candidate.osint.lastUpdated}</span>
+                            </div>
                           </div>
 
                           <div className="flex items-center space-x-3">
