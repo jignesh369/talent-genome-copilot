@@ -8,19 +8,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Users, UserPlus, Filter } from 'lucide-react';
 import QuickActionsGrid from '@/components/admin/QuickActionsGrid';
 import CandidatePipeline from '@/components/admin/CandidatePipeline';
-import AdvancedAnalyticsDashboard from '@/components/admin/AdvancedAnalyticsDashboard';
-import PerformanceOptimizationHub from '@/components/admin/PerformanceOptimizationHub';
-import AdvancedCommunicationCenter from '@/components/admin/AdvancedCommunicationCenter';
-import SmartNotificationsSystem from '@/components/admin/SmartNotificationsSystem';
-import EmailCalendarIntegration from '@/components/admin/EmailCalendarIntegration';
 import OrganizationBilling from '@/components/admin/OrganizationBilling';
 import UserRoleAssignment from '@/components/admin/UserRoleAssignment';
-import PlatformIntegrationHub from '@/components/admin/PlatformIntegrationHub';
-import AutomationWorkflows from '@/components/admin/AutomationWorkflows';
-import AIConfiguration from '@/components/admin/AIConfiguration';
-import CustomizationThemes from '@/components/admin/CustomizationThemes';
-import SystemConfiguration from '@/components/admin/SystemConfiguration';
 import TeamMemberCard from '@/components/admin/TeamMemberCard';
+import UsageAnalyticsDashboard from '@/components/admin/analytics/UsageAnalyticsDashboard';
+import ROIPerformanceDashboard from '@/components/admin/analytics/ROIPerformanceDashboard';
+import ForecastingInsights from '@/components/admin/analytics/ForecastingInsights';
+import CustomerIntegrationsHub from '@/components/admin/integrations/CustomerIntegrationsHub';
+import CustomerAIConfiguration from '@/components/admin/config/CustomerAIConfiguration';
+import BillingPaymentsMangement from '@/components/admin/billing/BillingPaymentsManagement';
+import AuditLogsViewer from '@/components/admin/logs/AuditLogsViewer';
+import OrganizationSettingsPanel from '@/components/admin/settings/OrganizationSettingsPanel';
 import { TeamMember, Organization } from '@/types/organization';
 
 interface CustomerAdminContentProps {
@@ -58,30 +56,18 @@ const CustomerAdminContent: React.FC<CustomerAdminContentProps> = ({
       </TabsContent>
 
       <TabsContent value="analytics" className="mt-0">
-        <AdvancedAnalyticsDashboard />
+        <UsageAnalyticsDashboard />
       </TabsContent>
 
       <TabsContent value="performance" className="mt-0">
-        <PerformanceOptimizationHub />
+        <ROIPerformanceDashboard />
       </TabsContent>
 
-      <TabsContent value="communication" className="mt-0">
-        <AdvancedCommunicationCenter />
+      <TabsContent value="forecasting" className="mt-0">
+        <ForecastingInsights />
       </TabsContent>
 
-      <TabsContent value="notifications" className="mt-0">
-        <SmartNotificationsSystem />
-      </TabsContent>
-
-      <TabsContent value="email-calendar" className="mt-0">
-        <EmailCalendarIntegration />
-      </TabsContent>
-
-      <TabsContent value="billing" className="mt-0">
-        <OrganizationBilling organization={currentOrganization} />
-      </TabsContent>
-
-      <TabsContent value="team" className="mt-0">
+      <TabsContent value="team-members" className="mt-0">
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -133,7 +119,7 @@ const CustomerAdminContent: React.FC<CustomerAdminContentProps> = ({
         </Card>
       </TabsContent>
 
-      <TabsContent value="roles" className="mt-0">
+      <TabsContent value="roles-permissions" className="mt-0">
         <UserRoleAssignment 
           users={teamMembers}
           onUpdateRole={handleUpdateRole}
@@ -141,23 +127,23 @@ const CustomerAdminContent: React.FC<CustomerAdminContentProps> = ({
       </TabsContent>
 
       <TabsContent value="integrations" className="mt-0">
-        <PlatformIntegrationHub />
-      </TabsContent>
-
-      <TabsContent value="automation" className="mt-0">
-        <AutomationWorkflows />
+        <CustomerIntegrationsHub />
       </TabsContent>
 
       <TabsContent value="ai-config" className="mt-0">
-        <AIConfiguration />
+        <CustomerAIConfiguration />
       </TabsContent>
 
-      <TabsContent value="themes" className="mt-0">
-        <CustomizationThemes />
+      <TabsContent value="billing-payments" className="mt-0">
+        <BillingPaymentsMangement organization={currentOrganization} />
       </TabsContent>
 
-      <TabsContent value="system" className="mt-0">
-        <SystemConfiguration />
+      <TabsContent value="audit-logs" className="mt-0">
+        <AuditLogsViewer />
+      </TabsContent>
+
+      <TabsContent value="organization-settings" className="mt-0">
+        <OrganizationSettingsPanel organization={currentOrganization} />
       </TabsContent>
     </div>
   );
