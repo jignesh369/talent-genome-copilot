@@ -27,6 +27,9 @@ import {
   TrendingUp,
   Brain
 } from 'lucide-react';
+import AIJobCreationWizard from '@/components/recruiter/AIJobCreationWizard';
+import AdvancedCandidateFilters from '@/components/recruiter/AdvancedCandidateFilters';
+import EnhancedCommunicationHub from '@/components/recruiter/EnhancedCommunicationHub';
 
 const RecruiterDashboard = () => {
   const { user } = useAuth();
@@ -137,7 +140,7 @@ const RecruiterDashboard = () => {
       case 'interviews':
         return <EnhancedInterviewManagement />;
       case 'communication':
-        return <CommunicationHub />;
+        return <EnhancedCommunicationHub />;
       case 'team':
         return <TeamManagement onInviteMember={() => setShowInviteModal(true)} />;
       default:
@@ -207,7 +210,7 @@ const RecruiterDashboard = () => {
     >
       {renderContent()}
 
-      {/* Modals */}
+      {/* Enhanced Modals */}
       <InviteMemberModal
         isOpen={showInviteModal}
         onClose={() => setShowInviteModal(false)}
@@ -215,11 +218,11 @@ const RecruiterDashboard = () => {
       />
 
       <Dialog open={showCreateJobModal} onOpenChange={setShowCreateJobModal}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Create New Job</DialogTitle>
+            <DialogTitle>AI-Powered Job Creation</DialogTitle>
           </DialogHeader>
-          <CreateJobForm
+          <AIJobCreationWizard
             onSubmit={handleCreateJob}
             onCancel={() => setShowCreateJobModal(false)}
           />

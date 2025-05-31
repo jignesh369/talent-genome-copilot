@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,9 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Filter, Plus, Star, Zap, Clock, Calendar, TrendingUp, Users, Target, Brain } from "lucide-react";
 import { useEnhancedCandidates } from "@/hooks/useEnhancedCandidates";
 import EnhancedCandidateCard from "@/components/candidates/EnhancedCandidateCard";
+import AdvancedCandidateFilters from "@/components/recruiter/AdvancedCandidateFilters";
 
 const Candidates = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const { 
     enhancedCandidates, 
     loading, 
@@ -40,6 +41,15 @@ const Candidates = () => {
 
   const handleScheduleInterview = (candidate: any) => {
     console.log('Schedule interview with:', candidate);
+  };
+
+  const handleAdvancedFilters = (filters: any) => {
+    console.log('Advanced filters applied:', filters);
+    // Apply filters to candidates
+  };
+
+  const handleResetFilters = () => {
+    console.log('Filters reset');
   };
 
   if (loading) {
@@ -84,24 +94,37 @@ const Candidates = () => {
       </div>
 
       {/* Enhanced Search and Filters */}
-      <div className="flex gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input
-            placeholder="Search candidates by name, skills, engagement, or availability..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 h-12 text-lg"
-          />
+      <div className="space-y-4">
+        <div className="flex gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Search candidates by name, skills, engagement, or availability..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 h-12 text-lg"
+            />
+          </div>
+          <Button 
+            variant={showAdvancedFilters ? "default" : "outline"} 
+            size="lg"
+            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+          >
+            <Filter className="h-4 w-4 mr-2" />
+            Advanced Filters
+          </Button>
+          <Button variant="outline" size="lg">
+            <Brain className="h-4 w-4 mr-2" />
+            AI Recommendations
+          </Button>
         </div>
-        <Button variant="outline" size="lg">
-          <Filter className="h-4 w-4 mr-2" />
-          Enhanced Filters
-        </Button>
-        <Button variant="outline" size="lg">
-          <TrendingUp className="h-4 w-4 mr-2" />
-          Sort by AI Score
-        </Button>
+
+        {showAdvancedFilters && (
+          <AdvancedCandidateFilters
+            onFiltersChange={handleAdvancedFilters}
+            onReset={handleResetFilters}
+          />
+        )}
       </div>
 
       {/* Enhanced Quick Stats */}

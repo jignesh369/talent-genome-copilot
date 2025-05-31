@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,15 +5,18 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, Clock, DollarSign, MapPin, Search, Filter } from "lucide-react";
+import { Users, Clock, DollarSign, MapPin, Search, Filter, Plus, TrendingUp, Target, Brain } from "lucide-react";
 import CreateJobModal from "@/components/jobs/CreateJobModal";
 import JobDetailsModal from "@/components/jobs/JobDetailsModal";
+import AIJobCreationWizard from "@/components/recruiter/AIJobCreationWizard";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const Jobs = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedJob, setSelectedJob] = useState<any>(null);
   const [jobDetailsOpen, setJobDetailsOpen] = useState(false);
+  const [showAIWizard, setShowAIWizard] = useState(false);
 
   const jobs = [
     {
@@ -117,14 +119,81 @@ const Jobs = () => {
     setJobDetailsOpen(true);
   };
 
+  const handleAIJobCreation = (jobData: any) => {
+    console.log('AI Job created:', jobData);
+    setShowAIWizard(false);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Job Openings</h1>
-          <p className="text-gray-600">Manage your open positions and hiring pipeline</p>
+          <h1 className="text-3xl font-bold text-gray-900">Enhanced Job Management</h1>
+          <p className="text-gray-600">AI-powered job creation and advanced pipeline management</p>
         </div>
-        <CreateJobModal />
+        <div className="flex space-x-2">
+          <Button variant="outline" onClick={() => setShowAIWizard(true)}>
+            <Brain className="h-4 w-4 mr-2" />
+            AI Job Wizard
+          </Button>
+          <CreateJobModal />
+        </div>
+      </div>
+
+      {/* Enhanced Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-blue-700">Total Jobs</p>
+                <p className="text-2xl font-bold text-blue-900">{jobs.length}</p>
+              </div>
+              <div className="p-2 bg-blue-200 rounded-lg">
+                <Target className="h-6 w-6 text-blue-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-green-700">Active Jobs</p>
+                <p className="text-2xl font-bold text-green-900">{jobs.filter(j => j.status === 'Active').length}</p>
+              </div>
+              <div className="p-2 bg-green-200 rounded-lg">
+                <TrendingUp className="h-6 w-6 text-green-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-purple-700">Applications</p>
+                <p className="text-2xl font-bold text-purple-900">{jobs.reduce((sum, job) => sum + job.applications, 0)}</p>
+              </div>
+              <div className="p-2 bg-purple-200 rounded-lg">
+                <Users className="h-6 w-6 text-purple-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-gradient-to-r from-orange-50 to-orange-100 border-orange-200">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-orange-700">Avg Time Open</p>
+                <p className="text-2xl font-bold text-orange-900">{Math.round(jobs.reduce((sum, job) => sum + job.daysOpen, 0) / jobs.length)} days</p>
+              </div>
+              <div className="p-2 bg-orange-200 rounded-lg">
+                <Clock className="h-6 w-6 text-orange-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Filters */}
@@ -246,6 +315,18 @@ const Jobs = () => {
         open={jobDetailsOpen}
         onOpenChange={setJobDetailsOpen}
       />
+
+      <Dialog open={showAIWizard} onOpenChange={setShowAIWizard}>
+        <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>AI Job Creation Wizard</DialogTitle>
+          </DialogHeader>
+          <AIJobCreationWizard
+            onSubmit={handleAIJobCreation}
+            onCancel={() => setShowAIWizard(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
