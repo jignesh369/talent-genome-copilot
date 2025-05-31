@@ -97,6 +97,10 @@ const App = () => (
             } />
             <Route path="/apply/:jobId" element={<CandidateApplication />} />
             
+            {/* Assessment Routes - Updated to match navigation calls */}
+            <Route path="/assessment/demo" element={<CandidateAssessment />} />
+            <Route path="/assessment/:assessmentId" element={<CandidateAssessment />} />
+            
             {/* Hiring Manager Routes */}
             <Route path="/hiring-manager" element={
               <ProtectedRoute allowedRoles={['hiring_manager']}>

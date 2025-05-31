@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -84,13 +83,13 @@ const sampleQuestions: AssessmentQuestion[] = [
 
 const CandidateAssessment: React.FC = () => {
   const navigate = useNavigate();
-  const { jobId } = useParams();
+  const { assessmentId } = useParams();
   const { toast } = useToast();
   
   const [session, setSession] = useState<AssessmentSession>({
-    id: 'demo-session-1',
+    id: assessmentId || 'demo-session-1',
     candidateId: 'candidate-1',
-    jobId: jobId,
+    jobId: assessmentId === 'demo' ? undefined : assessmentId,
     questions: sampleQuestions,
     answers: [],
     currentQuestionIndex: 0,
