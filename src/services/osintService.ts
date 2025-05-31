@@ -1,5 +1,4 @@
-
-import { OSINTProfile, EnhancedCandidate } from '../types/enhanced-candidate';
+import { OSINTProfile } from '../types/osint';
 
 export class OSINTService {
   private static instance: OSINTService;
