@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { useEnhancedCandidates } from './useEnhancedCandidates';
 import { useToast } from '@/hooks/use-toast';
-import { CandidateInteraction } from '@/types/enhanced-recruiting';
 
 export const useEnhancedCandidateOperations = () => {
   const { 
@@ -19,14 +18,14 @@ export const useEnhancedCandidateOperations = () => {
       moveToStage(candidateId, newStage, 'recruiter', reason);
       
       // Add interaction record
-      const interaction: Omit<CandidateInteraction, 'id'> = {
-        candidate_id: candidateId,
-        interaction_type: 'stage_change',
-        interaction_date: new Date().toISOString(),
-        recruiter_id: 'current-user', // In real app, get from auth
-        outcome: `moved_to_${newStage}`,
-        notes: reason || `Candidate moved to ${newStage} stage`,
-        channel: 'platform'
+      const interaction = {
+        type: 'stage_change' as const,
+        direction: 'outbound' as const,
+        content_summary: `Candidate moved to ${newStage} stage`,
+        timestamp: new Date().toISOString(),
+        recruiter_id: 'current-user',
+        response_received: false,
+        follow_up_required: false
       };
       
       addInteraction(candidateId, interaction);
@@ -46,14 +45,14 @@ export const useEnhancedCandidateOperations = () => {
 
   const handleAddNote = (candidateId: string, note: string) => {
     try {
-      const interaction: Omit<CandidateInteraction, 'id'> = {
-        candidate_id: candidateId,
-        interaction_type: 'note',
-        interaction_date: new Date().toISOString(),
+      const interaction = {
+        type: 'email' as const,
+        direction: 'outbound' as const,
+        content_summary: note,
+        timestamp: new Date().toISOString(),
         recruiter_id: 'current-user',
-        outcome: 'note_added',
-        notes: note,
-        channel: 'platform'
+        response_received: false,
+        follow_up_required: false
       };
       
       addInteraction(candidateId, interaction);
@@ -73,14 +72,14 @@ export const useEnhancedCandidateOperations = () => {
 
   const handleScheduleInterview = (candidateId: string, interviewData?: any) => {
     try {
-      const interaction: Omit<CandidateInteraction, 'id'> = {
-        candidate_id: candidateId,
-        interaction_type: 'interview_scheduled',
-        interaction_date: new Date().toISOString(),
+      const interaction = {
+        type: 'interview' as const,
+        direction: 'outbound' as const,
+        content_summary: 'Interview scheduled with candidate',
+        timestamp: new Date().toISOString(),
         recruiter_id: 'current-user',
-        outcome: 'scheduled',
-        notes: 'Interview scheduled with candidate',
-        channel: 'platform'
+        response_received: false,
+        follow_up_required: true
       };
       
       addInteraction(candidateId, interaction);

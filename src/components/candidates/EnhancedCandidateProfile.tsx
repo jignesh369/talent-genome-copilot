@@ -115,18 +115,18 @@ const EnhancedCandidateProfile: React.FC<EnhancedCandidateProfileProps> = ({
                 
                 <div>
                   <div className="flex justify-between mb-2">
-                    <span className="text-sm">Technical Depth</span>
-                    <span className="text-sm font-medium">{candidate.technical_depth_score}/100</span>
+                    <span className="text-sm">Cultural Fit</span>
+                    <span className="text-sm font-medium">{candidate.cultural_fit_score}/100</span>
                   </div>
-                  <Progress value={candidate.technical_depth_score} className="h-2" />
+                  <Progress value={candidate.cultural_fit_score} className="h-2" />
                 </div>
 
                 <div>
                   <div className="flex justify-between mb-2">
-                    <span className="text-sm">Learning Velocity</span>
-                    <span className="text-sm font-medium">{candidate.learning_velocity_score}%</span>
+                    <span className="text-sm">Portal Activity</span>
+                    <span className="text-sm font-medium">{candidate.portal_activity_score}%</span>
                   </div>
-                  <Progress value={candidate.learning_velocity_score} className="h-2" />
+                  <Progress value={candidate.portal_activity_score} className="h-2" />
                 </div>
               </CardContent>
             </Card>
@@ -157,7 +157,7 @@ const EnhancedCandidateProfile: React.FC<EnhancedCandidateProfileProps> = ({
               <CardTitle className="text-lg">AI Summary</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-700">{candidate.ai_summary}</p>
+              <p className="text-gray-700">{candidate.ai_summary || 'No AI summary available'}</p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -212,16 +212,16 @@ const EnhancedCandidateProfile: React.FC<EnhancedCandidateProfileProps> = ({
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {candidate.interactions.slice(0, 5).map((interaction, index) => (
+                {candidate.interaction_timeline.slice(0, 5).map((interaction, index) => (
                   <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
-                      <p className="text-sm font-medium">{interaction.interaction_type}</p>
+                      <p className="text-sm font-medium">{interaction.type}</p>
                       <p className="text-xs text-gray-500">
-                        {new Date(interaction.interaction_date).toLocaleDateString()}
+                        {new Date(interaction.timestamp).toLocaleDateString()}
                       </p>
                     </div>
                     <Badge variant="outline" className="text-xs">
-                      {interaction.outcome}
+                      {interaction.response_received ? 'Responded' : 'No Response'}
                     </Badge>
                   </div>
                 ))}
@@ -249,7 +249,7 @@ const EnhancedCandidateProfile: React.FC<EnhancedCandidateProfileProps> = ({
                           {signal.signal_type}
                         </Badge>
                         <span className="text-blue-800">
-                          Confidence: {Math.round(signal.confidence_score * 100)}%
+                          Confidence: {Math.round(signal.confidence * 100)}%
                         </span>
                       </div>
                     ))}
