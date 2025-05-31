@@ -11,11 +11,9 @@ import CandidateDetailsModal from '@/components/search/CandidateDetailsModal';
 import DigitalFootprintModal from '@/components/search/DigitalFootprintModal';
 import EmptyState from '@/components/search/EmptyState';
 import { useSearch } from '@/hooks/useSearch';
-import { Search as SearchIcon, History, Bell, Sparkles, Filter, SortDesc } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Search as SearchIcon, History, Bell, Filter, SortDesc } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
-import SourceBadge from '@/components/search/SourceBadge';
 
 const Search = () => {
   const [activeTab, setActiveTab] = useState('search');
@@ -74,27 +72,18 @@ const Search = () => {
                       <h2 className="text-2xl font-bold text-gray-900 mb-2">
                         Best Matches ({searchResult.candidates.length})
                       </h2>
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                        <p className="text-gray-600">Ranked by AI relevance and digital footprint analysis</p>
-                        <SourceBadge source="ai_analysis" confidence={searchResult.search_quality_score} />
-                      </div>
+                      <p className="text-gray-600">Ranked by AI relevance and digital footprint analysis</p>
                     </div>
                     
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                      <Badge variant="secondary" className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border-green-200 px-3 py-1.5">
-                        <Sparkles className="h-4 w-4 mr-2" />
-                        {Math.round(searchResult.search_quality_score * 100)}% confidence
-                      </Badge>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="hover:bg-purple-50 hover:border-purple-200">
-                          <Filter className="h-4 w-4 mr-2" />
-                          Refine
-                        </Button>
-                        <Button variant="outline" size="sm" className="hover:bg-blue-50 hover:border-blue-200">
-                          <SortDesc className="h-4 w-4 mr-2" />
-                          Sort
-                        </Button>
-                      </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" className="hover:bg-purple-50 hover:border-purple-200">
+                        <Filter className="h-4 w-4 mr-2" />
+                        Refine
+                      </Button>
+                      <Button variant="outline" size="sm" className="hover:bg-blue-50 hover:border-blue-200">
+                        <SortDesc className="h-4 w-4 mr-2" />
+                        Sort
+                      </Button>
                     </div>
                   </div>
 
