@@ -13,6 +13,9 @@ import { useToast } from '@/hooks/use-toast';
 import CandidatePipeline from '@/components/admin/CandidatePipeline';
 import JobsManagement from '@/components/recruiter/JobsManagement';
 import CandidatesManagement from '@/components/recruiter/CandidatesManagement';
+import AIMatchingEngine from '@/components/recruiter/AIMatchingEngine';
+import EnhancedInterviewManagement from '@/components/recruiter/EnhancedInterviewManagement';
+import CommunicationHub from '@/components/recruiter/CommunicationHub';
 import { 
   Users, 
   Briefcase, 
@@ -156,7 +159,7 @@ const RecruiterDashboard = () => {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="overview" className="flex items-center space-x-2">
               <BarChart3 className="w-4 h-4" />
               <span>Overview</span>
@@ -172,6 +175,18 @@ const RecruiterDashboard = () => {
             <TabsTrigger value="pipeline" className="flex items-center space-x-2">
               <TrendingUp className="w-4 h-4" />
               <span>Pipeline</span>
+            </TabsTrigger>
+            <TabsTrigger value="ai-matching" className="flex items-center space-x-2">
+              <Target className="w-4 h-4" />
+              <span>AI Matching</span>
+            </TabsTrigger>
+            <TabsTrigger value="interviews" className="flex items-center space-x-2">
+              <Calendar className="w-4 h-4" />
+              <span>Interviews</span>
+            </TabsTrigger>
+            <TabsTrigger value="communication" className="flex items-center space-x-2">
+              <MessageSquare className="w-4 h-4" />
+              <span>Communications</span>
             </TabsTrigger>
             <TabsTrigger value="team" className="flex items-center space-x-2">
               <UserPlus className="w-4 h-4" />
@@ -249,6 +264,18 @@ const RecruiterDashboard = () => {
 
           <TabsContent value="pipeline">
             <CandidatePipeline showCandidates={true} />
+          </TabsContent>
+
+          <TabsContent value="ai-matching">
+            <AIMatchingEngine />
+          </TabsContent>
+
+          <TabsContent value="interviews">
+            <EnhancedInterviewManagement />
+          </TabsContent>
+
+          <TabsContent value="communication">
+            <CommunicationHub />
           </TabsContent>
 
           <TabsContent value="team">
