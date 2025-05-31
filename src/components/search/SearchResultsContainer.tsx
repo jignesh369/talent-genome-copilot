@@ -19,7 +19,7 @@ const SearchResultsContainer: React.FC = () => {
     return null;
   }
 
-  const { candidates, search_metadata } = searchResult;
+  const { candidates } = searchResult;
 
   const handleCandidateClick = (candidate: EnhancedCandidate) => {
     setSelectedCandidate(candidate);
@@ -39,38 +39,36 @@ const SearchResultsContainer: React.FC = () => {
 
   return (
     <div className="w-full space-y-6">
-      {/* Search Metadata */}
-      {search_metadata && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5" />
-              Search Results Summary
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-blue-500" />
-                <span className="text-sm text-gray-600">Total Found:</span>
-                <Badge variant="secondary">{candidates?.length || 0}</Badge>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-green-500" />
-                <span className="text-sm text-gray-600">Search Time:</span>
-                <Badge variant="secondary">{search_metadata.search_time_ms}ms</Badge>
-              </div>
-              <div className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-purple-500" />
-                <span className="text-sm text-gray-600">Avg Score:</span>
-                <Badge variant="secondary">
-                  {search_metadata.average_match_score?.toFixed(1) || 'N/A'}
-                </Badge>
-              </div>
+      {/* Search Summary */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="w-5 h-5" />
+            Search Results Summary
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="flex items-center gap-2">
+              <Users className="w-4 h-4 text-blue-500" />
+              <span className="text-sm text-gray-600">Total Found:</span>
+              <Badge variant="secondary">{candidates?.length || 0}</Badge>
             </div>
-          </CardContent>
-        </Card>
-      )}
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-green-500" />
+              <span className="text-sm text-gray-600">Quality Score:</span>
+              <Badge variant="secondary">
+                {Math.round((searchResult.search_quality_score || 0.85) * 100)}%
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-purple-500" />
+              <span className="text-sm text-gray-600">Status:</span>
+              <Badge variant="secondary">Complete</Badge>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Candidates Grid */}
       {candidates && candidates.length > 0 ? (
@@ -79,8 +77,9 @@ const SearchResultsContainer: React.FC = () => {
             <SimplifiedCandidateCard
               key={candidate.id}
               candidate={candidate}
-              onClick={() => handleCandidateClick(candidate)}
-              onViewDigitalFootprint={() => handleViewDigitalFootprint(candidate)}
+              onViewProfile={() => handleCandidateClick(candidate)}
+              onViewSnapshot={() => handleViewDigitalFootprint(candidate)}
+              onContactCandidate={() => handleCandidateClick(candidate)}
               onFeedback={(feedback, reason) => handleFeedback(candidate.id, feedback, reason)}
             />
           ))}
@@ -100,13 +99,16 @@ const SearchResultsContainer: React.FC = () => {
       {/* Modals */}
       {selectedCandidate && (
         <>
-          <CandidateDetailsModal
-            candidate={selectedCandidate}
-            isOpen={showDetailsModal}
-            onClose={handleCloseModals}
-          />
+          {showDetailsModal && (
+            <CandidateDetailsModal
+              candidate={selectedCandidate}
+              onClose={handleCloseModals}
+              onFeedback={handleFeedback}
+              onContactCandidate={() => {}}
+            />
+          )}
           <DigitalFootprintModal
-            candidate={selectedCandidate}
+            candidate={showDigitalFootprint ? selectedCandidate : null}
             isOpen={showDigitalFootprint}
             onClose={handleCloseModals}
           />

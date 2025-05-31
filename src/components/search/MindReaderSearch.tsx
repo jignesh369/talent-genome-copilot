@@ -80,24 +80,12 @@ const MindReaderSearch = () => {
     // This will be handled by the parent component
   };
 
-  const handleSearchWrapper = () => {
-    console.log('MindReaderSearch: Search button clicked with query:', query);
-    handleSearch();
-  };
-
   return (
     <ErrorBoundary>
       <div className="max-w-7xl mx-auto space-y-6 sm:space-y-10 p-4 sm:p-6">
         <SearchHeader />
         
-        <SearchInterface
-          query={query}
-          setQuery={setQuery}
-          isSearching={isSearching}
-          isListening={isListening}
-          onSearch={handleSearchWrapper}
-          onVoiceInput={handleVoiceInput}
-        />
+        <SearchInterface />
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
