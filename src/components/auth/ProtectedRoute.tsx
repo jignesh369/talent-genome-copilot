@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useAuthContext } from '@/hooks/useAuthContext';
+import { useAuth } from './AuthProvider';
 import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
@@ -14,14 +14,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   allowedRoles,
   fallback 
 }) => {
-  // For startup admin, we'll use a simplified auth check
-  const STARTUP_ADMIN_BYPASS = true;
+  // TEMPORARY: Bypass authentication for development
+  // TODO: Re-enable authentication when ready for production
+  const BYPASS_AUTH = true;
   
-  if (STARTUP_ADMIN_BYPASS) {
+  if (BYPASS_AUTH) {
     return <>{children}</>;
   }
 
-  const { user, userRole, loading } = useAuthContext();
+  const { user, userRole, loading } = useAuth();
 
   if (loading) {
     return (

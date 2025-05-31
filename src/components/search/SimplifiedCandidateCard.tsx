@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,7 @@ interface SimplifiedCandidateCardProps {
   candidate: EnhancedCandidate;
   onViewProfile: (candidate: EnhancedCandidate) => void;
   onViewSnapshot: (candidate: EnhancedCandidate) => void;
-  onFeedback: (candidateId: string, feedback: 'positive' | 'negative', reason?: string) => void;
+  onFeedback: (candidateId: string, isPositive: boolean) => void;
   onContactCandidate: (candidate: EnhancedCandidate) => void;
 }
 
@@ -154,7 +155,7 @@ const SimplifiedCandidateCard: React.FC<SimplifiedCandidateCardProps> = ({
               <Button 
                 size="sm" 
                 variant="outline"
-                onClick={() => onFeedback(candidate.id, 'positive')}
+                onClick={() => onFeedback(candidate.id, true)}
                 className="px-3 hover:bg-green-50 hover:border-green-200"
               >
                 <ThumbsUp className="h-3 w-3" />
@@ -162,7 +163,7 @@ const SimplifiedCandidateCard: React.FC<SimplifiedCandidateCardProps> = ({
               <Button 
                 size="sm" 
                 variant="outline"
-                onClick={() => onFeedback(candidate.id, 'negative')}
+                onClick={() => onFeedback(candidate.id, false)}
                 className="px-3 hover:bg-red-50 hover:border-red-200"
               >
                 <ThumbsDown className="h-3 w-3" />

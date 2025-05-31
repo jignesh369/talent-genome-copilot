@@ -1,13 +1,9 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export class BackendService {
-  // Real-time subscriptions with proper authentication checks
+  // Real-time subscriptions
   static subscribeToApplicationUpdates(organizationId: string, callback: (payload: any) => void) {
-    if (!organizationId) {
-      console.error('BackendService: No organization ID provided for subscription');
-      return null;
-    }
-
     return supabase
       .channel('application-updates')
       .on(
@@ -24,11 +20,6 @@ export class BackendService {
   }
 
   static subscribeToRiskAlerts(organizationId: string, callback: (payload: any) => void) {
-    if (!organizationId) {
-      console.error('BackendService: No organization ID provided for risk alerts subscription');
-      return null;
-    }
-
     return supabase
       .channel('risk-alerts')
       .on(
@@ -45,11 +36,6 @@ export class BackendService {
   }
 
   static subscribeToTeamMessages(organizationId: string, callback: (payload: any) => void) {
-    if (!organizationId) {
-      console.error('BackendService: No organization ID provided for team messages subscription');
-      return null;
-    }
-
     return supabase
       .channel('team-messages')
       .on(
@@ -65,18 +51,11 @@ export class BackendService {
       .subscribe();
   }
 
-  // Database operations with proper organization context
-  static async createCandidate(candidateData: any, organizationId: string) {
-    if (!organizationId) {
-      throw new Error('Organization ID is required');
-    }
-
+  // Database operations
+  static async createCandidate(candidateData: any) {
     const { data, error } = await supabase
       .from('candidates')
-      .insert({
-        ...candidateData,
-        // Note: candidates table doesn't have organization_id, but this ensures context
-      })
+      .insert(candidateData)
       .select()
       .single();
     
@@ -95,17 +74,10 @@ export class BackendService {
     return data;
   }
 
-  static async createJob(jobData: any, organizationId: string) {
-    if (!organizationId) {
-      throw new Error('Organization ID is required');
-    }
-
+  static async createJob(jobData: any) {
     const { data, error } = await supabase
       .from('jobs')
-      .insert({
-        ...jobData,
-        organization_id: organizationId
-      })
+      .insert(jobData)
       .select()
       .single();
     
@@ -146,17 +118,10 @@ export class BackendService {
     return data;
   }
 
-  static async logAnalyticsEvent(eventData: any, organizationId: string) {
-    if (!organizationId) {
-      throw new Error('Organization ID is required for analytics events');
-    }
-
+  static async logAnalyticsEvent(eventData: any) {
     const { data, error } = await supabase
       .from('analytics_events')
-      .insert({
-        ...eventData,
-        organization_id: organizationId
-      })
+      .insert(eventData)
       .select()
       .single();
     
@@ -194,7 +159,7 @@ export class BackendService {
     return { uploadData, documentRecord };
   }
 
-  // Organization management with proper auth
+  // Organization management
   static async getUserOrganization(userId: string) {
     const { data, error } = await supabase
       .from('organization_members')
@@ -236,16 +201,12 @@ export class BackendService {
     return { organization: org, membership };
   }
 
-  // User role management with proper type safety
+  // User role management - Fixed TypeScript error
   static async assignUserRole(
     userId: string, 
     role: 'startup_admin' | 'customer_admin' | 'recruiter' | 'hiring_manager' | 'candidate', 
     organizationId: string
   ) {
-    if (!organizationId) {
-      throw new Error('Organization ID is required for role assignment');
-    }
-
     const { data, error } = await supabase
       .from('user_roles')
       .insert({

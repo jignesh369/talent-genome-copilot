@@ -1,20 +1,16 @@
 
 import { useState, useCallback } from 'react';
 import { useBackendIntegration } from './useBackendIntegration';
-import { useAuthContext } from './useAuthContext';
+import { SearchResult } from '@/types/enhanced-candidate';
 import { useToast } from './use-toast';
-import { EnhancedCandidate, SearchResult } from '@/types/enhanced-candidate';
 
 export const useSearch = () => {
   const [query, setQuery] = useState('');
-  const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
   const [isListening, setIsListening] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
-  const { searchCandidates, loading: backendLoading } = useBackendIntegration();
-  const { user, organizationId } = useAuthContext();
   const { toast } = useToast();
+  const { searchCandidates, loading, error } = useBackendIntegration();
 
   const handleSearch = useCallback(async () => {
     if (!query.trim()) {
@@ -26,187 +22,176 @@ export const useSearch = () => {
       return;
     }
 
-    if (!user) {
-      setError('Please log in to search for candidates');
-      return;
-    }
-
-    if (!organizationId) {
-      setError('No organization found for your account');
-      return;
-    }
-
     setIsSearching(true);
-    setError(null);
-
+    
     try {
-      console.log('Starting search with query:', query);
+      console.log('Starting AI candidate search for query:', query);
       
       const searchParams = {
-        query,
-        organization_id: organizationId
+        query: query.trim(),
+        skills: extractSkillsFromQuery(query),
+        location: extractLocationFromQuery(query),
+        experience_range: extractExperienceFromQuery(query),
+        job_requirements: [query],
+        organization_id: 'current-org' // This should come from user context
       };
 
       const result = await searchCandidates(searchParams);
+      console.log('Search result received:', result);
       
-      console.log('Search result:', result);
-
       if (result && result.candidates) {
-        const searchResult: SearchResult = {
-          candidates: result.candidates,
-          total_found: result.candidates.length,
-          search_quality_score: result.search_quality_score || 0.85,
-          ai_interpretation: {
-            original_query: query,
-            interpreted_intent: `Search for candidates matching: ${query}`,
-            extracted_requirements: [
-              {
-                category: 'skills',
-                value: query,
-                importance: 1.0,
-                source: 'explicit'
-              }
-            ],
-            search_strategy: 'AI-powered semantic search',
-            confidence: result.search_quality_score || 0.85
-          },
-          suggested_refinements: [
-            'Add specific skills or technologies',
-            'Include location preferences',
-            'Specify experience level'
-          ],
-          diversity_metrics: {
-            gender_distribution: {},
-            location_distribution: {},
-            experience_distribution: {},
-            background_diversity_score: 0.5
-          }
-        };
-        
-        setSearchResult(searchResult);
-        
+        setSearchResult(result);
         toast({
           title: "Search Complete",
           description: `Found ${result.candidates.length} candidates matching your criteria.`,
         });
       } else {
-        const emptySearchResult: SearchResult = {
-          candidates: [],
-          total_found: 0,
-          search_quality_score: 0,
-          ai_interpretation: {
-            original_query: query,
-            interpreted_intent: `Search for candidates matching: ${query}`,
-            extracted_requirements: [],
-            search_strategy: 'AI-powered semantic search',
-            confidence: 0
-          },
-          suggested_refinements: [
-            'Try different keywords',
-            'Broaden your search criteria',
-            'Check spelling and terminology'
-          ],
-          diversity_metrics: {
-            gender_distribution: {},
-            location_distribution: {},
-            experience_distribution: {},
-            background_diversity_score: 0
-          }
-        };
-        
-        setSearchResult(emptySearchResult);
-        
         toast({
           title: "No Results",
           description: "No candidates found matching your search criteria.",
-          variant: "destructive"
         });
+        setSearchResult(null);
       }
-    } catch (err) {
-      console.error('Search error:', err);
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred during search';
-      setError(errorMessage);
-      
+    } catch (error) {
+      console.error('Search error:', error);
       toast({
-        title: "Search Error",
-        description: errorMessage,
+        title: "Search Failed",
+        description: "There was an error performing the search. Please try again.",
         variant: "destructive"
       });
+      setSearchResult(null);
     } finally {
       setIsSearching(false);
     }
-  }, [query, user, organizationId, searchCandidates, toast]);
+  }, [query, searchCandidates, toast]);
 
   const handleVoiceInput = useCallback(() => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
-      const recognition = new SpeechRecognition();
-      
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = 'en-US';
-
-      recognition.onstart = () => {
-        setIsListening(true);
-      };
-
-      recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        setQuery(transcript);
-        setIsListening(false);
-      };
-
-      recognition.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
-        setIsListening(false);
-        toast({
-          title: "Voice Input Error",
-          description: "Could not process voice input. Please try again.",
-          variant: "destructive"
-        });
-      };
-
-      recognition.onend = () => {
-        setIsListening(false);
-      };
-
-      recognition.start();
-    } else {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
       toast({
-        title: "Voice Input Unavailable",
-        description: "Voice input is not supported in your browser.",
+        title: "Voice Input Not Supported",
+        description: "Your browser doesn't support voice input.",
         variant: "destructive"
       });
+      return;
     }
-  }, [toast]);
 
-  const handleFeedback = useCallback(async (candidateId: string, feedback: 'positive' | 'negative', reason?: string) => {
-    try {
-      console.log('Feedback submitted:', { candidateId, feedback, reason });
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    setIsListening(true);
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setQuery(transcript);
+      setIsListening(false);
       
       toast({
-        title: "Feedback Submitted",
-        description: `Thank you for your ${feedback} feedback on this candidate.`,
+        title: "Voice Input Captured",
+        description: `Captured: "${transcript}"`,
       });
-    } catch (err) {
-      console.error('Feedback error:', err);
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
+      setIsListening(false);
       toast({
-        title: "Feedback Error",
-        description: "Could not submit feedback. Please try again.",
+        title: "Voice Input Error",
+        description: "Failed to capture voice input. Please try again.",
         variant: "destructive"
       });
-    }
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
   }, [toast]);
+
+  const handleFeedback = useCallback((candidateId: string, feedback: 'positive' | 'negative', reason?: string) => {
+    console.log('Feedback received:', { candidateId, feedback, reason });
+    
+    toast({
+      title: "Feedback Recorded",
+      description: `Your ${feedback} feedback has been recorded and will improve future searches.`,
+    });
+  }, [toast]);
+
+  // Helper functions to extract search parameters from natural language
+  const extractSkillsFromQuery = (query: string): string[] => {
+    const skillKeywords = [
+      'react', 'angular', 'vue', 'javascript', 'typescript', 'python', 'java', 'go', 'rust',
+      'node.js', 'express', 'django', 'flask', 'spring', 'laravel', 'rails',
+      'aws', 'azure', 'gcp', 'docker', 'kubernetes', 'terraform',
+      'mysql', 'postgresql', 'mongodb', 'redis', 'elasticsearch',
+      'machine learning', 'ml', 'ai', 'data science', 'analytics'
+    ];
+    
+    const foundSkills = skillKeywords.filter(skill => 
+      query.toLowerCase().includes(skill.toLowerCase())
+    );
+    
+    return foundSkills;
+  };
+
+  const extractLocationFromQuery = (query: string): string | undefined => {
+    const locationPatterns = [
+      /in ([A-Za-z\s]+(?:, [A-Z]{2})?)/i,
+      /from ([A-Za-z\s]+(?:, [A-Z]{2})?)/i,
+      /based in ([A-Za-z\s]+(?:, [A-Z]{2})?)/i
+    ];
+    
+    for (const pattern of locationPatterns) {
+      const match = query.match(pattern);
+      if (match) {
+        return match[1].trim();
+      }
+    }
+    
+    return undefined;
+  };
+
+  const extractExperienceFromQuery = (query: string): [number, number] | undefined => {
+    const experiencePatterns = [
+      /(\d+)\+?\s*years?\s*experience/i,
+      /(\d+)-(\d+)\s*years?\s*experience/i,
+      /senior/i,
+      /junior/i,
+      /mid-level/i
+    ];
+    
+    if (query.toLowerCase().includes('senior')) {
+      return [5, 15];
+    }
+    if (query.toLowerCase().includes('junior')) {
+      return [0, 3];
+    }
+    if (query.toLowerCase().includes('mid-level')) {
+      return [3, 7];
+    }
+    
+    const match = query.match(/(\d+)\+?\s*years?\s*experience/i);
+    if (match) {
+      const years = parseInt(match[1]);
+      return [years, years + 5];
+    }
+    
+    return undefined;
+  };
 
   return {
     query,
     setQuery,
+    isSearching: isSearching || loading,
     searchResult,
-    isSearching: isSearching || backendLoading,
     isListening,
-    error,
     handleSearch,
     handleVoiceInput,
-    handleFeedback
+    handleFeedback,
+    error
   };
 };

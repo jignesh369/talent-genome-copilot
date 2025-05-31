@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
-import { useAuthContext } from '@/hooks/useAuthContext';
+import { useAuth } from '@/components/auth/AuthProvider';
 import OrganizationModal from '@/components/modals/OrganizationModal';
 import BillingManagement from '@/components/admin/BillingManagement';
 import AdvancedAnalytics from '@/components/admin/AdvancedAnalytics';
@@ -14,10 +14,7 @@ import StartupAdminWelcome from '@/components/admin/StartupAdminWelcome';
 import StartupAdminSidebar from '@/components/admin/StartupAdminSidebar';
 import StartupAdminOverview from '@/components/admin/StartupAdminOverview';
 import StartupAdminOrganizations from '@/components/admin/StartupAdminOrganizations';
-import StartupAdminCredentials from '@/components/auth/StartupAdminCredentials';
 import { Organization } from '@/types/organization';
-import { useBackendIntegration } from '@/hooks/useBackendIntegration';
-import { useToast } from '@/hooks/use-toast';
 import { 
   Building, 
   Users, 
@@ -28,16 +25,7 @@ import {
 } from 'lucide-react';
 
 const StartupAdmin = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const { user, signOut } = useAuthContext();
-  const { loading: backendLoading, error: backendError } = useBackendIntegration();
-  const { toast } = useToast();
-
-  // Show login screen if not authenticated
-  if (!isAuthenticated) {
-    return <StartupAdminCredentials onSuccess={() => setIsAuthenticated(true)} />;
-  }
-
+  const { user, signOut } = useAuth();
   const [showOrgModal, setShowOrgModal] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create');
@@ -156,17 +144,6 @@ const StartupAdmin = () => {
     { action: 'Performance optimization', organization: 'Infrastructure', time: '4 hours ago', type: 'performance' }
   ];
 
-  // Show backend connection errors if any
-  React.useEffect(() => {
-    if (backendError) {
-      toast({
-        title: "Backend Connection Error",
-        description: `Backend service error: ${backendError}`,
-        variant: "destructive"
-      });
-    }
-  }, [backendError, toast]);
-
   const handleCreateOrganization = () => {
     setSelectedOrg(null);
     setModalMode('create');
@@ -196,18 +173,10 @@ const StartupAdmin = () => {
         updated_at: new Date().toISOString()
       };
       setOrganizations(prev => [...prev, newOrg]);
-      toast({
-        title: "Organization Created",
-        description: `${newOrg.name} has been successfully created.`,
-      });
     } else {
       setOrganizations(prev => 
         prev.map(org => org.id === selectedOrg?.id ? { ...org, ...data } : org)
       );
-      toast({
-        title: "Organization Updated",
-        description: `${selectedOrg?.name} has been successfully updated.`,
-      });
     }
     setShowOrgModal(false);
   };
@@ -216,39 +185,15 @@ const StartupAdmin = () => {
     setOrganizations(prev =>
       prev.map(org => org.id === orgId ? { ...org, ...data } : org)
     );
-    toast({
-      title: "Billing Updated",
-      description: "Billing information has been successfully updated.",
-    });
-  };
-
-  const handleSignOut = () => {
-    setIsAuthenticated(false);
-    if (signOut) {
-      signOut();
-    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 w-full overflow-x-hidden">
-      <StartupAdminHeader onSignOut={handleSignOut} />
+      <StartupAdminHeader onSignOut={signOut} />
 
       <div className="max-w-7xl mx-auto px-4 lg:px-8 py-4 lg:py-8 w-full">
         <div className="mb-6 lg:mb-8">
-          <StartupAdminWelcome userName="Admin" />
-          
-          {/* Backend Connection Status */}
-          {backendLoading && (
-            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-blue-700 text-sm">Connecting to backend services...</p>
-            </div>
-          )}
-          
-          {backendError && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-700 text-sm">Backend connection error: {backendError}</p>
-            </div>
-          )}
+          <StartupAdminWelcome userName={user?.user_metadata?.first_name} />
         </div>
 
         {/* Enhanced Stats Grid - Better responsive design */}

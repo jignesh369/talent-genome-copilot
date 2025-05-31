@@ -1,47 +1,24 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuthContext } from './useAuthContext';
 
 export const useBackendIntegration = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { user, organizationId } = useAuthContext();
 
   const invokeFunction = async (functionName: string, payload: any) => {
-    console.log(`useBackendIntegration: Invoking function ${functionName} with payload:`, payload);
-    
-    if (!user) {
-      const errorMessage = 'User not authenticated';
-      console.error('useBackendIntegration: User not authenticated');
-      setError(errorMessage);
-      throw new Error(errorMessage);
-    }
-
     setLoading(true);
     setError(null);
     
     try {
-      const finalPayload = organizationId ? {
-        ...payload,
-        organization_id: organizationId
-      } : payload;
-
       const { data, error } = await supabase.functions.invoke(functionName, {
-        body: finalPayload
+        body: payload
       });
       
-      console.log(`useBackendIntegration: Function ${functionName} response:`, { data, error });
-      
-      if (error) {
-        console.error(`useBackendIntegration: Function ${functionName} error:`, error);
-        throw error;
-      }
-      
+      if (error) throw error;
       return data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-      console.error(`useBackendIntegration: Error in ${functionName}:`, err);
       setError(errorMessage);
       throw err;
     } finally {
@@ -49,17 +26,19 @@ export const useBackendIntegration = () => {
     }
   };
 
+  // AI-powered candidate search
   const searchCandidates = async (searchParams: {
     query: string;
     skills?: string[];
     location?: string;
     experience_range?: [number, number];
     job_requirements?: string[];
+    organization_id: string;
   }) => {
-    console.log('useBackendIntegration: searchCandidates called with params:', searchParams);
     return invokeFunction('ai-candidate-search', searchParams);
   };
 
+  // OSINT data collection
   const collectOSINTData = async (params: {
     candidate_id: string;
     platforms?: string[];
@@ -70,6 +49,7 @@ export const useBackendIntegration = () => {
     return invokeFunction('osint-data-collector', params);
   };
 
+  // Generate dynamic assessments
   const generateAssessment = async (params: {
     job_id: string;
     candidate_id?: string;
@@ -81,6 +61,7 @@ export const useBackendIntegration = () => {
     return invokeFunction('assessment-generator', params);
   };
 
+  // Create personalized outreach
   const generatePersonalizedOutreach = async (params: {
     candidate_id: string;
     job_id?: string;
@@ -91,6 +72,7 @@ export const useBackendIntegration = () => {
     return invokeFunction('outreach-personalization', params);
   };
 
+  // Get predictive analytics
   const getPredictiveAnalytics = async (params: {
     candidate_id: string;
     job_id: string;
@@ -99,6 +81,7 @@ export const useBackendIntegration = () => {
     return invokeFunction('predictive-analytics', params);
   };
 
+  // Send emails
   const sendEmail = async (params: {
     to: string;
     subject: string;
@@ -111,6 +94,7 @@ export const useBackendIntegration = () => {
     return invokeFunction('email-service', params);
   };
 
+  // Process documents
   const processDocument = async (params: {
     file_path: string;
     entity_type: 'candidate' | 'job' | 'application';
@@ -120,8 +104,9 @@ export const useBackendIntegration = () => {
     return invokeFunction('document-processor', params);
   };
 
+  // Generate analytics reports
   const generateAnalyticsReport = async (params: {
-    organization_id?: string;
+    organization_id: string;
     report_type: 'hiring_pipeline' | 'recruiter_performance' | 'source_effectiveness' | 'candidate_insights';
     date_range: {
       start: string;
@@ -129,11 +114,7 @@ export const useBackendIntegration = () => {
     };
     filters?: Record<string, any>;
   }) => {
-    const finalParams = organizationId ? {
-      ...params,
-      organization_id: organizationId
-    } : params;
-    return invokeFunction('analytics-processor', finalParams);
+    return invokeFunction('analytics-processor', params);
   };
 
   return {

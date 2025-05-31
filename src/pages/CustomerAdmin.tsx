@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { Tabs } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useAuthContext } from '@/hooks/useAuthContext';
+import { useAuth } from '@/components/auth/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import InviteMemberModal from '@/components/modals/InviteMemberModal';
 import CreateJobForm from '@/components/forms/CreateJobForm';
@@ -10,60 +11,17 @@ import CustomerAdminHeader from '@/components/admin/CustomerAdminHeader';
 import CustomerAdminWelcome from '@/components/admin/CustomerAdminWelcome';
 import CustomerAdminSidebar from '@/components/admin/CustomerAdminSidebar';
 import CustomerAdminContent from '@/components/admin/CustomerAdminContent';
-import ErrorBoundary from '@/components/ErrorBoundary';
 import { TeamMember, Organization } from '@/types/organization';
 import { UserRole } from '@/types/auth';
 import { Users, Briefcase, TrendingUp, CheckCircle } from 'lucide-react';
 
 const CustomerAdmin = () => {
-  const { user, loading: authLoading, organizationId } = useAuthContext();
+  const { user } = useAuth();
   const { toast } = useToast();
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showCreateJobModal, setShowCreateJobModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('all');
-
-  // Show loading state while auth is initializing
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading admin panel...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show auth required message if user is not authenticated
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center bg-white p-8 rounded-lg shadow-sm border">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Authentication Required</h2>
-          <p className="text-gray-600 mb-4">Please log in to access the admin panel.</p>
-          <button 
-            onClick={() => window.location.href = '/auth'} 
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Go to Login
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Show organization required message if no organization
-  if (!organizationId) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center bg-white p-8 rounded-lg shadow-sm border">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Organization Required</h2>
-          <p className="text-gray-600 mb-4">No organization found for your account. Please contact your administrator.</p>
-        </div>
-      </div>
-    );
-  }
 
   // Simplified stats for cleaner layout
   const organizationStats = [
@@ -74,7 +32,7 @@ const CustomerAdmin = () => {
 
   // Current organization data
   const currentOrganization: Organization = {
-    id: organizationId,
+    id: '1',
     name: 'TechCorp Solutions',
     plan: 'professional' as const,
     status: 'active' as const,
@@ -154,67 +112,65 @@ const CustomerAdmin = () => {
   });
 
   return (
-    <ErrorBoundary>
-      <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
-        <CustomerAdminHeader organizationName={currentOrganization.name} />
+    <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
+      <CustomerAdminHeader organizationName={currentOrganization.name} />
 
-        <div className="max-w-7xl mx-auto px-4 lg:px-8 py-4 lg:py-8">
-          <div className="mb-6 lg:mb-8">
-            <CustomerAdminWelcome userName={user?.user_metadata?.first_name} />
-          </div>
-
-          {/* Improved Stats Grid - 3 columns with better responsive design */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-8 mb-6 lg:mb-10">
-            {organizationStats.map((stat, index) => (
-              <StatCard key={index} {...stat} />
-            ))}
-          </div>
-
-          {/* Main Content with improved spacing and overflow handling */}
-          <Tabs defaultValue="overview" className="w-full">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-8">
-              <div className="lg:col-span-3">
-                <CustomerAdminSidebar />
-              </div>
-              <div className="lg:col-span-9 min-w-0 overflow-hidden">
-                <CustomerAdminContent
-                  currentOrganization={currentOrganization}
-                  teamMembers={teamMembers}
-                  filteredMembers={filteredMembers}
-                  searchTerm={searchTerm}
-                  filterRole={filterRole}
-                  setSearchTerm={setSearchTerm}
-                  setFilterRole={setFilterRole}
-                  setShowInviteModal={setShowInviteModal}
-                  handleEditMember={handleEditMember}
-                  handleRemoveMember={handleRemoveMember}
-                  handleUpdateRole={handleUpdateRole}
-                />
-              </div>
-            </div>
-          </Tabs>
+      <div className="max-w-7xl mx-auto px-4 lg:px-8 py-4 lg:py-8">
+        <div className="mb-6 lg:mb-8">
+          <CustomerAdminWelcome userName={user?.user_metadata?.first_name} />
         </div>
 
-        {/* Modals */}
-        <InviteMemberModal
-          isOpen={showInviteModal}
-          onClose={() => setShowInviteModal(false)}
-          onInvite={handleInviteMember}
-        />
+        {/* Improved Stats Grid - 3 columns with better responsive design */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-8 mb-6 lg:mb-10">
+          {organizationStats.map((stat, index) => (
+            <StatCard key={index} {...stat} />
+          ))}
+        </div>
 
-        <Dialog open={showCreateJobModal} onOpenChange={setShowCreateJobModal}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Create New Job</DialogTitle>
-            </DialogHeader>
-            <CreateJobForm
-              onSubmit={handleCreateJob}
-              onCancel={() => setShowCreateJobModal(false)}
-            />
-          </DialogContent>
-        </Dialog>
+        {/* Main Content with improved spacing and overflow handling */}
+        <Tabs defaultValue="overview" className="w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-8">
+            <div className="lg:col-span-3">
+              <CustomerAdminSidebar />
+            </div>
+            <div className="lg:col-span-9 min-w-0 overflow-hidden">
+              <CustomerAdminContent
+                currentOrganization={currentOrganization}
+                teamMembers={teamMembers}
+                filteredMembers={filteredMembers}
+                searchTerm={searchTerm}
+                filterRole={filterRole}
+                setSearchTerm={setSearchTerm}
+                setFilterRole={setFilterRole}
+                setShowInviteModal={setShowInviteModal}
+                handleEditMember={handleEditMember}
+                handleRemoveMember={handleRemoveMember}
+                handleUpdateRole={handleUpdateRole}
+              />
+            </div>
+          </div>
+        </Tabs>
       </div>
-    </ErrorBoundary>
+
+      {/* Modals */}
+      <InviteMemberModal
+        isOpen={showInviteModal}
+        onClose={() => setShowInviteModal(false)}
+        onInvite={handleInviteMember}
+      />
+
+      <Dialog open={showCreateJobModal} onOpenChange={setShowCreateJobModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create New Job</DialogTitle>
+          </DialogHeader>
+          <CreateJobForm
+            onSubmit={handleCreateJob}
+            onCancel={() => setShowCreateJobModal(false)}
+          />
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 };
 
