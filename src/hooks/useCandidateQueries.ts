@@ -1,15 +1,13 @@
 
-import { useCandidateData } from './useCandidateData';
+import { useCandidateStore } from './useCandidateStore';
 
 export const useCandidateQueries = () => {
-  const { enhancedCandidates } = useCandidateData();
+  const { enhancedCandidates } = useCandidateStore();
 
-  // Get candidates by engagement score
   const getHighEngagementCandidates = (minScore: number = 70) => {
     return enhancedCandidates.filter(candidate => candidate.engagement_score >= minScore);
   };
 
-  // Get candidates with active availability signals
   const getActivelySeeking = () => {
     return enhancedCandidates.filter(candidate => 
       candidate.availability_signals.some(signal => 
@@ -18,12 +16,10 @@ export const useCandidateQueries = () => {
     );
   };
 
-  // Get candidates by pipeline stage
   const getCandidatesByStage = (stage: string) => {
     return enhancedCandidates.filter(candidate => candidate.pipeline_stage === stage);
   };
 
-  // Get top candidates by placement probability
   const getTopCandidates = (limit: number = 10) => {
     return enhancedCandidates
       .sort((a, b) => b.placement_probability_score - a.placement_probability_score)

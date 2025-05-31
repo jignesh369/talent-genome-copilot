@@ -1,12 +1,10 @@
 
-import { useCandidateData } from './useCandidateData';
-import { useCandidateActions } from './useCandidateActions';
+import { useCandidateStore } from './useCandidateStore';
 import { useCandidateQueries } from './useCandidateQueries';
 import { useCandidateSearch } from './useCandidateSearch';
 
 export const useEnhancedCandidates = () => {
-  const { enhancedCandidates, loading } = useCandidateData();
-  const { addInteraction, addAvailabilitySignal, moveToStage } = useCandidateActions();
+  const { enhancedCandidates, loading, addInteraction, addAvailabilitySignal, moveToStage } = useCandidateStore();
   const { 
     getHighEngagementCandidates, 
     getActivelySeeking, 

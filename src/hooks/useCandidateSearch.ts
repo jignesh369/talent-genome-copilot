@@ -1,5 +1,5 @@
 
-import { useCandidateData } from './useCandidateData';
+import { useCandidateStore } from './useCandidateStore';
 
 interface SearchFilters {
   query?: string;
@@ -11,9 +11,8 @@ interface SearchFilters {
 }
 
 export const useCandidateSearch = () => {
-  const { enhancedCandidates } = useCandidateData();
+  const { enhancedCandidates } = useCandidateStore();
 
-  // Search candidates with enhanced filters
   const searchEnhancedCandidates = (filters: SearchFilters) => {
     let filtered = [...enhancedCandidates];
 

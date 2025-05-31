@@ -8,52 +8,25 @@ import {
   Users, 
   Target, 
   Clock,
-  Star,
   Activity,
-  BarChart3,
-  PieChart
+  BarChart3
 } from 'lucide-react';
 import { EnhancedCandidate } from '@/types/enhanced-recruiting';
+import { candidateAnalyticsService } from '@/services/candidateAnalyticsService';
 
 interface CandidateAnalyticsDashboardProps {
   candidates: EnhancedCandidate[];
 }
 
 const CandidateAnalyticsDashboard: React.FC<CandidateAnalyticsDashboardProps> = ({ candidates }) => {
-  // Calculate analytics
-  const totalCandidates = candidates.length;
-  const highEngagementCandidates = candidates.filter(c => c.engagement_score >= 70).length;
-  const activelySeeking = candidates.filter(c => 
-    c.availability_signals.some(signal => 
-      signal.signal_type === 'active_job_search' || signal.signal_type === 'career_change'
-    )
-  ).length;
-  
-  const averageEngagement = Math.round(
-    candidates.reduce((sum, c) => sum + c.engagement_score, 0) / totalCandidates
-  );
-  
-  const averagePlacementProbability = Math.round(
-    candidates.reduce((sum, c) => sum + c.placement_probability_score, 0) / totalCandidates
-  );
-
-  // Pipeline distribution
-  const pipelineStats = candidates.reduce((acc, candidate) => {
-    acc[candidate.pipeline_stage] = (acc[candidate.pipeline_stage] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
-  // Top skills
-  const skillCounts = candidates.reduce((acc, candidate) => {
-    candidate.skills.forEach(skill => {
-      acc[skill] = (acc[skill] || 0) + 1;
-    });
-    return acc;
-  }, {} as Record<string, number>);
-
-  const topSkills = Object.entries(skillCounts)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 10);
+  const totalCandidates = candidateAnalyticsService.calculateTotalCandidates(candidates);
+  const highEngagementCandidates = candidateAnalyticsService.calculateHighEngagementCandidates(candidates);
+  const activelySeeking = candidateAnalyticsService.calculateActivelySeeking(candidates);
+  const averageEngagement = candidateAnalyticsService.calculateAverageEngagement(candidates);
+  const averagePlacementProbability = candidateAnalyticsService.calculateAveragePlacementProbability(candidates);
+  const pipelineStats = candidateAnalyticsService.calculatePipelineDistribution(candidates);
+  const topSkills = candidateAnalyticsService.calculateTopSkills(candidates, 10);
+  const conversionRate = candidateAnalyticsService.calculateConversionRate(candidates, pipelineStats);
 
   return (
     <div className="space-y-6">
@@ -134,7 +107,7 @@ const CandidateAnalyticsDashboard: React.FC<CandidateAnalyticsDashboardProps> = 
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Star className="w-5 h-5 mr-2" />
+              <Target className="w-5 h-5 mr-2" />
               Top Skills in Database
             </CardTitle>
           </CardHeader>
@@ -153,6 +126,37 @@ const CandidateAnalyticsDashboard: React.FC<CandidateAnalyticsDashboardProps> = 
                   </Badge>
                 </div>
               ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Performance Insights */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Clock className="w-5 h-5 mr-2" />
+              Performance Insights
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 gap-3">
+              <div className="p-3 border rounded-lg">
+                <p className="text-sm font-medium">Conversion Rate</p>
+                <p className="text-xs text-gray-600 mt-1">
+                  {conversionRate}% of candidates reach hiring stage
+                </p>
+              </div>
+              
+              <div className="p-3 border rounded-lg">
+                <p className="text-sm font-medium">Quality Score</p>
+                <p className="text-xs text-gray-600 mt-1">
+                  Based on engagement and placement probability metrics
+                </p>
+                <div className="flex items-center mt-2">
+                  <Progress value={averageEngagement} className="h-2 flex-1" />
+                  <span className="ml-2 text-xs font-medium">{averageEngagement}%</span>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -190,37 +194,6 @@ const CandidateAnalyticsDashboard: React.FC<CandidateAnalyticsDashboardProps> = 
               <div className="text-center p-3 bg-orange-50 rounded-lg">
                 <p className="text-lg font-bold text-orange-700">{activelySeeking}</p>
                 <p className="text-xs text-orange-600">Actively Seeking</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Performance Metrics */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Clock className="w-5 h-5 mr-2" />
-              Performance Insights
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 gap-3">
-              <div className="p-3 border rounded-lg">
-                <p className="text-sm font-medium">Conversion Rate</p>
-                <p className="text-xs text-gray-600 mt-1">
-                  {Math.round((pipelineStats.hired || 0) / totalCandidates * 100)}% of candidates reach hiring stage
-                </p>
-              </div>
-              
-              <div className="p-3 border rounded-lg">
-                <p className="text-sm font-medium">Quality Score</p>
-                <p className="text-xs text-gray-600 mt-1">
-                  Based on engagement and placement probability metrics
-                </p>
-                <div className="flex items-center mt-2">
-                  <Progress value={averageEngagement} className="h-2 flex-1" />
-                  <span className="ml-2 text-xs font-medium">{averageEngagement}%</span>
-                </div>
               </div>
             </div>
           </CardContent>

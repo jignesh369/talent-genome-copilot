@@ -5,18 +5,16 @@ import RecruiterLayout from '@/components/recruiter/RecruiterLayout';
 import EnhancedCandidateProfile from '@/components/candidates/EnhancedCandidateProfile';
 import CandidatePipelineManager from '@/components/candidates/CandidatePipelineManager';
 import CandidateAnalyticsDashboard from '@/components/candidates/CandidateAnalyticsDashboard';
-import { useEnhancedCandidateOperations } from '@/hooks/useEnhancedCandidateOperations';
+import { useCandidateStore } from '@/hooks/useCandidateStore';
 import { EnhancedCandidate } from '@/types/enhanced-recruiting';
 
 const EnhancedCandidatesPage = () => {
   const {
     enhancedCandidates,
-    selectedCandidate,
-    setSelectedCandidate,
     handleStageChange,
     handleAddNote,
     handleScheduleInterview
-  } = useEnhancedCandidateOperations();
+  } = useCandidateStore();
 
   const [activeTab, setActiveTab] = useState('pipeline');
   const [viewingCandidate, setViewingCandidate] = useState<EnhancedCandidate | null>(null);
