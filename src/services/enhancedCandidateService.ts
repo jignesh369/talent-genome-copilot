@@ -1,4 +1,3 @@
-
 import { EnhancedCandidate, CandidateInteraction, AvailabilitySignal, OSINTProfile } from '@/types/enhanced-recruiting';
 import { Candidate } from '@/types/recruiting';
 
@@ -88,7 +87,8 @@ class EnhancedCandidateService {
     }
   }
 
-  private updatePlacementProbability(candidate: EnhancedCandidate): void {
+  // Make this method public so it can be called from hooks
+  updatePlacementProbability(candidate: EnhancedCandidate): void {
     let score = 50; // Base score
 
     // Factor in engagement
@@ -122,7 +122,7 @@ class EnhancedCandidateService {
       this.updateCulturalFitScore(candidate);
       
       // Check for red flags
-      if (osintProfile.red_flags.length > 0) {
+      if (osintProfile.red_flags && osintProfile.red_flags.length > 0) {
         candidate.background_verification_status = 'flagged';
       } else {
         candidate.background_verification_status = 'verified';
@@ -136,16 +136,20 @@ class EnhancedCandidateService {
     let score = 50; // Base score
     const osint = candidate.osint_profile;
 
-    // Factor in professional reputation
-    score += osint.professional_reputation.thought_leadership_score * 0.2;
-    score += osint.professional_reputation.community_involvement.length * 5;
+    // Factor in professional reputation (simplified scoring)
+    if (osint.professional_reputation) {
+      score += (osint.professional_reputation.industry_recognition_score || 0) * 0.2;
+      score += (osint.professional_reputation.community_involvement?.length || 0) * 5;
+    }
 
     // Factor in social presence
-    score += osint.social_presence.professional_consistency * 0.3;
+    if (osint.social_presence) {
+      score += (osint.social_presence.professional_consistency || 0) * 0.3;
+    }
 
     // Factor in GitHub activity (for technical roles)
     if (osint.github_profile) {
-      score += Math.min(20, osint.github_profile.contribution_activity * 0.1);
+      score += Math.min(20, (osint.github_profile.contribution_activity || 0) * 0.1);
     }
 
     candidate.cultural_fit_score = Math.min(100, Math.max(0, score));
@@ -222,7 +226,6 @@ class EnhancedCandidateService {
 
   // Mock data population (for development)
   initializeMockData(): void {
-    // This would be replaced with real data loading
     console.log('Enhanced candidate service initialized with mock data');
   }
 }
