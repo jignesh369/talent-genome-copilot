@@ -1,3 +1,4 @@
+
 import { EnhancedCandidate, CandidateInteraction, AvailabilitySignal, OSINTProfile } from '@/types/enhanced-recruiting';
 import { Candidate } from '@/types/recruiting';
 
@@ -138,19 +139,22 @@ class EnhancedCandidateService {
 
     // Factor in professional reputation (simplified scoring)
     if (osint.professional_reputation) {
-      score += (osint.professional_reputation.industry_recognition || 0) * 0.2;
+      const industryRecognition = Number(osint.professional_reputation.industry_recognition || 0);
+      score += industryRecognition * 0.2;
       const communityInvolvementCount = osint.professional_reputation.community_involvement ? osint.professional_reputation.community_involvement.length : 0;
       score += communityInvolvementCount * 5;
     }
 
     // Factor in social presence
     if (osint.social_presence) {
-      score += (osint.social_presence.professional_consistency || 0) * 0.3;
+      const professionalConsistency = Number(osint.social_presence.professional_consistency || 0);
+      score += professionalConsistency * 0.3;
     }
 
     // Factor in GitHub activity (for technical roles)
     if (osint.github_profile) {
-      score += Math.min(20, (osint.github_profile.contribution_activity || 0) * 0.1);
+      const contributionActivity = Number(osint.github_profile.contribution_activity || 0);
+      score += Math.min(20, contributionActivity * 0.1);
     }
 
     candidate.cultural_fit_score = Math.min(100, Math.max(0, score));
