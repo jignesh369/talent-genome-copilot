@@ -10,7 +10,7 @@ import {
   AlertTriangle,
   Lightbulb
 } from 'lucide-react';
-import { PredictiveInsight } from '@/services/predictiveAnalyticsService';
+import { PredictiveInsight } from '@/types/predictive-analytics';
 
 interface PredictiveInsightsCardProps {
   insights: PredictiveInsight[];

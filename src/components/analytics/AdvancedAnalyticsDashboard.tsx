@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { predictiveAnalyticsService, PredictiveInsight, MarketIntelligence } from '@/services/predictiveAnalyticsService';
+import { predictiveAnalyticsService } from '@/services/predictiveAnalyticsService';
+import { PredictiveInsight, MarketIntelligence } from '@/types/predictive-analytics';
 import { useEnhancedCandidates } from '@/hooks/useEnhancedCandidates';
 import AnalyticsHeader from './AnalyticsHeader';
 import PredictiveInsightsCard from './PredictiveInsightsCard';

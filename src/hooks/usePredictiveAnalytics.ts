@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
-import { predictiveAnalyticsService, PredictiveInsight, MarketIntelligence } from '@/services/predictiveAnalyticsService';
+import { predictiveAnalyticsService } from '@/services/predictiveAnalyticsService';
+import { PredictiveInsight, MarketIntelligence } from '@/types/predictive-analytics';
 import { useEnhancedCandidates } from './useEnhancedCandidates';
 
 export const usePredictiveAnalytics = () => {

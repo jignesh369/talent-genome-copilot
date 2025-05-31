@@ -11,7 +11,7 @@ import {
   Tooltip, 
   ResponsiveContainer
 } from 'recharts';
-import { MarketIntelligence } from '@/services/predictiveAnalyticsService';
+import { MarketIntelligence } from '@/types/predictive-analytics';
 
 interface MarketIntelligenceTabContentProps {
   marketData: MarketIntelligence | null;
