@@ -68,7 +68,7 @@ const EnhancedAnalyticsDashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">OSINT Profiles</p>
-                <p className="text-2xl font-bold">{osintMonitoring.length}</p>
+                <p className="text-2xl font-bold">{osintMonitoring.total || 0}</p>
               </div>
               <Target className="h-8 w-8 text-purple-500" />
             </div>
@@ -80,7 +80,7 @@ const EnhancedAnalyticsDashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Active Alerts</p>
-                <p className="text-2xl font-bold">{alertStats.active}</p>
+                <p className="text-2xl font-bold">{alertStats.recent || 0}</p>
               </div>
               <AlertTriangle className="h-8 w-8 text-orange-500" />
             </div>
