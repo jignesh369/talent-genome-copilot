@@ -48,7 +48,6 @@ const StartupAdmin = () => {
       currentUsers: 32,
       currentJobs: 12,
       monthlyAmount: 299,
-      billingStatus: 'active',
       nextBilling: 'Jan 15, 2024',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
@@ -68,7 +67,6 @@ const StartupAdmin = () => {
       currentUsers: 7,
       currentJobs: 3,
       monthlyAmount: 99,
-      billingStatus: 'active',
       nextBilling: 'Jan 20, 2024',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
@@ -88,7 +86,6 @@ const StartupAdmin = () => {
       currentUsers: 85,
       currentJobs: 28,
       monthlyAmount: 599,
-      billingStatus: 'active',
       nextBilling: 'Jan 25, 2024',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
