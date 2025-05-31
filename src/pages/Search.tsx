@@ -5,10 +5,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import RecruiterLayout from '@/components/recruiter/RecruiterLayout';
 import SearchInterface from '@/components/search/SearchInterface';
 import SearchHistory from '@/components/search/SearchHistory';
+import { useSearch } from '@/hooks/useSearch';
 import { Search as SearchIcon, History, Bell } from 'lucide-react';
 
 const Search = () => {
   const [activeTab, setActiveTab] = useState('search');
+  const {
+    query,
+    setQuery,
+    isSearching,
+    isListening,
+    handleSearch,
+    handleVoiceInput
+  } = useSearch();
 
   return (
     <RecruiterLayout 
@@ -34,7 +43,14 @@ const Search = () => {
           </TabsList>
 
           <TabsContent value="search">
-            <SearchInterface />
+            <SearchInterface 
+              query={query}
+              setQuery={setQuery}
+              isSearching={isSearching}
+              isListening={isListening}
+              onSearch={handleSearch}
+              onVoiceInput={handleVoiceInput}
+            />
           </TabsContent>
 
           <TabsContent value="history">
