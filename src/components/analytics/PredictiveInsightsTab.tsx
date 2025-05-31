@@ -6,10 +6,12 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Brain, TrendingUp, Target, Zap } from 'lucide-react';
 import { useRecruitingIntelligence } from '@/hooks/useRecruitingIntelligence';
+import { useCandidatePredictions } from '@/hooks/useCandidatePredictions';
 import { useCandidateConversion } from '@/hooks/useCandidateConversion';
 
 const PredictiveInsightsTab = () => {
-  const { enhancedCandidates, predictJobSuccess, generateAssessment } = useRecruitingIntelligence();
+  const { enhancedCandidates } = useRecruitingIntelligence();
+  const { predictJobSuccess, generateAssessment } = useCandidatePredictions();
   const { convertToSearchCandidate } = useCandidateConversion();
   const [predictions, setPredictions] = useState<any[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);

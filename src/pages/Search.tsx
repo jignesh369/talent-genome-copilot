@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import RecruiterLayout from '@/components/recruiter/RecruiterLayout';
 import SearchTabsContainer from '@/components/search/SearchTabsContainer';
@@ -6,6 +5,7 @@ import SearchModalsContainer from '@/components/search/SearchModalsContainer';
 import { useSearch } from '@/hooks/useSearch';
 import { useSearchModals } from '@/hooks/useSearchModals';
 import { useRecruitingIntelligence } from '@/hooks/useRecruitingIntelligence';
+import { useCommunicationAutomation } from '@/hooks/useCommunicationAutomation';
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
 import { PersonalizedSequence } from '@/types/outreach-sequence';
 import { useToast } from '@/hooks/use-toast';
@@ -37,7 +37,7 @@ const Search = () => {
     setOutreachCandidate
   } = useSearchModals();
 
-  const { processAutomaticOutreach } = useRecruitingIntelligence();
+  const { processAutomaticOutreach } = useCommunicationAutomation();
 
   const handleContactCandidate = async (candidate: EnhancedCandidate) => {
     console.log('Opening outreach sequence modal for candidate:', candidate.name);
