@@ -2,8 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Users, Filter, ArrowUpDown, Zap } from "lucide-react";
+import { Filter, ArrowUpDown } from "lucide-react";
 import { SearchResult, EnhancedCandidate } from '@/types/enhanced-candidate';
 import CandidateCard from './CandidateCard';
 import SearchSidebar from './SearchSidebar';

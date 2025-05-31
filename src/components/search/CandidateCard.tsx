@@ -4,11 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Star, Clock, Target, User, Radar, Sparkles, ThumbsUp, ThumbsDown, Briefcase } from "lucide-react";
+import { Star, Clock, Target, User, Sparkles, ThumbsUp, ThumbsDown, Briefcase } from "lucide-react";
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
-import OSINTMetrics from './OSINTMetrics';
-import ScoreIndicator from './ScoreIndicator';
-import SourceBadge from './SourceBadge';
 
 interface CandidateCardProps {
   candidate: EnhancedCandidate;
@@ -25,14 +22,6 @@ const CandidateCard: React.FC<CandidateCardProps> = ({
   onContactCandidate,
   onFeedback 
 }) => {
-  const getMatchSources = () => {
-    const sources = [];
-    if (candidate.osint_profile.github) sources.push('github');
-    if (candidate.osint_profile.linkedin) sources.push('linkedin');
-    if (candidate.osint_profile.stackoverflow) sources.push('stackoverflow');
-    return sources;
-  };
-
   return (
     <Card className="group hover:shadow-lg transition-all duration-300 border border-gray-200 hover:border-purple-200 cursor-pointer rounded-xl overflow-hidden bg-white">
       <CardContent className="p-6">
@@ -85,15 +74,21 @@ const CandidateCard: React.FC<CandidateCardProps> = ({
 
               <div className="grid grid-cols-3 gap-4 mb-4 p-3 bg-gray-50 rounded-lg">
                 <div className="text-center">
-                  <div className="text-lg font-bold text-blue-600">{candidate.technical_depth_score}</div>
+                  <div className="text-lg font-bold text-blue-600">
+                    {Math.round(candidate.technical_depth_score || 0)}
+                  </div>
                   <div className="text-xs text-gray-500">Technical</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-lg font-bold text-green-600">{candidate.community_influence_score}</div>
+                  <div className="text-lg font-bold text-green-600">
+                    {Math.round(candidate.community_influence_score || 0)}
+                  </div>
                   <div className="text-xs text-gray-500">Community</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-lg font-bold text-purple-600">{candidate.learning_velocity_score}</div>
+                  <div className="text-lg font-bold text-purple-600">
+                    {Math.round(candidate.learning_velocity_score || 0)}
+                  </div>
                   <div className="text-xs text-gray-500">Learning</div>
                 </div>
               </div>

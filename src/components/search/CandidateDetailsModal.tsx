@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { Star, X, User, ExternalLink, Target, Zap, ThumbsUp, ThumbsDown, Brain, Contact } from "lucide-react";
+import { Star, X, ExternalLink, Target, Zap, ThumbsUp, ThumbsDown, Brain, Contact } from "lucide-react";
 import { EnhancedCandidate } from "@/types/enhanced-candidate";
 
 interface CandidateDetailsModalProps {
@@ -112,15 +112,21 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                       <h3 className="text-lg font-bold mb-3">Key Metrics</h3>
                       <div className="grid grid-cols-3 gap-4 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl border border-green-200">
                         <div className="text-center">
-                          <div className="text-2xl font-bold text-blue-600">{candidate.technical_depth_score}</div>
+                          <div className="text-2xl font-bold text-blue-600">
+                            {Math.round(candidate.technical_depth_score || 0)}
+                          </div>
                           <div className="text-sm text-gray-600">Technical Depth</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-2xl font-bold text-green-600">{candidate.community_influence_score}</div>
+                          <div className="text-2xl font-bold text-green-600">
+                            {Math.round(candidate.community_influence_score || 0)}
+                          </div>
                           <div className="text-sm text-gray-600">Community Impact</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-2xl font-bold text-green-600">{candidate.learning_velocity_score}</div>
+                          <div className="text-2xl font-bold text-green-600">
+                            {Math.round(candidate.learning_velocity_score || 0)}
+                          </div>
                           <div className="text-sm text-gray-600">Learning Velocity</div>
                         </div>
                       </div>
