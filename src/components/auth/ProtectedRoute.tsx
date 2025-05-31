@@ -16,11 +16,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
   const { user, userRole, loading } = useAuth();
 
-  console.log('ProtectedRoute - User:', user?.email, 'Role:', userRole, 'Loading:', loading, 'AllowedRoles:', allowedRoles);
-
   // Show loading spinner while authentication is being checked
   if (loading) {
-    console.log('ProtectedRoute: Showing loading state');
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -33,14 +30,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Redirect to auth page if not authenticated
   if (!user) {
-    console.log('User not authenticated, redirecting to /auth');
     window.location.href = '/auth';
     return null;
   }
 
   // Check role authorization if roles are specified
   if (allowedRoles && userRole && !allowedRoles.includes(userRole)) {
-    console.log('Access denied - User role:', userRole, 'Required roles:', allowedRoles);
     return fallback || (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -55,7 +50,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Show loading if user exists but role is still being fetched
   if (user && allowedRoles && !userRole) {
-    console.log('User exists but no role found - showing permissions loading');
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -67,7 +61,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  console.log('ProtectedRoute: Rendering children');
   return <>{children}</>;
 };
 

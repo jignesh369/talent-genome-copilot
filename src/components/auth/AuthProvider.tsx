@@ -55,7 +55,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session check:', session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
       
@@ -71,8 +70,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUserData = async (user: User) => {
     try {
-      console.log('Fetching user data for:', user.email, 'User ID:', user.id);
-      
       // Fetch user profile - use maybeSingle to avoid errors if no profile exists
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
@@ -84,7 +81,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Error fetching profile:', profileError);
         // Don't stop execution, continue with role fetch
       } else {
-        console.log('Profile data:', profileData);
         setProfile(profileData);
         setOrganizationId(profileData?.organization_id);
       }
@@ -100,7 +96,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Error fetching role:', roleError);
         setUserRole(null);
       } else {
-        console.log('Role data:', roleData);
         setUserRole(roleData?.role || null);
       }
       
@@ -127,8 +122,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Error signing out:', error);
     }
   };
-
-  console.log('Auth state - User:', user?.email, 'Role:', userRole, 'Loading:', loading);
 
   return (
     <AuthContext.Provider
