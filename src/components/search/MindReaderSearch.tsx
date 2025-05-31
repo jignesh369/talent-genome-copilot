@@ -122,6 +122,7 @@ const MindReaderSearch = () => {
           candidate={selectedCandidate}
           onClose={() => setSelectedCandidate(null)}
           onFeedback={handleFeedback}
+          onContactCandidate={handleContactCandidate}
         />
       )}
 
