@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -306,11 +305,11 @@ const OutreachSequenceBuilder: React.FC = () => {
                           </div>
 
                           <div className="mt-3 flex flex-wrap gap-1">
-                            <Badge variant="outline" className="text-xs">{{candidate_name}}</Badge>
-                            <Badge variant="outline" className="text-xs">{{current_title}}</Badge>
-                            <Badge variant="outline" className="text-xs">{{company_name}}</Badge>
-                            <Badge variant="outline" className="text-xs">{{skills}}</Badge>
-                            <Badge variant="outline" className="text-xs">{{recent_achievement}}</Badge>
+                            <Badge variant="outline" className="text-xs">{'{{candidate_name}}'}</Badge>
+                            <Badge variant="outline" className="text-xs">{'{{current_title}}'}</Badge>
+                            <Badge variant="outline" className="text-xs">{'{{company_name}}'}</Badge>
+                            <Badge variant="outline" className="text-xs">{'{{skills}}'}</Badge>
+                            <Badge variant="outline" className="text-xs">{'{{recent_achievement}}'}</Badge>
                           </div>
                         </Card>
                       );

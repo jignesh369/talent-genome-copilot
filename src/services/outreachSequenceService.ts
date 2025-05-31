@@ -1,5 +1,4 @@
-
-import { EnhancedCandidate } from '@/types/enhanced-recruiting';
+import { EnhancedCandidate } from '@/types/enhanced-candidate';
 
 export interface OutreachSequence {
   id: string;
@@ -230,8 +229,8 @@ class OutreachSequenceService {
     const personalizationData: PersonalizationData = {
       candidate_id: candidate.id,
       insights,
-      communication_style,
-      optimal_timing,
+      communication_style: communicationStyle,
+      optimal_timing: optimalTiming,
       personalization_score: this.calculatePersonalizationScore(insights),
       generated_content: generatedContent
     };
@@ -256,7 +255,7 @@ class OutreachSequenceService {
       });
     }
 
-    // Career trajectory analysis
+    // Career trajectory analysis - using the correct property name
     if (candidate.career_trajectory_analysis) {
       insights.push({
         type: 'career_trajectory',
@@ -268,17 +267,19 @@ class OutreachSequenceService {
       });
     }
 
-    // Recent activity signals
-    if (candidate.availability_signals.length > 0) {
-      const recentSignal = candidate.availability_signals[0];
-      insights.push({
-        type: 'recent_activity',
-        title: 'Availability Signal Detected',
-        content: recentSignal.details,
-        confidence: recentSignal.confidence,
-        source: recentSignal.source,
-        suggested_usage: 'Reference their current career exploration and timing for new opportunities.'
-      });
+    // Recent activity signals - using correct property names
+    if (candidate.osint_profile && candidate.osint_profile.activity_indicators) {
+      const recentActivity = candidate.osint_profile.activity_indicators[0];
+      if (recentActivity) {
+        insights.push({
+          type: 'recent_activity',
+          title: 'Recent Activity Signal',
+          content: `Recent ${recentActivity.type} activity detected`,
+          confidence: recentActivity.confidence,
+          source: recentActivity.source,
+          suggested_usage: 'Reference their current activity and engagement in the field.'
+        });
+      }
     }
 
     return insights;
@@ -314,7 +315,7 @@ class OutreachSequenceService {
         `Your expertise in ${candidate.skills.slice(0, 2).join(' & ')} caught our attention`
       ],
       opening_lines: [
-        `Hi ${candidate.first_name}, I noticed your experience with ${candidate.skills[0]} and thought you might be interested in...`,
+        `Hi ${candidate.name}, I noticed your experience with ${candidate.skills[0]} and thought you might be interested in...`,
         `Your background in ${candidate.current_title} roles is exactly what we're looking for...`,
         `Given your ${candidate.experience_years} years of experience, I wanted to reach out about...`
       ],
