@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Star, Clock, Target, User, Radar, Sparkles, ThumbsUp, ThumbsDown, Briefcase, Brain, Contact } from "lucide-react";
+import { Star, Clock, Target, User, Radar, Sparkles, ThumbsUp, ThumbsDown, Briefcase, Brain, Contact, Camera } from "lucide-react";
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
 import OSINTMetrics from './OSINTMetrics';
 import ScoreIndicator from './ScoreIndicator';
@@ -130,6 +130,16 @@ const SimplifiedCandidateCard: React.FC<SimplifiedCandidateCardProps> = ({
             >
               <User className="h-4 w-4 mr-2" />
               View Full Profile
+            </Button>
+            
+            <Button 
+              size="sm" 
+              variant="outline"
+              className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+              onClick={() => onViewSnapshot(candidate)}
+            >
+              <Camera className="h-4 w-4 mr-2" />
+              AI Snapshot
             </Button>
             
             <Button 
