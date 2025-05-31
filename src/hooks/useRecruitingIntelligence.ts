@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { realTimeOSINTService } from '@/services/analytics/realTimeOSINTService';
 import { predictiveAnalyticsEngine } from '@/services/analytics/predictiveAnalyticsEngine';
@@ -76,7 +75,7 @@ export const useRecruitingIntelligence = () => {
         platform: candidate.preferred_contact_method as any || 'email',
         confidence: 0.8,
         best_time: '9-17',
-        approach_style: 'professional' as const
+        approach_style: 'direct' as const
       },
       profile_last_updated: new Date().toISOString(),
       osint_last_fetched: new Date().toISOString()
@@ -118,10 +117,9 @@ export const useRecruitingIntelligence = () => {
 
     riskAlertSystem.onAlert(handleNewAlert);
     
-    // Analyze existing candidates for risks
+    // Analyze existing candidates for risks - use original candidate type
     enhancedCandidates.forEach(candidate => {
-      const convertedCandidate = convertToAnalyticsCandidate(candidate);
-      const candidateRisks = riskAlertSystem.analyzeCandidate(convertedCandidate);
+      const candidateRisks = riskAlertSystem.analyzeCandidate(candidate);
       if (candidateRisks.length > 0) {
         setAlerts(prev => [...candidateRisks, ...prev]);
       }
