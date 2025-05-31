@@ -1,10 +1,7 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/components/auth/AuthProvider';
 import UserProfileDropdown from '@/components/navigation/UserProfileDropdown';
@@ -13,6 +10,9 @@ import InviteMemberModal from '@/components/modals/InviteMemberModal';
 import CreateJobForm from '@/components/forms/CreateJobForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import CandidatePipeline from '@/components/admin/CandidatePipeline';
+import JobsManagement from '@/components/recruiter/JobsManagement';
+import CandidatesManagement from '@/components/recruiter/CandidatesManagement';
 import { 
   Users, 
   Briefcase, 
@@ -21,23 +21,20 @@ import {
   TrendingUp,
   Building,
   Search,
-  Filter,
-  MoreHorizontal,
-  Edit,
-  Trash2,
   Calendar,
-  MessageSquare,
-  Target
+  Target,
+  BarChart3,
+  MessageSquare
 } from 'lucide-react';
-import CandidatePipeline from '@/components/admin/CandidatePipeline';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Edit, Trash2, Filter, MoreHorizontal } from 'lucide-react';
 
 const RecruiterDashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showCreateJobModal, setShowCreateJobModal] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterRole, setFilterRole] = useState('all');
 
   const stats = [
     { label: 'Active Jobs', value: '12', icon: Briefcase, color: 'text-blue-600', change: '+3 this month' },
@@ -53,12 +50,8 @@ const RecruiterDashboard = () => {
     { id: '4', name: 'Alex Wilson', email: 'alex@company.com', role: 'interviewer', status: 'Inactive', jobs: 0, department: 'Product', lastActive: '1 week ago' }
   ]);
 
-  const recentJobs = [
-    { id: '1', title: 'Senior Frontend Developer', candidates: 23, status: 'Active', posted: '3 days ago' },
-    { id: '2', title: 'Product Manager', candidates: 18, status: 'Active', posted: '1 week ago' },
-    { id: '3', title: 'UX Designer', candidates: 12, status: 'Draft', posted: '2 days ago' },
-    { id: '4', title: 'Backend Engineer', candidates: 31, status: 'Active', posted: '5 days ago' }
-  ];
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterRole, setFilterRole] = useState('all');
 
   const handleInviteMember = (memberData: any) => {
     const newMember = {
@@ -79,7 +72,6 @@ const RecruiterDashboard = () => {
       title: "Job Created",
       description: `${jobData.title} has been posted successfully.`,
     });
-    console.log('Creating job:', jobData);
     setShowCreateJobModal(false);
   };
 
@@ -164,83 +156,102 @@ const RecruiterDashboard = () => {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="jobs">Jobs</TabsTrigger>
-            <TabsTrigger value="candidates">Candidates</TabsTrigger>
-            <TabsTrigger value="team">Team</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="overview" className="flex items-center space-x-2">
+              <BarChart3 className="w-4 h-4" />
+              <span>Overview</span>
+            </TabsTrigger>
+            <TabsTrigger value="jobs" className="flex items-center space-x-2">
+              <Briefcase className="w-4 h-4" />
+              <span>Jobs</span>
+            </TabsTrigger>
+            <TabsTrigger value="candidates" className="flex items-center space-x-2">
+              <Users className="w-4 h-4" />
+              <span>Candidates</span>
+            </TabsTrigger>
+            <TabsTrigger value="pipeline" className="flex items-center space-x-2">
+              <TrendingUp className="w-4 h-4" />
+              <span>Pipeline</span>
+            </TabsTrigger>
+            <TabsTrigger value="team" className="flex items-center space-x-2">
+              <UserPlus className="w-4 h-4" />
+              <span>Team</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            {/* Candidate Pipeline with candidates visible for recruiters */}
-            <CandidatePipeline showCandidates={true} />
-
-            {/* Recent Jobs */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
+            {/* Quick Actions */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setShowCreateJobModal(true)}>
+                <CardHeader>
                   <CardTitle className="flex items-center">
-                    <Briefcase className="w-5 h-5 mr-2" />
-                    Recent Jobs
+                    <Plus className="w-5 h-5 mr-2 text-blue-600" />
+                    Create New Job
                   </CardTitle>
-                  <Button size="sm" onClick={() => setShowCreateJobModal(true)}>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600 mb-4">
+                    Post a new job opening and start attracting candidates.
+                  </p>
+                  <Button className="w-full">
                     <Plus className="w-4 h-4 mr-2" />
-                    New Job
+                    Create Job
                   </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentJobs.map((job) => (
-                    <div key={job.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                      <div>
-                        <h4 className="font-medium text-gray-900">{job.title}</h4>
-                        <p className="text-sm text-gray-600">{job.candidates} candidates • Posted {job.posted}</p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge 
-                          variant={job.status === 'Active' ? 'default' : 'secondary'}
-                          className={job.status === 'Active' ? 'bg-green-100 text-green-800' : ''}
-                        >
-                          {job.status}
-                        </Badge>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Search className="w-5 h-5 mr-2 text-green-600" />
+                    AI Candidate Search
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600 mb-4">
+                    Use AI to find the perfect candidates for your roles.
+                  </p>
+                  <Button variant="outline" className="w-full">
+                    Search Candidates
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <MessageSquare className="w-5 h-5 mr-2 text-purple-600" />
+                    Interview Scheduling
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600 mb-4">
+                    Schedule and manage interviews with candidates.
+                  </p>
+                  <Button variant="outline" className="w-full">
+                    Schedule Interview
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Candidate Pipeline */}
+            <CandidatePipeline showCandidates={true} />
           </TabsContent>
 
           <TabsContent value="jobs">
-            {/* Jobs management content */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Job Management</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">Job management functionality will be implemented here.</p>
-              </CardContent>
-            </Card>
+            <JobsManagement />
           </TabsContent>
 
           <TabsContent value="candidates">
-            {/* Candidates management content */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Candidate Management</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">Candidate management functionality will be implemented here.</p>
-              </CardContent>
-            </Card>
+            <CandidatesManagement />
+          </TabsContent>
+
+          <TabsContent value="pipeline">
+            <CandidatePipeline showCandidates={true} />
           </TabsContent>
 
           <TabsContent value="team">
-            {/* Team Members */}
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
