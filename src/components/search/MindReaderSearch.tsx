@@ -1,15 +1,18 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { Search, Brain, Mic, ExternalLink, User, Lightbulb, Github, Star, Loader2, Users, MessageSquare, Award, Target, X, Filter, SortDesc, Sparkles } from "lucide-react";
+import { Search, Brain, Mic, ExternalLink, User, Lightbulb, Github, Star, Loader2, Users, MessageSquare, Award, Target, X, Filter, SortDesc, Sparkles, Twitter, Zap, ThumbsUp, ThumbsDown } from "lucide-react";
 import { EnhancedCandidate } from "@/types/enhanced-candidate";
 import DigitalFootprintModal from "./DigitalFootprintModal";
 import CandidateCard from "./CandidateCard";
 import SearchSidebar from "./SearchSidebar";
+import OSINTMetrics from "./OSINTMetrics";
 import { useSearch } from "@/hooks/useSearch";
 
 const MindReaderSearch = () => {
