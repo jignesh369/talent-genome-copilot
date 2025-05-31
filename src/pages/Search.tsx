@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -12,7 +11,7 @@ import DigitalFootprintModal from '@/components/search/DigitalFootprintModal';
 import EmptyState from '@/components/search/EmptyState';
 import { useSearch } from '@/hooks/useSearch';
 import { useRecruitingIntelligence } from '@/hooks/useRecruitingIntelligence';
-import { Search as SearchIcon, History, Bell, Filter, SortDesc } from 'lucide-react';
+import { Search as SearchIcon, History, Bell, Filter, SortDesc, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
 import { useToast } from '@/hooks/use-toast';
@@ -34,15 +33,15 @@ const Search = () => {
     handleFeedback
   } = useSearch();
 
-  const { generatePersonalizedOutreach } = useRecruitingIntelligence();
+  const { generatePersonalizedOutreach, processAutomaticOutreach } = useRecruitingIntelligence();
 
   const handleContactCandidate = async (candidate: EnhancedCandidate) => {
     try {
       console.log('Contacting candidate:', candidate.name);
       
       toast({
-        title: "Generating AI Outreach",
-        description: "Creating personalized message for the candidate...",
+        title: "Generating Enhanced AI Outreach",
+        description: "Creating highly personalized message with quality scoring...",
       });
 
       const message = await generatePersonalizedOutreach(
@@ -51,15 +50,16 @@ const Search = () => {
         {
           company_name: 'TechCorp',
           role_title: 'Senior Software Engineer',
-          recruiter_name: 'Sarah'
+          recruiter_name: 'Sarah',
+          role_benefits: 'Cutting-edge AI projects,Competitive salary + equity,Remote work flexibility'
         }
       );
 
       if (message) {
-        console.log('Generated outreach message:', message);
+        console.log('Generated enhanced outreach message:', message);
         toast({
-          title: "AI Outreach Generated",
-          description: `Personalized message created for ${candidate.name}. Review and send when ready.`,
+          title: "Enhanced AI Outreach Generated",
+          description: `High-quality personalized message created for ${candidate.name}. Quality-scored and optimized for response.`,
         });
       }
     } catch (error) {
@@ -72,28 +72,58 @@ const Search = () => {
     }
   };
 
+  const handleAutomaticOutreach = async () => {
+    try {
+      toast({
+        title: "Processing Automatic Outreach",
+        description: "Analyzing candidates and generating triggered outreach...",
+      });
+
+      await processAutomaticOutreach();
+    } catch (error) {
+      console.error('Error in automatic outreach:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process automatic outreach.",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <RecruiterLayout 
       title="AI-Powered Talent Discovery" 
-      subtitle="Discover exceptional talent with comprehensive analysis and search history"
+      subtitle="Discover exceptional talent with enhanced AI outreach and smart triggers"
       showSearch={false}
     >
       <div className="max-w-7xl mx-auto space-y-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3 max-w-md">
-            <TabsTrigger value="search" className="flex items-center space-x-2">
-              <SearchIcon className="h-4 w-4" />
-              <span>Search</span>
-            </TabsTrigger>
-            <TabsTrigger value="history" className="flex items-center space-x-2">
-              <History className="h-4 w-4" />
-              <span>History</span>
-            </TabsTrigger>
-            <TabsTrigger value="alerts" className="flex items-center space-x-2">
-              <Bell className="h-4 w-4" />
-              <span>Alerts</span>
-            </TabsTrigger>
-          </TabsList>
+          <div className="flex items-center justify-between">
+            <TabsList className="grid w-full grid-cols-3 max-w-md">
+              <TabsTrigger value="search" className="flex items-center space-x-2">
+                <SearchIcon className="h-4 w-4" />
+                <span>Search</span>
+              </TabsTrigger>
+              <TabsTrigger value="history" className="flex items-center space-x-2">
+                <History className="h-4 w-4" />
+                <span>History</span>
+              </TabsTrigger>
+              <TabsTrigger value="alerts" className="flex items-center space-x-2">
+                <Bell className="h-4 w-4" />
+                <span>Alerts</span>
+              </TabsTrigger>
+            </TabsList>
+            
+            {searchResult && (
+              <Button 
+                onClick={handleAutomaticOutreach}
+                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                Process Auto Outreach
+              </Button>
+            )}
+          </div>
 
           <TabsContent value="search" className="space-y-6">
             <SearchInterface 

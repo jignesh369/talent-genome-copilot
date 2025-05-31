@@ -1,4 +1,3 @@
-
 import { predictiveAnalyticsEngine } from '@/services/analytics/predictiveAnalyticsEngine';
 import { dynamicAssessmentGenerator } from '@/services/analytics/dynamicAssessmentGenerator';
 import { automatedCommunicationService } from '@/services/analytics/automatedCommunicationService';
@@ -8,6 +7,8 @@ import { useRiskAlerts } from './useRiskAlerts';
 import { useOSINTMonitoring } from './useOSINTMonitoring';
 import { useCommunicationMetrics } from './useCommunicationMetrics';
 import { convertToAnalyticsCandidate } from '@/utils/candidateConverter';
+import { enhancedAutomatedCommunication } from '@/services/analytics/enhancedAutomatedCommunication';
+import { smartOutreachTriggers } from '@/services/analytics/smartOutreachTriggers';
 
 export const useRecruitingIntelligence = () => {
   const { enhancedCandidates } = useEnhancedCandidates();
@@ -38,13 +39,66 @@ export const useRecruitingIntelligence = () => {
     const candidate = enhancedCandidates.find(c => c.id === candidateId);
     if (!candidate) return null;
     
-    const communicationCandidate = convertToAnalyticsCandidate(candidate);
+    // Use enhanced outreach generation
+    const result = await enhancedAutomatedCommunication.generateEnhancedOutreach({
+      candidate,
+      message_type: messageType,
+      context: {
+        company_name: customData.company_name || 'TechCorp',
+        role_title: customData.role_title || 'Senior Software Engineer',
+        recruiter_name: customData.recruiter_name || 'Sarah',
+        role_benefits: customData.role_benefits ? customData.role_benefits.split(',') : undefined
+      }
+    });
+
+    console.log('Enhanced outreach generated:', {
+      quality_score: result.quality_score,
+      recommendations: result.recommendations
+    });
+
+    return result.message;
+  };
+
+  const processAutomaticOutreach = async () => {
+    console.log('Processing automatic outreach for all candidates...');
     
-    return await automatedCommunicationService.generatePersonalizedMessage(
-      communicationCandidate, 
-      messageType, 
-      customData
+    const result = await enhancedAutomatedCommunication.processTriggerBasedOutreach(enhancedCandidates);
+    
+    toast({
+      title: "Automatic Outreach Processed",
+      description: `Generated ${result.generated} messages, scheduled ${result.scheduled} more.`
+    });
+
+    return result;
+  };
+
+  const createBulkOutreach = async (candidateIds: string[], templateType: string) => {
+    const jobId = await enhancedAutomatedCommunication.createBatchOutreachJob(
+      candidateIds,
+      templateType,
+      {
+        company_name: 'TechCorp',
+        role_title: 'Senior Software Engineer',
+        recruiter_name: 'Sarah'
+      }
     );
+
+    toast({
+      title: "Bulk Outreach Started",
+      description: `Processing outreach for ${candidateIds.length} candidates.`
+    });
+
+    return jobId;
+  };
+
+  const getOutreachAnalytics = () => {
+    const triggerAnalytics = smartOutreachTriggers.getTriggerAnalytics();
+    const performanceAnalytics = enhancedAutomatedCommunication.getPerformanceAnalytics();
+    
+    return {
+      ...triggerAnalytics,
+      ...performanceAnalytics
+    };
   };
 
   const sendMessage = async (messageId: string) => {
@@ -76,6 +130,9 @@ export const useRecruitingIntelligence = () => {
     
     // Communication automation
     generatePersonalizedOutreach,
+    processAutomaticOutreach,
+    createBulkOutreach,
+    getOutreachAnalytics,
     sendMessage,
     communicationMetrics,
     
