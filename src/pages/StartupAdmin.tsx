@@ -188,45 +188,45 @@ const StartupAdmin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 w-full overflow-x-hidden">
       <StartupAdminHeader onSignOut={signOut} />
 
-      <div className="max-w-7xl mx-auto px-8 py-8">
-        <div className="mb-8">
+      <div className="max-w-7xl mx-auto px-4 lg:px-8 py-4 lg:py-8 w-full">
+        <div className="mb-6 lg:mb-8">
           <StartupAdminWelcome userName={user?.user_metadata?.first_name} />
         </div>
 
-        {/* Enhanced Stats Grid - 5 columns for more comprehensive view */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-10">
+        {/* Enhanced Stats Grid - Better responsive design */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6 mb-6 lg:mb-10 w-full overflow-hidden">
           {platformStats.map((stat, index) => (
-            <div key={index} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200">
+            <div key={index} className="bg-white rounded-xl p-4 lg:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200 min-w-0">
               <div className="flex items-center justify-between mb-3">
-                <div className={`p-3 rounded-lg bg-gray-50`}>
-                  <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                <div className="p-2 lg:p-3 rounded-lg bg-gray-50 flex-shrink-0">
+                  <stat.icon className={`w-4 h-4 lg:w-5 lg:h-5 ${stat.color}`} />
                 </div>
                 {stat.trend === 'up' && (
-                  <div className="flex items-center text-emerald-600 text-xs">
+                  <div className="flex items-center text-emerald-600 text-xs flex-shrink-0">
                     <TrendingUp className="w-3 h-3 mr-1" />
                     <span>Up</span>
                   </div>
                 )}
               </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">{stat.label}</p>
-                <p className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</p>
-                <p className="text-xs text-emerald-600">{stat.change}</p>
+              <div className="min-w-0">
+                <p className="text-xs lg:text-sm font-medium text-gray-600 mb-1 truncate">{stat.label}</p>
+                <p className="text-lg lg:text-2xl font-bold text-gray-900 mb-1 truncate">{stat.value}</p>
+                <p className="text-xs text-emerald-600 truncate">{stat.change}</p>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Main Content with improved spacing */}
-        <Tabs defaultValue="overview" className="w-full">
-          <div className="grid grid-cols-12 gap-8">
+        {/* Main Content with improved layout */}
+        <Tabs defaultValue="overview" className="w-full min-w-0">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-8 w-full overflow-hidden">
             <StartupAdminSidebar />
 
             {/* Main Content Area */}
-            <div className="col-span-9">
+            <div className="lg:col-span-9 min-w-0 overflow-hidden">
               <TabsContent value="overview" className="mt-0">
                 <StartupAdminOverview 
                   recentActivities={recentActivities}
@@ -246,25 +246,25 @@ const StartupAdmin = () => {
               </TabsContent>
 
               <TabsContent value="predictive" className="mt-0">
-                <div className="space-y-6">
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-8 border">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">AI Predictions</h2>
+                <div className="space-y-6 w-full overflow-hidden">
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 lg:p-8 border min-w-0">
+                    <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">AI Predictions</h2>
                     <p className="text-gray-600 mb-6">Advanced predictive analytics powered by machine learning</p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <div className="bg-white rounded-lg p-4 shadow-sm">
-                        <h3 className="font-semibold text-gray-900 mb-2">Revenue Forecast</h3>
-                        <p className="text-2xl font-bold text-emerald-600">$425k</p>
-                        <p className="text-sm text-gray-600">Predicted next month</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full overflow-hidden">
+                      <div className="bg-white rounded-lg p-4 shadow-sm min-w-0">
+                        <h3 className="font-semibold text-gray-900 mb-2 truncate">Revenue Forecast</h3>
+                        <p className="text-xl lg:text-2xl font-bold text-emerald-600 truncate">$425k</p>
+                        <p className="text-sm text-gray-600 truncate">Predicted next month</p>
                       </div>
-                      <div className="bg-white rounded-lg p-4 shadow-sm">
-                        <h3 className="font-semibold text-gray-900 mb-2">Churn Risk</h3>
-                        <p className="text-2xl font-bold text-orange-600">2.1%</p>
-                        <p className="text-sm text-gray-600">Organizations at risk</p>
+                      <div className="bg-white rounded-lg p-4 shadow-sm min-w-0">
+                        <h3 className="font-semibold text-gray-900 mb-2 truncate">Churn Risk</h3>
+                        <p className="text-xl lg:text-2xl font-bold text-orange-600 truncate">2.1%</p>
+                        <p className="text-sm text-gray-600 truncate">Organizations at risk</p>
                       </div>
-                      <div className="bg-white rounded-lg p-4 shadow-sm">
-                        <h3 className="font-semibold text-gray-900 mb-2">Growth Rate</h3>
-                        <p className="text-2xl font-bold text-blue-600">+18%</p>
-                        <p className="text-sm text-gray-600">Projected monthly</p>
+                      <div className="bg-white rounded-lg p-4 shadow-sm min-w-0">
+                        <h3 className="font-semibold text-gray-900 mb-2 truncate">Growth Rate</h3>
+                        <p className="text-xl lg:text-2xl font-bold text-blue-600 truncate">+18%</p>
+                        <p className="text-sm text-gray-600 truncate">Projected monthly</p>
                       </div>
                     </div>
                   </div>
@@ -304,30 +304,30 @@ const StartupAdmin = () => {
               </TabsContent>
 
               <TabsContent value="security" className="mt-0">
-                <div className="space-y-6">
-                  <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-xl p-8 border">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Security Center</h2>
+                <div className="space-y-6 w-full overflow-hidden">
+                  <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-xl p-6 lg:p-8 border min-w-0">
+                    <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">Security Center</h2>
                     <p className="text-gray-600 mb-6">Platform security monitoring and threat detection</p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                      <div className="bg-white rounded-lg p-4 shadow-sm">
-                        <h3 className="font-semibold text-gray-900 mb-2">Security Score</h3>
-                        <p className="text-2xl font-bold text-green-600">98/100</p>
-                        <p className="text-sm text-gray-600">Excellent security</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full overflow-hidden">
+                      <div className="bg-white rounded-lg p-4 shadow-sm min-w-0">
+                        <h3 className="font-semibold text-gray-900 mb-2 truncate">Security Score</h3>
+                        <p className="text-xl lg:text-2xl font-bold text-green-600 truncate">98/100</p>
+                        <p className="text-sm text-gray-600 truncate">Excellent security</p>
                       </div>
-                      <div className="bg-white rounded-lg p-4 shadow-sm">
-                        <h3 className="font-semibold text-gray-900 mb-2">Threats Blocked</h3>
-                        <p className="text-2xl font-bold text-red-600">247</p>
-                        <p className="text-sm text-gray-600">Last 24 hours</p>
+                      <div className="bg-white rounded-lg p-4 shadow-sm min-w-0">
+                        <h3 className="font-semibold text-gray-900 mb-2 truncate">Threats Blocked</h3>
+                        <p className="text-xl lg:text-2xl font-bold text-red-600 truncate">247</p>
+                        <p className="text-sm text-gray-600 truncate">Last 24 hours</p>
                       </div>
-                      <div className="bg-white rounded-lg p-4 shadow-sm">
-                        <h3 className="font-semibold text-gray-900 mb-2">Compliance</h3>
-                        <p className="text-2xl font-bold text-blue-600">100%</p>
-                        <p className="text-sm text-gray-600">GDPR, SOC2 compliant</p>
+                      <div className="bg-white rounded-lg p-4 shadow-sm min-w-0">
+                        <h3 className="font-semibold text-gray-900 mb-2 truncate">Compliance</h3>
+                        <p className="text-xl lg:text-2xl font-bold text-blue-600 truncate">100%</p>
+                        <p className="text-sm text-gray-600 truncate">GDPR, SOC2 compliant</p>
                       </div>
-                      <div className="bg-white rounded-lg p-4 shadow-sm">
-                        <h3 className="font-semibold text-gray-900 mb-2">Last Scan</h3>
-                        <p className="text-2xl font-bold text-gray-600">2m</p>
-                        <p className="text-sm text-gray-600">ago</p>
+                      <div className="bg-white rounded-lg p-4 shadow-sm min-w-0">
+                        <h3 className="font-semibold text-gray-900 mb-2 truncate">Last Scan</h3>
+                        <p className="text-xl lg:text-2xl font-bold text-gray-600 truncate">2m</p>
+                        <p className="text-sm text-gray-600 truncate">ago</p>
                       </div>
                     </div>
                   </div>
