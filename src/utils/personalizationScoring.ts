@@ -1,6 +1,18 @@
-
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
 import { OutreachTemplate, PersonalizedStep } from '@/types/outreach-sequence';
+
+export const generatePersonalizationVariables = (candidate: EnhancedCandidate): Record<string, string> => {
+  return {
+    name: candidate.name,
+    firstName: candidate.name.split(' ')[0],
+    currentTitle: candidate.current_title || 'Professional',
+    currentCompany: candidate.current_company || '',
+    experience: `${candidate.experience_years} years`,
+    topSkills: candidate.skills.slice(0, 3).join(', '),
+    location: candidate.location || '',
+    industry: candidate.industry || 'Technology'
+  };
+};
 
 export const generatePersonalizationHighlights = (
   candidate: EnhancedCandidate, 
