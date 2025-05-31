@@ -3,17 +3,7 @@ import { useState, useCallback } from 'react';
 import { useBackendIntegration } from './useBackendIntegration';
 import { useAuthContext } from './useAuthContext';
 import { useToast } from './use-toast';
-import { EnhancedCandidate } from '@/types/enhanced-candidate';
-
-export interface SearchResult {
-  candidates: EnhancedCandidate[];
-  search_quality_score: number;
-  search_metadata?: {
-    total_found: number;
-    search_time_ms: number;
-    sources_used: string[];
-  };
-}
+import { EnhancedCandidate, SearchResult } from '@/types/enhanced-candidate';
 
 export const useSearch = () => {
   const [query, setQuery] = useState('');
@@ -62,30 +52,69 @@ export const useSearch = () => {
       console.log('Search result:', result);
 
       if (result && result.candidates) {
-        setSearchResult({
+        const searchResult: SearchResult = {
           candidates: result.candidates,
+          total_found: result.candidates.length,
           search_quality_score: result.search_quality_score || 0.85,
-          search_metadata: result.search_metadata || {
-            total_found: result.candidates.length,
-            search_time_ms: 0,
-            sources_used: ['ai_search']
+          ai_interpretation: {
+            original_query: query,
+            interpreted_intent: `Search for candidates matching: ${query}`,
+            extracted_requirements: [
+              {
+                category: 'skills',
+                value: query,
+                importance: 1.0,
+                source: 'explicit'
+              }
+            ],
+            search_strategy: 'AI-powered semantic search',
+            confidence: result.search_quality_score || 0.85
+          },
+          suggested_refinements: [
+            'Add specific skills or technologies',
+            'Include location preferences',
+            'Specify experience level'
+          ],
+          diversity_metrics: {
+            gender_distribution: {},
+            location_distribution: {},
+            experience_distribution: {},
+            background_diversity_score: 0.5
           }
-        });
+        };
+        
+        setSearchResult(searchResult);
         
         toast({
           title: "Search Complete",
           description: `Found ${result.candidates.length} candidates matching your criteria.`,
         });
       } else {
-        setSearchResult({
+        const emptySearchResult: SearchResult = {
           candidates: [],
+          total_found: 0,
           search_quality_score: 0,
-          search_metadata: {
-            total_found: 0,
-            search_time_ms: 0,
-            sources_used: []
+          ai_interpretation: {
+            original_query: query,
+            interpreted_intent: `Search for candidates matching: ${query}`,
+            extracted_requirements: [],
+            search_strategy: 'AI-powered semantic search',
+            confidence: 0
+          },
+          suggested_refinements: [
+            'Try different keywords',
+            'Broaden your search criteria',
+            'Check spelling and terminology'
+          ],
+          diversity_metrics: {
+            gender_distribution: {},
+            location_distribution: {},
+            experience_distribution: {},
+            background_diversity_score: 0
           }
-        });
+        };
+        
+        setSearchResult(emptySearchResult);
         
         toast({
           title: "No Results",
