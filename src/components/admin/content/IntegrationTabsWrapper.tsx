@@ -4,7 +4,7 @@ import { TabsContent } from '@/components/ui/tabs';
 import CustomerIntegrationsHub from '@/components/admin/integrations/CustomerIntegrationsHub';
 import CustomerAIConfiguration from '@/components/admin/config/CustomerAIConfiguration';
 import BillingPaymentsMangement from '@/components/admin/billing/BillingPaymentsManagement';
-import AuditLogsViewer from '@/components/admin/logs/AuditLogsViewer';
+import AuditLogs from '@/components/admin/AuditLogs';
 import OrganizationSettingsPanel from '@/components/admin/settings/OrganizationSettingsPanel';
 import { Organization } from '@/types/organization';
 
@@ -28,7 +28,7 @@ const IntegrationTabsWrapper: React.FC<IntegrationTabsWrapperProps> = ({ current
       </TabsContent>
 
       <TabsContent value="audit-logs" className="mt-0">
-        <AuditLogsViewer />
+        <AuditLogs />
       </TabsContent>
 
       <TabsContent value="organization-settings" className="mt-0">
