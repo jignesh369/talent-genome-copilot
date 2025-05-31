@@ -1,4 +1,3 @@
-
 import { EnhancedCandidate, CandidateInteraction, AvailabilitySignal, OSINTProfile } from '@/types/enhanced-recruiting';
 import { Candidate } from '@/types/recruiting';
 
@@ -7,6 +6,7 @@ class EnhancedCandidateService {
 
   // Convert basic candidate to enhanced candidate
   enhanceCandidate(basicCandidate: Candidate): EnhancedCandidate {
+    console.log('Enhancing candidate:', basicCandidate);
     return {
       ...basicCandidate,
       source_details: {
@@ -114,6 +114,7 @@ class EnhancedCandidateService {
 
   // Update OSINT profile
   updateOSINTProfile(candidateId: string, osintProfile: OSINTProfile): void {
+    console.log('Updating OSINT profile for candidate:', candidateId, osintProfile);
     const candidate = this.candidates.find(c => c.id === candidateId);
     if (candidate) {
       candidate.osint_profile = osintProfile;
@@ -132,32 +133,77 @@ class EnhancedCandidateService {
   }
 
   private updateCulturalFitScore(candidate: EnhancedCandidate): void {
-    if (!candidate.osint_profile) return;
+    console.log('Updating cultural fit score for candidate:', candidate.id);
+    
+    if (!candidate.osint_profile) {
+      console.log('No OSINT profile found, skipping cultural fit score update');
+      return;
+    }
 
     let score = 50; // Base score
     const osint = candidate.osint_profile;
+    
+    console.log('OSINT profile structure:', osint);
 
-    // Factor in professional reputation (simplified scoring)
-    if (osint.professional_reputation) {
-      const industryRecognition = Number(osint.professional_reputation.industry_recognition || 0);
-      score += industryRecognition * 0.2;
-      const communityInvolvementCount = osint.professional_reputation.community_involvement ? osint.professional_reputation.community_involvement.length : 0;
-      score += communityInvolvementCount * 5;
+    try {
+      // Factor in professional reputation (simplified scoring)
+      if (osint.professional_reputation) {
+        console.log('Professional reputation data:', osint.professional_reputation);
+        
+        const industryRecognition = osint.professional_reputation.industry_recognition;
+        if (industryRecognition !== undefined && industryRecognition !== null) {
+          const industryRecognitionNum = Number(industryRecognition);
+          if (!isNaN(industryRecognitionNum)) {
+            score += industryRecognitionNum * 0.2;
+            console.log('Added industry recognition score:', industryRecognitionNum * 0.2);
+          }
+        }
+        
+        const communityInvolvement = osint.professional_reputation.community_involvement;
+        if (Array.isArray(communityInvolvement)) {
+          const communityScore = communityInvolvement.length * 5;
+          score += communityScore;
+          console.log('Added community involvement score:', communityScore);
+        }
+      }
+
+      // Factor in social presence
+      if (osint.social_presence) {
+        console.log('Social presence data:', osint.social_presence);
+        
+        const professionalConsistency = osint.social_presence.professional_consistency;
+        if (professionalConsistency !== undefined && professionalConsistency !== null) {
+          const professionalConsistencyNum = Number(professionalConsistency);
+          if (!isNaN(professionalConsistencyNum)) {
+            score += professionalConsistencyNum * 0.3;
+            console.log('Added professional consistency score:', professionalConsistencyNum * 0.3);
+          }
+        }
+      }
+
+      // Factor in GitHub activity (for technical roles)
+      if (osint.github_profile) {
+        console.log('GitHub profile data:', osint.github_profile);
+        
+        const contributionActivity = osint.github_profile.contribution_activity;
+        if (contributionActivity !== undefined && contributionActivity !== null) {
+          const contributionActivityNum = Number(contributionActivity);
+          if (!isNaN(contributionActivityNum)) {
+            const githubScore = Math.min(20, contributionActivityNum * 0.1);
+            score += githubScore;
+            console.log('Added GitHub contribution score:', githubScore);
+          }
+        }
+      }
+
+      const finalScore = Math.min(100, Math.max(0, score));
+      candidate.cultural_fit_score = finalScore;
+      console.log('Final cultural fit score:', finalScore);
+      
+    } catch (error) {
+      console.error('Error updating cultural fit score:', error);
+      candidate.cultural_fit_score = 50; // Fallback to base score
     }
-
-    // Factor in social presence
-    if (osint.social_presence) {
-      const professionalConsistency = Number(osint.social_presence.professional_consistency || 0);
-      score += professionalConsistency * 0.3;
-    }
-
-    // Factor in GitHub activity (for technical roles)
-    if (osint.github_profile) {
-      const contributionActivity = Number(osint.github_profile.contribution_activity || 0);
-      score += Math.min(20, contributionActivity * 0.1);
-    }
-
-    candidate.cultural_fit_score = Math.min(100, Math.max(0, score));
   }
 
   // Move candidate through pipeline stages
