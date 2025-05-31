@@ -38,6 +38,8 @@ const Search = () => {
 
   const handleContactCandidate = async (candidate: EnhancedCandidate) => {
     try {
+      console.log('Contacting candidate:', candidate.name);
+      
       toast({
         title: "Generating AI Outreach",
         description: "Creating personalized message for the candidate...",
@@ -54,15 +56,14 @@ const Search = () => {
       );
 
       if (message) {
+        console.log('Generated outreach message:', message);
         toast({
           title: "AI Outreach Generated",
           description: `Personalized message created for ${candidate.name}. Review and send when ready.`,
         });
-        
-        // Here you could open a modal to show the generated message
-        console.log('Generated outreach message:', message);
       }
     } catch (error) {
+      console.error('Error generating outreach:', error);
       toast({
         title: "Error",
         description: "Failed to generate AI outreach message. Please try again.",
