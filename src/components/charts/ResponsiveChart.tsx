@@ -4,7 +4,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/
 import { ResponsiveContainer } from 'recharts';
 
 interface ResponsiveChartProps {
-  children: React.ReactNode;
+  children: React.ReactElement;
   config: any;
   className?: string;
   height?: number;
