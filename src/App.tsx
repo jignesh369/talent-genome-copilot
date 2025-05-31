@@ -30,6 +30,7 @@ import HiringManagerDashboard from "./pages/HiringManagerDashboard";
 import RecruiterDashboard from "./pages/RecruiterDashboard";
 import ResumeParser from "./pages/ResumeParser";
 import Communication from "./pages/Communication";
+import OutreachSequences from "./pages/OutreachSequences";
 
 const queryClient = new QueryClient();
 
@@ -141,6 +142,11 @@ const App = () => (
             <Route path="/communication" element={
               <ProtectedRoute allowedRoles={['recruiter', 'hiring_manager']}>
                 <Communication />
+              </ProtectedRoute>
+            } />
+            <Route path="/outreach-sequences" element={
+              <ProtectedRoute allowedRoles={['recruiter', 'hiring_manager']}>
+                <OutreachSequences />
               </ProtectedRoute>
             } />
             <Route path="/search" element={

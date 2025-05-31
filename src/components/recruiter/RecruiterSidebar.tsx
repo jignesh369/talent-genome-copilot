@@ -13,7 +13,8 @@ import {
   UserPlus,
   Search,
   BarChart3,
-  Settings
+  Settings,
+  Zap
 } from 'lucide-react';
 
 interface RecruiterSidebarProps {
@@ -34,6 +35,7 @@ const RecruiterSidebar: React.FC<RecruiterSidebarProps> = ({ activeTab, onTabCha
     { id: 'ai-matching', label: 'AI Matching', icon: Brain, href: '/recruiter-dashboard', isDashboardTab: true },
     { id: 'interviews', label: 'Interviews', icon: Calendar, href: '/recruiter-dashboard', isDashboardTab: true },
     { id: 'communication', label: 'Communications', icon: MessageSquare, href: '/communication', isDashboardTab: false },
+    { id: 'outreach-sequences', label: 'Outreach Sequences', icon: Zap, href: '/outreach-sequences', isDashboardTab: false },
     { id: 'analytics', label: 'Analytics', icon: BarChart3, href: '/analytics', isDashboardTab: false },
     { id: 'search', label: 'Search', icon: Search, href: '/search', isDashboardTab: false },
     { id: 'team', label: 'Team', icon: UserPlus, href: '/recruiter-dashboard', isDashboardTab: true },
