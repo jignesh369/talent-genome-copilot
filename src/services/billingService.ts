@@ -1,5 +1,6 @@
 
-import { BillingStats, UsageMetrics, Organization } from '@/types/billing';
+import { BillingStats, UsageMetrics } from '@/types/billing';
+import { Organization } from '@/types/organization';
 
 export class BillingService {
   static calculateUsagePercentage(current: number, limit: number): number {

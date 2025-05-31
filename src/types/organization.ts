@@ -1,4 +1,6 @@
 
+import { UserRole } from './auth';
+
 export interface Organization {
   id: string;
   name: string;

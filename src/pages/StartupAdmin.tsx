@@ -44,15 +44,19 @@ const StartupAdmin = () => {
       domain: 'techcorp.com', 
       industry: 'technology',
       size: '51-200',
-      plan: 'professional',
-      status: 'active',
+      plan: 'professional' as const,
+      status: 'active' as const,
       contactEmail: 'admin@techcorp.com',
       contactName: 'John Smith',
       userLimit: 50,
       jobLimit: 20,
+      currentUsers: 32,
+      currentJobs: 12,
       monthlyAmount: 299,
       billingStatus: 'active',
-      nextBilling: 'Jan 15, 2024'
+      nextBilling: 'Jan 15, 2024',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     },
     { 
       id: '2', 
@@ -60,15 +64,19 @@ const StartupAdmin = () => {
       domain: 'startupxyz.com', 
       industry: 'finance',
       size: '11-50',
-      plan: 'starter',
-      status: 'active',
+      plan: 'starter' as const,
+      status: 'active' as const,
       contactEmail: 'founder@startupxyz.com',
       contactName: 'Sarah Johnson',
       userLimit: 10,
       jobLimit: 5,
+      currentUsers: 7,
+      currentJobs: 3,
       monthlyAmount: 99,
       billingStatus: 'active',
-      nextBilling: 'Jan 20, 2024'
+      nextBilling: 'Jan 20, 2024',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     },
     { 
       id: '3', 
@@ -76,15 +84,19 @@ const StartupAdmin = () => {
       domain: 'growthco.io', 
       industry: 'healthcare',
       size: '201-1000',
-      plan: 'enterprise',
-      status: 'active',
+      plan: 'enterprise' as const,
+      status: 'active' as const,
       contactEmail: 'admin@growthco.io',
       contactName: 'Mike Chen',
       userLimit: 100,
       jobLimit: 50,
+      currentUsers: 85,
+      currentJobs: 28,
       monthlyAmount: 599,
       billingStatus: 'active',
-      nextBilling: 'Jan 25, 2024'
+      nextBilling: 'Jan 25, 2024',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     }
   ]);
 
