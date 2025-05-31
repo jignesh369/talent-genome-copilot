@@ -184,11 +184,11 @@ const CustomerAdmin = () => {
           ))}
         </div>
 
-        {/* Main Content Layout */}
-        <div className="grid grid-cols-12 gap-6">
-          {/* Left Sidebar Navigation */}
-          <div className="col-span-3">
-            <Tabs defaultValue="overview" orientation="vertical" className="w-full">
+        {/* Main Content with Tabs */}
+        <Tabs defaultValue="overview" className="w-full">
+          <div className="grid grid-cols-12 gap-6">
+            {/* Left Sidebar Navigation */}
+            <div className="col-span-3">
               <TabsList className="flex flex-col h-auto w-full p-1 bg-white border shadow-sm space-y-1">
                 {/* Dashboard Section */}
                 <div className="w-full">
@@ -288,12 +288,10 @@ const CustomerAdmin = () => {
                   </TabsTrigger>
                 </div>
               </TabsList>
-            </Tabs>
-          </div>
+            </div>
 
-          {/* Main Content Area */}
-          <div className="col-span-9">
-            <Tabs defaultValue="overview" orientation="vertical" className="w-full">
+            {/* Main Content Area */}
+            <div className="col-span-9">
               <TabsContent value="overview" className="mt-0 space-y-6">
                 <QuickActionsGrid />
                 <CandidatePipeline showCandidates={false} />
@@ -401,9 +399,9 @@ const CustomerAdmin = () => {
               <TabsContent value="system" className="mt-0">
                 <SystemConfiguration />
               </TabsContent>
-            </Tabs>
+            </div>
           </div>
-        </div>
+        </Tabs>
       </div>
 
       {/* Modals */}
