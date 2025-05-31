@@ -22,23 +22,25 @@ export const useSearch = () => {
     }
 
     setIsSearching(true);
+    console.log('Starting search for:', query);
     
     try {
       const result = await aiSearchService.processNaturalLanguageQuery(query);
+      console.log('Search result:', result);
       setSearchResult(result);
-      setIsSearching(false);
       toast({
         title: "Search Complete",
         description: `Found ${result.candidates.length} candidates with ${Math.round(result.search_quality_score * 10)}% confidence.`,
       });
     } catch (error) {
       console.error('Search error:', error);
-      setIsSearching(false);
       toast({
         title: "Search Error",
         description: "Something went wrong. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsSearching(false);
     }
   };
 
@@ -62,6 +64,7 @@ export const useSearch = () => {
   };
 
   const handleFeedback = (candidateId: string, isPositive: boolean) => {
+    console.log('Feedback for candidate:', candidateId, 'positive:', isPositive);
     toast({
       title: isPositive ? "Thanks for the feedback!" : "Feedback noted",
       description: isPositive ? "We'll find more candidates like this" : "We'll adjust future recommendations",
