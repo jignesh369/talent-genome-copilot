@@ -1,4 +1,3 @@
-
 import { predictiveAnalyticsEngine } from '@/services/analytics/predictiveAnalyticsEngine';
 import { dynamicAssessmentGenerator } from '@/services/analytics/dynamicAssessmentGenerator';
 import { automatedCommunicationService } from '@/services/analytics/automatedCommunicationService';
@@ -61,7 +60,7 @@ export const useRecruitingIntelligence = () => {
         platform: candidate.preferred_contact_method || 'email',
         confidence: 0.8,
         best_time: '10:00 AM',
-        approach_style: 'professional'
+        approach_style: 'direct'
       },
       salary_expectation_range: candidate.portal_preferences?.salary_expectations ? {
         min: candidate.portal_preferences.salary_expectations.min,

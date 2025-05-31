@@ -135,8 +135,8 @@ export class EnhancedPersonalizationEngine {
   private extractTechnicalHighlights(candidate: EnhancedCandidate, context: PersonalizationContext): string[] {
     const highlights = [];
     
-    if (candidate.osint_profile?.github_profile?.public_repos && candidate.osint_profile.github_profile.public_repos > 10) {
-      highlights.push(`${candidate.osint_profile.github_profile.public_repos}+ open source projects`);
+    if (candidate.osint_profile?.github?.public_repos && candidate.osint_profile.github.public_repos > 10) {
+      highlights.push(`${candidate.osint_profile.github.public_repos}+ open source projects`);
     }
     
     if (candidate.technical_depth_score > 8) {
@@ -203,8 +203,8 @@ export class EnhancedPersonalizationEngine {
       achievements.push(candidate.skills[0]);
     }
     
-    if (candidate.osint_profile?.github_profile?.top_languages) {
-      achievements.push(...candidate.osint_profile.github_profile.top_languages.slice(0, 1));
+    if (candidate.osint_profile?.github?.primary_languages) {
+      achievements.push(...candidate.osint_profile.github.primary_languages.slice(0, 1));
     }
     
     return achievements;
