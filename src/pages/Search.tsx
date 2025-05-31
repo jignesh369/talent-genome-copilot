@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import RecruiterLayout from '@/components/recruiter/RecruiterLayout';
 import SearchInterface from '@/components/search/SearchInterface';
 import SearchHistory from '@/components/search/SearchHistory';
-import CandidateCard from '@/components/search/CandidateCard';
+import SimplifiedCandidateCard from '@/components/search/SimplifiedCandidateCard';
 import SearchSidebar from '@/components/search/SearchSidebar';
 import CandidateDetailsModal from '@/components/search/CandidateDetailsModal';
 import DigitalFootprintModal from '@/components/search/DigitalFootprintModal';
@@ -39,16 +39,16 @@ const Search = () => {
       subtitle="Discover exceptional talent with comprehensive analysis and search history"
       showSearch={false}
     >
-      <div className="space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-3 max-w-md">
             <TabsTrigger value="search" className="flex items-center space-x-2">
               <SearchIcon className="h-4 w-4" />
               <span>Search</span>
             </TabsTrigger>
             <TabsTrigger value="history" className="flex items-center space-x-2">
               <History className="h-4 w-4" />
-              <span>History & Saved</span>
+              <span>History</span>
             </TabsTrigger>
             <TabsTrigger value="alerts" className="flex items-center space-x-2">
               <Bell className="h-4 w-4" />
@@ -56,72 +56,71 @@ const Search = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="search">
-            <div className="space-y-6">
-              <SearchInterface 
-                query={query}
-                setQuery={setQuery}
-                isSearching={isSearching}
-                isListening={isListening}
-                onSearch={handleSearch}
-                onVoiceInput={handleVoiceInput}
-              />
+          <TabsContent value="search" className="space-y-6">
+            <SearchInterface 
+              query={query}
+              setQuery={setQuery}
+              isSearching={isSearching}
+              isListening={isListening}
+              onSearch={handleSearch}
+              onVoiceInput={handleVoiceInput}
+            />
 
-              {searchResult && (
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                  <div className="lg:col-span-3 space-y-6">
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                      <div>
-                        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                          Best Matches ({searchResult.candidates.length})
-                        </h2>
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2">
-                          <p className="text-gray-600 text-base sm:text-lg">Ranked by AI relevance and digital footprint analysis</p>
-                          <SourceBadge source="ai_analysis" confidence={searchResult.search_quality_score} />
-                        </div>
-                      </div>
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-                        <Badge variant="secondary" className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border-green-200 px-4 py-2 text-sm">
-                          <Sparkles className="h-4 w-4 mr-2" />
-                          {Math.round(searchResult.search_quality_score * 100)}% confidence
-                        </Badge>
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="hover:bg-purple-50 hover:border-purple-200 transition-colors">
-                            <Filter className="h-4 w-4 mr-2" />
-                            Refine
-                          </Button>
-                          <Button variant="outline" size="sm" className="hover:bg-blue-50 hover:border-blue-200 transition-colors">
-                            <SortDesc className="h-4 w-4 mr-2" />
-                            Sort
-                          </Button>
-                        </div>
+            {searchResult && (
+              <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+                <div className="xl:col-span-3">
+                  <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4 mb-6">
+                    <div className="flex-1">
+                      <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                        Best Matches ({searchResult.candidates.length})
+                      </h2>
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                        <p className="text-gray-600">Ranked by AI relevance and digital footprint analysis</p>
+                        <SourceBadge source="ai_analysis" confidence={searchResult.search_quality_score} />
                       </div>
                     </div>
-
-                    <div className="space-y-6">
-                      {searchResult.candidates.map((candidate) => (
-                        <CandidateCard 
-                          key={candidate.id} 
-                          candidate={candidate}
-                          onViewProfile={setSelectedCandidate}
-                          onViewSnapshot={setFootprintCandidate}
-                          onFeedback={handleFeedback}
-                        />
-                      ))}
+                    
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                      <Badge variant="secondary" className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border-green-200 px-3 py-1.5">
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        {Math.round(searchResult.search_quality_score * 100)}% confidence
+                      </Badge>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" className="hover:bg-purple-50 hover:border-purple-200">
+                          <Filter className="h-4 w-4 mr-2" />
+                          Refine
+                        </Button>
+                        <Button variant="outline" size="sm" className="hover:bg-blue-50 hover:border-blue-200">
+                          <SortDesc className="h-4 w-4 mr-2" />
+                          Sort
+                        </Button>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="lg:col-span-1">
-                    <SearchSidebar 
-                      searchResult={searchResult} 
-                      onRefinementClick={setQuery}
-                    />
+                  <div className="space-y-4">
+                    {searchResult.candidates.map((candidate) => (
+                      <SimplifiedCandidateCard 
+                        key={candidate.id} 
+                        candidate={candidate}
+                        onViewProfile={setSelectedCandidate}
+                        onViewSnapshot={setFootprintCandidate}
+                        onFeedback={handleFeedback}
+                      />
+                    ))}
                   </div>
                 </div>
-              )}
 
-              {!searchResult && !isSearching && <EmptyState />}
-            </div>
+                <div className="xl:col-span-1">
+                  <SearchSidebar 
+                    searchResult={searchResult} 
+                    onRefinementClick={setQuery}
+                  />
+                </div>
+              </div>
+            )}
+
+            {!searchResult && !isSearching && <EmptyState />}
           </TabsContent>
 
           <TabsContent value="history">
