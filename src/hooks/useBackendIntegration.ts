@@ -1,19 +1,38 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuthContext } from './useAuthContext';
 
 export const useBackendIntegration = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { user, organizationId } = useAuthContext();
 
   const invokeFunction = async (functionName: string, payload: any) => {
     console.log(`useBackendIntegration: Invoking function ${functionName} with payload:`, payload);
+    
+    if (!user) {
+      const errorMessage = 'User not authenticated';
+      console.error('useBackendIntegration: User not authenticated');
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    }
+
+    if (!organizationId) {
+      const errorMessage = 'No organization found for user';
+      console.error('useBackendIntegration: No organization found');
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    }
+
     setLoading(true);
     setError(null);
     
     try {
       const { data, error } = await supabase.functions.invoke(functionName, {
-        body: payload
+        body: {
+          ...payload,
+          organization_id: organizationId // Ensure organization_id is always included
+        }
       });
       
       console.log(`useBackendIntegration: Function ${functionName} response:`, { data, error });
@@ -34,17 +53,23 @@ export const useBackendIntegration = () => {
     }
   };
 
-  // AI-powered candidate search
+  // AI-powered candidate search with proper organization context
   const searchCandidates = async (searchParams: {
     query: string;
     skills?: string[];
     location?: string;
     experience_range?: [number, number];
     job_requirements?: string[];
-    organization_id: string;
   }) => {
     console.log('useBackendIntegration: searchCandidates called with params:', searchParams);
-    return invokeFunction('ai-candidate-search', searchParams);
+    
+    // Ensure organization_id is included in the search
+    const fullParams = {
+      ...searchParams,
+      organization_id: organizationId
+    };
+    
+    return invokeFunction('ai-candidate-search', fullParams);
   };
 
   // OSINT data collection
