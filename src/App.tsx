@@ -15,6 +15,7 @@ import Jobs from "./pages/Jobs";
 import Analytics from "./pages/Analytics";
 import Search from "./pages/Search";
 import Settings from "./pages/Settings";
+import PlatformSettings from "./pages/PlatformSettings";
 import NotFound from "./pages/NotFound";
 import CandidatePortal from "./pages/CandidatePortal";
 import CandidateDashboard from "./pages/CandidateDashboard";
