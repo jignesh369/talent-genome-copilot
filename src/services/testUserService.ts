@@ -1,12 +1,15 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
+
+type AppRole = Database['public']['Enums']['app_role'];
 
 interface TestUser {
   email: string;
   password: string;
   firstName: string;
   lastName: string;
-  role: string;
+  role: AppRole;
   organizationName: string;
   organizationId: string;
   title?: string;
