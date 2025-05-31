@@ -3,8 +3,7 @@ import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Filter, SortDesc } from "lucide-react";
-import { SearchResult } from "@/types/recruiting";
-import { EnhancedCandidate } from "@/types/enhanced-candidate";
+import { SearchResult, EnhancedCandidate } from "@/types/enhanced-candidate";
 import CandidateCard from "./CandidateCard";
 import SearchSidebar from "./SearchSidebar";
 import SourceBadge from "./SourceBadge";
@@ -13,6 +12,7 @@ interface SearchResultsContainerProps {
   searchResult: SearchResult;
   onViewProfile: (candidate: EnhancedCandidate) => void;
   onViewSnapshot: (candidate: EnhancedCandidate) => void;
+  onContactCandidate: (candidate: EnhancedCandidate) => void;
   onFeedback: (candidateId: string, helpful: boolean) => void;
   onRefinementClick: (query: string) => void;
 }
@@ -21,6 +21,7 @@ const SearchResultsContainer: React.FC<SearchResultsContainerProps> = ({
   searchResult,
   onViewProfile,
   onViewSnapshot,
+  onContactCandidate,
   onFeedback,
   onRefinementClick
 }) => {
@@ -62,6 +63,7 @@ const SearchResultsContainer: React.FC<SearchResultsContainerProps> = ({
               candidate={candidate}
               onViewProfile={onViewProfile}
               onViewSnapshot={onViewSnapshot}
+              onContactCandidate={onContactCandidate}
               onFeedback={onFeedback}
             />
           ))}
