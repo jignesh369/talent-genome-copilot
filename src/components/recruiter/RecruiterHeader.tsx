@@ -21,7 +21,7 @@ const RecruiterHeader: React.FC<RecruiterHeaderProps> = ({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
-          <p className="text-sm text-gray-600">{subtitle}</p>
+          {subtitle && <p className="text-sm text-gray-600 mt-1">{subtitle}</p>}
         </div>
         <div className="flex items-center space-x-4">
           {showSearch && (
@@ -34,7 +34,7 @@ const RecruiterHeader: React.FC<RecruiterHeaderProps> = ({
               <span>AI Search</span>
             </Button>
           )}
-          <Button className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600">
+          <Button className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
             <Sparkles className="w-4 h-4" />
             <span>AI Insights</span>
           </Button>

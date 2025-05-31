@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,7 +9,7 @@ import SmartLanding from "./components/smart-landing/SmartLanding";
 import AuthPage from "./components/auth/AuthPage";
 import StartupAdmin from "./pages/StartupAdmin";
 import CustomerAdmin from "./pages/CustomerAdmin";
-import Navigation from "./components/Navigation";
+import RecruiterLayout from "./components/recruiter/RecruiterLayout";
 import Candidates from "./pages/Candidates";
 import Jobs from "./pages/Jobs";
 import Analytics from "./pages/Analytics";
@@ -117,55 +116,40 @@ const App = () => (
               </ProtectedRoute>
             } />
             
-            {/* Individual Pages with Navigation (for legacy routes) */}
+            {/* Individual Pages with Unified Layout */}
             <Route path="/candidates" element={
               <ProtectedRoute allowedRoles={['recruiter', 'hiring_manager']}>
-                <div className="min-h-screen bg-gray-50">
-                  <Navigation />
-                  <main className="max-w-7xl mx-auto px-6 py-8">
-                    <Candidates />
-                  </main>
-                </div>
+                <RecruiterLayout>
+                  <Candidates />
+                </RecruiterLayout>
               </ProtectedRoute>
             } />
             <Route path="/jobs" element={
               <ProtectedRoute allowedRoles={['recruiter', 'hiring_manager']}>
-                <div className="min-h-screen bg-gray-50">
-                  <Navigation />
-                  <main className="max-w-7xl mx-auto px-6 py-8">
-                    <Jobs />
-                  </main>
-                </div>
+                <RecruiterLayout>
+                  <Jobs />
+                </RecruiterLayout>
               </ProtectedRoute>
             } />
             <Route path="/analytics" element={
               <ProtectedRoute allowedRoles={['recruiter', 'hiring_manager']}>
-                <div className="min-h-screen bg-gray-50">
-                  <Navigation />
-                  <main className="max-w-7xl mx-auto px-6 py-8">
-                    <Analytics />
-                  </main>
-                </div>
+                <RecruiterLayout>
+                  <Analytics />
+                </RecruiterLayout>
               </ProtectedRoute>
             } />
             <Route path="/search" element={
               <ProtectedRoute allowedRoles={['recruiter', 'hiring_manager']}>
-                <div className="min-h-screen bg-gray-50">
-                  <Navigation />
-                  <main className="max-w-7xl mx-auto px-6 py-8">
-                    <Search />
-                  </main>
-                </div>
+                <RecruiterLayout>
+                  <Search />
+                </RecruiterLayout>
               </ProtectedRoute>
             } />
             <Route path="/settings" element={
               <ProtectedRoute>
-                <div className="min-h-screen bg-gray-50">
-                  <Navigation />
-                  <main className="max-w-7xl mx-auto px-6 py-8">
-                    <Settings />
-                  </main>
-                </div>
+                <RecruiterLayout>
+                  <Settings />
+                </RecruiterLayout>
               </ProtectedRoute>
             } />
             <Route path="*" element={<NotFound />} />

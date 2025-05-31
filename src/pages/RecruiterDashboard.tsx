@@ -17,8 +17,7 @@ import AnalyticsCharts from '@/components/recruiter/AnalyticsCharts';
 import RecentActivityCard from '@/components/recruiter/RecentActivityCard';
 import PipelineOverview from '@/components/recruiter/PipelineOverview';
 import TeamManagement from '@/components/recruiter/TeamManagement';
-import RecruiterSidebar from '@/components/recruiter/RecruiterSidebar';
-import RecruiterHeader from '@/components/recruiter/RecruiterHeader';
+import RecruiterLayout from '@/components/recruiter/RecruiterLayout';
 import ConsistentStatsCard from '@/components/recruiter/ConsistentStatsCard';
 import { 
   Users,
@@ -149,22 +148,28 @@ const RecruiterDashboard = () => {
     return titles[activeTab as keyof typeof titles] || 'Recruiter Platform';
   };
 
+  const getPageSubtitle = () => {
+    const subtitles = {
+      overview: 'Your unified recruiting command center',
+      jobs: 'Manage your open positions and hiring pipeline',
+      candidates: 'Discover and manage your top candidates',
+      pipeline: 'Track and optimize your hiring funnel',
+      'ai-matching': 'Leverage AI to find the perfect candidates',
+      interviews: 'Schedule and manage candidate interviews',
+      communication: 'Centralized communication hub',
+      team: 'Manage your recruiting team'
+    };
+    return subtitles[activeTab as keyof typeof subtitles];
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <RecruiterSidebar activeTab={activeTab} onTabChange={setActiveTab} />
-
-      {/* Main Content */}
-      <div className="flex-1">
-        <RecruiterHeader 
-          title={getPageTitle()}
-          subtitle={activeTab === 'candidates' ? 'Discover and manage your top candidates' : undefined}
-        />
-
-        <main className="p-6">
-          {renderContent()}
-        </main>
-      </div>
+    <RecruiterLayout
+      title={getPageTitle()}
+      subtitle={getPageSubtitle()}
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+    >
+      {renderContent()}
 
       {/* Modals */}
       <InviteMemberModal
@@ -184,7 +189,7 @@ const RecruiterDashboard = () => {
           />
         </DialogContent>
       </Dialog>
-    </div>
+    </RecruiterLayout>
   );
 };
 

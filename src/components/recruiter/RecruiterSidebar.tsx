@@ -11,25 +11,48 @@ import {
   Calendar,
   MessageSquare,
   UserPlus,
-  Search
+  Search,
+  BarChart3,
+  Settings
 } from 'lucide-react';
 
 interface RecruiterSidebarProps {
-  activeTab: string;
-  onTabChange: (tab: string) => void;
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
 }
 
 const RecruiterSidebar: React.FC<RecruiterSidebarProps> = ({ activeTab, onTabChange }) => {
+  const location = useLocation();
+
+  // Navigation items for both dashboard tabs and page routes
   const navItems = [
-    { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-    { id: 'jobs', label: 'Jobs', icon: Briefcase },
-    { id: 'candidates', label: 'Candidates', icon: Users },
-    { id: 'pipeline', label: 'Pipeline', icon: TrendingUp },
-    { id: 'ai-matching', label: 'AI Matching', icon: Brain },
-    { id: 'interviews', label: 'Interviews', icon: Calendar },
-    { id: 'communication', label: 'Communications', icon: MessageSquare },
-    { id: 'team', label: 'Team', icon: UserPlus },
+    { id: 'overview', label: 'Overview', icon: LayoutDashboard, href: '/recruiter-dashboard', isDashboardTab: true },
+    { id: 'jobs', label: 'Jobs', icon: Briefcase, href: '/jobs', isDashboardTab: false },
+    { id: 'candidates', label: 'Candidates', icon: Users, href: '/candidates', isDashboardTab: false },
+    { id: 'pipeline', label: 'Pipeline', icon: TrendingUp, href: '/recruiter-dashboard', isDashboardTab: true },
+    { id: 'ai-matching', label: 'AI Matching', icon: Brain, href: '/recruiter-dashboard', isDashboardTab: true },
+    { id: 'interviews', label: 'Interviews', icon: Calendar, href: '/recruiter-dashboard', isDashboardTab: true },
+    { id: 'communication', label: 'Communications', icon: MessageSquare, href: '/recruiter-dashboard', isDashboardTab: true },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3, href: '/analytics', isDashboardTab: false },
+    { id: 'search', label: 'Search', icon: Search, href: '/search', isDashboardTab: false },
+    { id: 'team', label: 'Team', icon: UserPlus, href: '/recruiter-dashboard', isDashboardTab: true },
+    { id: 'settings', label: 'Settings', icon: Settings, href: '/settings', isDashboardTab: false },
   ];
+
+  const isItemActive = (item: any) => {
+    if (item.isDashboardTab) {
+      return location.pathname === '/recruiter-dashboard' && activeTab === item.id;
+    } else {
+      return location.pathname === item.href;
+    }
+  };
+
+  const handleItemClick = (item: any) => {
+    if (item.isDashboardTab && onTabChange) {
+      onTabChange(item.id);
+    }
+    // For non-dashboard tabs, Link will handle navigation
+  };
 
   return (
     <nav className="bg-white border-r border-gray-200 w-64 min-h-screen">
@@ -46,19 +69,35 @@ const RecruiterSidebar: React.FC<RecruiterSidebarProps> = ({ activeTab, onTabCha
         
         <div className="space-y-1">
           {navItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => onTabChange(item.id)}
-              className={cn(
-                "w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                activeTab === item.id
-                  ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
-                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+            <div key={item.id}>
+              {item.isDashboardTab ? (
+                <button
+                  onClick={() => handleItemClick(item)}
+                  className={cn(
+                    "w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                    isItemActive(item)
+                      ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
+                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                  )}
+                >
+                  <item.icon className="w-5 h-5" />
+                  <span>{item.label}</span>
+                </button>
+              ) : (
+                <Link
+                  to={item.href}
+                  className={cn(
+                    "w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                    isItemActive(item)
+                      ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
+                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                  )}
+                >
+                  <item.icon className="w-5 h-5" />
+                  <span>{item.label}</span>
+                </Link>
               )}
-            >
-              <item.icon className="w-5 h-5" />
-              <span>{item.label}</span>
-            </button>
+            </div>
           ))}
         </div>
       </div>
