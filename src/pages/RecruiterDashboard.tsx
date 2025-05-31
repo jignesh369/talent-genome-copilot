@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAuth } from '@/components/auth/AuthProvider';
@@ -11,9 +10,12 @@ import CandidatesManagement from '@/components/recruiter/CandidatesManagement';
 import AIMatchingEngine from '@/components/recruiter/AIMatchingEngine';
 import EnhancedInterviewManagement from '@/components/recruiter/EnhancedInterviewManagement';
 import CommunicationHub from '@/components/recruiter/CommunicationHub';
-import WelcomeSection from '@/components/recruiter/WelcomeSection';
+import EnhancedWelcomeSection from '@/components/recruiter/EnhancedWelcomeSection';
 import QuickActionsGrid from '@/components/recruiter/QuickActionsGrid';
-import AnalyticsCharts from '@/components/recruiter/AnalyticsCharts';
+import SmartRecommendationsCard from '@/components/recruiter/SmartRecommendationsCard';
+import GoalTrackingCard from '@/components/recruiter/GoalTrackingCard';
+import RecruitingHealthScore from '@/components/recruiter/RecruitingHealthScore';
+import InteractiveAnalyticsCharts from '@/components/recruiter/InteractiveAnalyticsCharts';
 import RecentActivityCard from '@/components/recruiter/RecentActivityCard';
 import PipelineOverview from '@/components/recruiter/PipelineOverview';
 import TeamManagement from '@/components/recruiter/TeamManagement';
@@ -100,7 +102,7 @@ const RecruiterDashboard = () => {
       case 'overview':
         return (
           <div className="space-y-6">
-            <WelcomeSection 
+            <EnhancedWelcomeSection 
               userName={user?.user_metadata?.first_name} 
               onCreateJob={() => setShowCreateJobModal(true)} 
             />
@@ -111,14 +113,21 @@ const RecruiterDashboard = () => {
               ))}
             </div>
             
-            <QuickActionsGrid onCreateJob={() => setShowCreateJobModal(true)} />
-            
-            <AnalyticsCharts />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <SmartRecommendationsCard />
+              </div>
+              <GoalTrackingCard />
+            </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <RecruitingHealthScore />
               <RecentActivityCard />
-              <PipelineOverview />
             </div>
+            
+            <InteractiveAnalyticsCharts />
+            
+            <PipelineOverview />
           </div>
         );
       case 'pipeline':
@@ -134,7 +143,7 @@ const RecruiterDashboard = () => {
       default:
         return (
           <div className="space-y-6">
-            <WelcomeSection 
+            <EnhancedWelcomeSection 
               userName={user?.user_metadata?.first_name} 
               onCreateJob={() => setShowCreateJobModal(true)} 
             />
@@ -145,14 +154,21 @@ const RecruiterDashboard = () => {
               ))}
             </div>
             
-            <QuickActionsGrid onCreateJob={() => setShowCreateJobModal(true)} />
-            
-            <AnalyticsCharts />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <SmartRecommendationsCard />
+              </div>
+              <GoalTrackingCard />
+            </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <RecruitingHealthScore />
               <RecentActivityCard />
-              <PipelineOverview />
             </div>
+            
+            <InteractiveAnalyticsCharts />
+            
+            <PipelineOverview />
           </div>
         );
     }
