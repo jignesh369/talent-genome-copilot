@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { useAuth } from '@/components/auth/AuthProvider';
 import OrganizationModal from '@/components/modals/OrganizationModal';
@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 
 const StartupAdmin = () => {
-  const { user, signOut } = useAuth();
+  const { user, userRole, loading, signOut } = useAuth();
   const [showOrgModal, setShowOrgModal] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create');
@@ -186,6 +186,37 @@ const StartupAdmin = () => {
       prev.map(org => org.id === orgId ? { ...org, ...data } : org)
     );
   };
+
+  // Add debugging and loading state
+  useEffect(() => {
+    console.log('StartupAdmin mounted, user:', user?.email, 'role:', userRole, 'loading:', loading);
+  }, [user, userRole, loading]);
+
+  // Show loading state while auth is being determined
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-blue-600" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Loading Admin Dashboard</h2>
+          <p className="text-gray-600">Please wait while we set up your workspace...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if user doesn't have the right role
+  if (user && userRole && userRole !== 'startup_admin') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Access Denied</h2>
+          <p className="text-gray-600">You need startup admin privileges to access this page.</p>
+          <p className="text-sm text-gray-500 mt-2">Current role: {userRole}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 w-full overflow-x-hidden">

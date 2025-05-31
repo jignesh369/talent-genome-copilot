@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Brain, Users, Building } from 'lucide-react';
+import { useAuth } from './AuthProvider';
+import { AuthService } from '@/services/authService';
 import TestUserInitializer from './TestUserInitializer';
 
 const AuthPage = () => {
@@ -20,6 +22,16 @@ const AuthPage = () => {
   const [role, setRole] = useState('');
   const [organizationName, setOrganizationName] = useState('');
   const { toast } = useToast();
+  const { user, userRole } = useAuth();
+
+  // Redirect authenticated users
+  useEffect(() => {
+    if (user && userRole) {
+      const redirectPath = AuthService.getDefaultRedirect(userRole as any);
+      console.log('Redirecting authenticated user to:', redirectPath);
+      window.location.href = redirectPath;
+    }
+  }, [user, userRole]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +50,7 @@ const AuthPage = () => {
           title: 'Welcome back!',
           description: 'You have been signed in successfully.',
         });
-        // The AuthProvider will handle the redirect based on user role
+        // The useEffect above will handle the redirect
       }
     } catch (error: any) {
       toast({
@@ -85,6 +97,15 @@ const AuthPage = () => {
       setLoading(false);
     }
   };
+
+  // Show loading state while checking auth
+  if (user && !userRole) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">

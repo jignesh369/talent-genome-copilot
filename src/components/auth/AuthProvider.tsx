@@ -40,7 +40,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          await fetchUserData(session.user);
+          // Use setTimeout to defer Supabase calls and prevent deadlock
+          setTimeout(() => {
+            fetchUserData(session.user);
+          }, 0);
         } else {
           setUserRole(null);
           setOrganizationId(null);
@@ -69,36 +72,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       console.log('Fetching user data for:', user.email);
       
-      // Fetch user profile
+      // Fetch user profile - use maybeSingle to avoid errors if no profile exists
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
       if (profileError) {
         console.error('Error fetching profile:', profileError);
-        setLoading(false);
-        return;
+        // Don't stop execution, continue with role fetch
+      } else {
+        console.log('Profile data:', profileData);
+        setProfile(profileData);
+        setOrganizationId(profileData?.organization_id);
       }
 
-      console.log('Profile data:', profileData);
-      setProfile(profileData);
-      setOrganizationId(profileData?.organization_id);
-
-      // Fetch user role
+      // Fetch user role - use maybeSingle to avoid errors if no role exists
       const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (roleError) {
         console.error('Error fetching role:', roleError);
         setUserRole(null);
       } else {
         console.log('Role data:', roleData);
-        setUserRole(roleData.role);
+        setUserRole(roleData?.role || null);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
