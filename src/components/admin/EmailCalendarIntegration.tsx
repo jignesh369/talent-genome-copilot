@@ -104,6 +104,14 @@ const EmailCalendarIntegration: React.FC = () => {
     { key: 'weekendBooking', label: 'Allow weekend interview booking', enabled: false }
   ];
 
+  const availableVariables = [
+    { name: 'candidate_name', description: "Candidate's full name" },
+    { name: 'job_title', description: 'Position title' },
+    { name: 'company_name', description: 'Your company name' },
+    { name: 'interview_date', description: 'Scheduled interview date' },
+    { name: 'interview_time', description: 'Scheduled interview time' }
+  ];
+
   const handleConnect = (service: string) => {
     toast({
       title: "Integration Initiated",
@@ -308,11 +316,11 @@ const EmailCalendarIntegration: React.FC = () => {
                 <div className="p-3 bg-blue-50 rounded-lg">
                   <h4 className="font-medium text-blue-900 mb-2">Available Variables:</h4>
                   <div className="text-sm text-blue-700 space-y-1">
-                    <p>{{candidate_name}} - Candidate's full name</p>
-                    <p>{{job_title}} - Position title</p>
-                    <p>{{company_name}} - Your company name</p>
-                    <p>{{interview_date}} - Scheduled interview date</p>
-                    <p>{{interview_time}} - Scheduled interview time</p>
+                    {availableVariables.map((variable) => (
+                      <p key={variable.name}>
+                        {`{{${variable.name}}}`} - {variable.description}
+                      </p>
+                    ))}
                   </div>
                 </div>
               </CardContent>
