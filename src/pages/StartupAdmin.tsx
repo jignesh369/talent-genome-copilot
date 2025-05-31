@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { useAuth } from '@/components/auth/AuthProvider';
@@ -21,7 +22,8 @@ import {
   DollarSign,
   TrendingUp,
   Shield,
-  Zap
+  Zap,
+  Loader2
 } from 'lucide-react';
 
 const StartupAdmin = () => {
