@@ -3,299 +3,64 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Brain, Mic, ThumbsUp, ThumbsDown, ExternalLink, User, Lightbulb, Github, Star, Calendar, Clock, Loader2, TrendingUp, Users, MessageSquare, Award, Zap, Target, Eye, Twitter, Linkedin, Radar, Sparkles, Filter, SortDesc, RefreshCw, X, MapPin, Briefcase, Calendar as CalendarIcon } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { aiSearchService } from "@/services/aiSearchService";
-import { EnhancedCandidate, SearchResult } from "@/types/enhanced-candidate";
+import { Progress } from "@/components/ui/progress";
+import { Search, Brain, Mic, ExternalLink, User, Lightbulb, Github, Star, Loader2, Users, MessageSquare, Award, Target, X, Filter, SortDesc, Sparkles } from "lucide-react";
+import { EnhancedCandidate } from "@/types/enhanced-candidate";
 import DigitalFootprintModal from "./DigitalFootprintModal";
+import CandidateCard from "./CandidateCard";
+import SearchSidebar from "./SearchSidebar";
+import { useSearch } from "@/hooks/useSearch";
 
 const MindReaderSearch = () => {
-  const [query, setQuery] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
-  const [isListening, setIsListening] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState<EnhancedCandidate | null>(null);
   const [footprintCandidate, setFootprintCandidate] = useState<EnhancedCandidate | null>(null);
-  const { toast } = useToast();
-
-  const handleSearch = async () => {
-    if (!query.trim()) {
-      toast({
-        title: "Please describe who you're looking for",
-        description: "Try something like 'senior React developer with startup experience'",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setIsSearching(true);
-    
-    try {
-      const result = await aiSearchService.processNaturalLanguageQuery(query);
-      setSearchResult(result);
-      setIsSearching(false);
-      toast({
-        title: "Search Complete",
-        description: `Found ${result.candidates.length} candidates with ${Math.round(result.search_quality_score * 10)}% confidence.`,
-      });
-    } catch (error) {
-      console.error('Search error:', error);
-      setIsSearching(false);
-      toast({
-        title: "Search Error",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleVoiceInput = () => {
-    if ('webkitSpeechRecognition' in window) {
-      const recognition = new (window as any).webkitSpeechRecognition();
-      recognition.onstart = () => setIsListening(true);
-      recognition.onend = () => setIsListening(false);
-      recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        setQuery(transcript);
-      };
-      recognition.start();
-    } else {
-      toast({
-        title: "Voice input not supported",
-        description: "Please use the text input instead.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleFeedback = (candidateId: string, isPositive: boolean) => {
-    toast({
-      title: isPositive ? "Thanks for the feedback!" : "Feedback noted",
-      description: isPositive ? "We'll find more candidates like this" : "We'll adjust future recommendations",
-    });
-  };
-
-  const ScoreIndicator = ({ score, label, color = "blue" }: { score: number; label: string; color?: string }) => (
-    <div className="flex items-center space-x-2 group">
-      <div className={`w-3 h-3 rounded-full transition-all duration-200 group-hover:scale-110 ${
-        color === 'blue' ? 'bg-blue-500' : 
-        color === 'green' ? 'bg-green-500' : 
-        color === 'purple' ? 'bg-purple-500' : 'bg-gray-500'
-      }`}></div>
-      <span className="text-xs text-gray-600 font-medium">{label}</span>
-      <span className="text-xs font-bold text-gray-800">{score.toFixed(1)}</span>
-    </div>
-  );
-
-  const OSINTMetrics = ({ candidate }: { candidate: EnhancedCandidate }) => (
-    <div className="grid grid-cols-3 gap-4 p-4 bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-50 rounded-xl border border-blue-200 shadow-sm">
-      <div className="text-center group cursor-pointer">
-        <div className="text-xl font-bold text-blue-700 group-hover:text-blue-800 transition-colors">
-          {candidate.technical_depth_score.toFixed(1)}
-        </div>
-        <div className="text-xs text-gray-600 font-medium">Technical Depth</div>
-        <Progress value={candidate.technical_depth_score * 10} className="h-2 mt-2 bg-blue-100" />
-      </div>
-      <div className="text-center group cursor-pointer">
-        <div className="text-xl font-bold text-green-700 group-hover:text-green-800 transition-colors">
-          {candidate.community_influence_score.toFixed(1)}
-        </div>
-        <div className="text-xs text-gray-600 font-medium">Community Impact</div>
-        <Progress value={candidate.community_influence_score * 10} className="h-2 mt-2 bg-green-100" />
-      </div>
-      <div className="text-center group cursor-pointer">
-        <div className="text-xl font-bold text-purple-700 group-hover:text-purple-800 transition-colors">
-          {candidate.learning_velocity_score.toFixed(1)}
-        </div>
-        <div className="text-xs text-gray-600 font-medium">Learning Velocity</div>
-        <Progress value={candidate.learning_velocity_score * 10} className="h-2 mt-2 bg-purple-100" />
-      </div>
-    </div>
-  );
-
-  const CandidateCard = ({ candidate }: { candidate: EnhancedCandidate }) => (
-    <Card className="group hover:shadow-2xl hover:shadow-purple-100/50 transition-all duration-500 border-0 bg-gradient-to-r from-white to-gray-50/50 hover:from-white hover:to-purple-50/30 cursor-pointer transform hover:-translate-y-2 hover:scale-[1.02] rounded-2xl overflow-hidden">
-      <CardContent className="p-8">
-        <div className="flex items-start justify-between">
-          <div className="flex items-start space-x-6 flex-1">
-            <div className="relative">
-              <Avatar className="h-20 w-20 ring-4 ring-purple-100 group-hover:ring-purple-200 transition-all duration-300 shadow-lg">
-                <AvatarImage src={candidate.avatar_url} className="object-cover" />
-                <AvatarFallback className="bg-gradient-to-br from-purple-100 to-blue-100 text-purple-700 font-bold text-lg">
-                  {candidate.name.split(' ').map(n => n[0]).join('')}
-                </AvatarFallback>
-              </Avatar>
-              <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-green-500 rounded-full border-4 border-white flex items-center justify-center shadow-lg">
-                <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
-              </div>
-            </div>
-            
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center space-x-4 mb-3">
-                <h3 className="text-2xl font-bold text-gray-900 group-hover:text-purple-700 transition-colors duration-300">
-                  {candidate.name}
-                </h3>
-                <span className="text-sm text-gray-500 font-medium">@{candidate.handle}</span>
-                <Badge variant="secondary" className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border-green-200 px-3 py-1 shadow-sm hover:shadow-md transition-shadow">
-                  <Star className="h-3 w-3 mr-1 fill-current" />
-                  {candidate.match_score}% match
-                </Badge>
-              </div>
-              
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="flex items-center space-x-2">
-                  <Briefcase className="h-4 w-4 text-gray-600" />
-                  <span className="text-gray-700 font-semibold">{candidate.current_title}</span>
-                </div>
-                <span className="text-gray-400">•</span>
-                <div className="flex items-center space-x-2">
-                  <span className="text-gray-600">{candidate.current_company}</span>
-                </div>
-                <Badge variant="outline" className="text-xs font-medium bg-white">
-                  {candidate.availability_status}
-                </Badge>
-              </div>
-              
-              <p className="text-gray-700 mb-5 leading-relaxed group-hover:text-gray-800 transition-colors line-clamp-3">
-                {candidate.ai_summary}
-              </p>
-              
-              <OSINTMetrics candidate={candidate} />
-              
-              <div className="flex flex-wrap gap-2 mt-4">
-                {candidate.skills.slice(0, 6).map((skill, index) => (
-                  <Badge 
-                    key={index} 
-                    variant="outline" 
-                    className="text-xs hover:bg-purple-50 hover:border-purple-200 hover:scale-105 transition-all duration-200 cursor-pointer"
-                  >
-                    {skill}
-                  </Badge>
-                ))}
-                {candidate.skills.length > 6 && (
-                  <Badge variant="outline" className="text-xs text-gray-500 hover:bg-gray-50 transition-colors">
-                    +{candidate.skills.length - 6} more skills
-                  </Badge>
-                )}
-              </div>
-
-              <div className="flex items-center justify-between mt-5 pt-4 border-t border-gray-100">
-                <div className="flex items-center space-x-6 text-xs text-gray-500">
-                  <div className="flex items-center space-x-2 hover:text-gray-700 transition-colors">
-                    <Clock className="h-3 w-3" />
-                    <span>Updated {new Date(candidate.osint_last_fetched).toLocaleDateString()}</span>
-                  </div>
-                  <div className="flex items-center space-x-2 hover:text-gray-700 transition-colors">
-                    <Target className="h-3 w-3" />
-                    <span>{candidate.experience_years}+ years experience</span>
-                  </div>
-                </div>
-                
-                <div className="flex items-center space-x-4">
-                  <ScoreIndicator score={candidate.technical_depth_score} label="Tech" color="blue" />
-                  <ScoreIndicator score={candidate.community_influence_score} label="Community" color="green" />
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex flex-col space-y-3 ml-6 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
-            <Button 
-              size="sm" 
-              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedCandidate(candidate);
-              }}
-            >
-              <User className="h-4 w-4 mr-2" />
-              View Profile
-            </Button>
-            
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className="bg-gradient-to-r from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100 border-purple-200 hover:border-purple-300 text-purple-700 hover:text-purple-800 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105"
-              onClick={(e) => {
-                e.stopPropagation();
-                setFootprintCandidate(candidate);
-              }}
-            >
-              <Radar className="h-4 w-4 mr-2" />
-              <Sparkles className="h-3 w-3 mr-1" />
-              AI Snapshot
-            </Button>
-            
-            <div className="flex space-x-2">
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleFeedback(candidate.id, true);
-                }}
-                className="px-3 hover:bg-green-50 hover:border-green-200 hover:text-green-700 transition-all duration-200 hover:scale-110"
-              >
-                <ThumbsUp className="h-3 w-3" />
-              </Button>
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleFeedback(candidate.id, false);
-                }}
-                className="px-3 hover:bg-red-50 hover:border-red-200 hover:text-red-700 transition-all duration-200 hover:scale-110"
-              >
-                <ThumbsDown className="h-3 w-3" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+  
+  const {
+    query,
+    setQuery,
+    isSearching,
+    searchResult,
+    isListening,
+    handleSearch,
+    handleVoiceInput,
+    handleFeedback
+  } = useSearch();
 
   const CandidateDetailsModal = ({ candidate }: { candidate: EnhancedCandidate }) => (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in-0 duration-300">
       <div className="max-w-6xl w-full max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-2xl animate-in slide-in-from-bottom-4 zoom-in-95 duration-300">
         <Card className="border-0 shadow-none">
           <CardHeader className="border-b bg-gradient-to-r from-purple-50 to-blue-50 rounded-t-2xl">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <Avatar className="h-20 w-20 ring-4 ring-purple-200 shadow-lg">
-                  <AvatarImage src={candidate.avatar_url} />
-                  <AvatarFallback className="bg-purple-100 text-purple-700 text-xl font-bold">
-                    {candidate.name.split(' ').map(n => n[0]).join('')}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <CardTitle className="text-3xl font-bold text-gray-900">{candidate.name}</CardTitle>
-                  <p className="text-lg text-gray-600 mt-1">{candidate.current_title} at {candidate.current_company}</p>
-                  <div className="flex items-center space-x-3 mt-3">
-                    <Badge variant="secondary" className="bg-green-100 text-green-800 px-3 py-1">
-                      <Star className="h-3 w-3 mr-1 fill-current" />
-                      {candidate.match_score}% match
-                    </Badge>
-                    <Badge variant="outline" className="px-3 py-1">
-                      {candidate.availability_status}
-                    </Badge>
-                  </div>
+            <div className="flex items-center space-x-4">
+              <Avatar className="h-20 w-20 ring-4 ring-purple-200 shadow-lg">
+                <AvatarImage src={candidate.avatar_url} />
+                <AvatarFallback className="bg-purple-100 text-purple-700 text-xl font-bold">
+                  {candidate.name.split(' ').map(n => n[0]).join('')}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <CardTitle className="text-3xl font-bold text-gray-900">{candidate.name}</CardTitle>
+                <p className="text-lg text-gray-600 mt-1">{candidate.current_title} at {candidate.current_company}</p>
+                <div className="flex items-center space-x-3 mt-3">
+                  <Badge variant="secondary" className="bg-green-100 text-green-800 px-3 py-1">
+                    <Star className="h-3 w-3 mr-1 fill-current" />
+                    {candidate.match_score}% match
+                  </Badge>
+                  <Badge variant="outline" className="px-3 py-1">
+                    {candidate.availability_status}
+                  </Badge>
                 </div>
               </div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-10 w-10 rounded-full hover:bg-gray-100 transition-colors"
-                onClick={() => setSelectedCandidate(null)}
-              >
-                <X className="h-5 w-5" />
-              </Button>
             </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-10 w-10 rounded-full hover:bg-gray-100 transition-colors"
+              onClick={() => setSelectedCandidate(null)}
+            >
+              <X className="h-5 w-5" />
+            </Button>
           </CardHeader>
 
           <CardContent className="p-8">
@@ -750,6 +515,9 @@ const MindReaderSearch = () => {
                 <CandidateCard 
                   key={candidate.id} 
                   candidate={candidate}
+                  onViewProfile={setSelectedCandidate}
+                  onViewSnapshot={setFootprintCandidate}
+                  onFeedback={handleFeedback}
                 />
               ))}
             </div>
@@ -757,86 +525,10 @@ const MindReaderSearch = () => {
 
           {/* Enhanced AI Sidebar */}
           <div className="lg:col-span-1">
-            <Card className="sticky top-6 shadow-lg border-0 bg-gradient-to-br from-white to-purple-50">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center text-lg">
-                  <div className="p-2 bg-purple-100 rounded-lg mr-3">
-                    <Lightbulb className="h-5 w-5 text-purple-600" />
-                  </div>
-                  AI Analysis
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <h4 className="font-semibold text-sm mb-3 text-gray-800">Search Interpretation:</h4>
-                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
-                    <p className="text-xs text-gray-700 leading-relaxed">
-                      {searchResult.ai_interpretation.interpreted_intent}
-                    </p>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-sm mb-3 text-gray-800">Key Requirements:</h4>
-                  <div className="space-y-2">
-                    {searchResult.ai_interpretation.extracted_requirements.slice(0, 4).map((req, index) => (
-                      <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                        <div>
-                          <span className="text-xs font-medium text-gray-700 capitalize">
-                            {req.category.replace('_', ' ')}
-                          </span>
-                          <p className="text-xs text-gray-600">{req.value}</p>
-                        </div>
-                        <Badge variant="outline" className="text-xs">
-                          {Math.round(req.importance * 100)}%
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-sm mb-3 text-gray-800">Diversity Insights:</h4>
-                  <div className="grid grid-cols-2 gap-3 text-xs">
-                    <div className="text-center p-2 bg-green-50 rounded-lg">
-                      <div className="font-semibold text-green-800">
-                        {Object.keys(searchResult.diversity_metrics.location_distribution).length}
-                      </div>
-                      <div className="text-green-600">Locations</div>
-                    </div>
-                    <div className="text-center p-2 bg-purple-50 rounded-lg">
-                      <div className="font-semibold text-purple-800">
-                        {searchResult.diversity_metrics.background_diversity_score.toFixed(1)}
-                      </div>
-                      <div className="text-purple-600">Diversity</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-sm mb-3 text-gray-800">Suggested Refinements:</h4>
-                  <div className="space-y-2">
-                    {searchResult.suggested_refinements.slice(0, 3).map((refinement, index) => (
-                      <Button 
-                        key={index}
-                        variant="ghost" 
-                        size="sm" 
-                        className="text-xs h-auto p-2 w-full justify-start hover:bg-purple-50 transition-colors"
-                        onClick={() => setQuery(refinement)}
-                      >
-                        <RefreshCw className="h-3 w-3 mr-2" />
-                        {refinement}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-
-                <Button variant="outline" size="sm" className="w-full hover:bg-purple-50 hover:border-purple-200 transition-colors">
-                  <Target className="h-4 w-4 mr-2" />
-                  Advanced Filters
-                </Button>
-              </CardContent>
-            </Card>
+            <SearchSidebar 
+              searchResult={searchResult} 
+              onRefinementClick={setQuery}
+            />
           </div>
         </div>
       )}
