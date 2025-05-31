@@ -16,10 +16,7 @@ export const useOSINTMonitoring = (candidateIds: string[]) => {
       updateMonitoringStatus();
       const interval = setInterval(updateMonitoringStatus, 30000);
       
-      return () => {
-        clearInterval(interval);
-        // Don't stop monitoring here as it might be used elsewhere
-      };
+      return () => clearInterval(interval);
     }
   }, [candidateIds]);
 

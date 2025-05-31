@@ -23,25 +23,8 @@ const RecruiterLayout: React.FC<RecruiterLayoutProps> = ({
 }) => {
   const location = useLocation();
 
-  // Get default title based on current route or active tab
+  // Get default title based on current route
   const getDefaultTitle = () => {
-    if (location.pathname === '/recruiter-dashboard') {
-      switch (activeTab) {
-        case 'overview':
-          return 'Dashboard Overview';
-        case 'candidates':
-          return 'Candidate Pipeline';
-        case 'jobs':
-          return 'AI Matching & Jobs';
-        case 'analytics':
-          return 'Interview Management';
-        case 'team':
-          return 'Team Management';
-        default:
-          return 'Recruiter Platform';
-      }
-    }
-
     switch (location.pathname) {
       case '/candidates':
         return 'Talent Pipeline';
@@ -53,29 +36,14 @@ const RecruiterLayout: React.FC<RecruiterLayoutProps> = ({
         return 'AI-Powered Talent Discovery';
       case '/settings':
         return 'Settings';
+      case '/recruiter-dashboard':
+        return 'Recruiter Platform';
       default:
         return 'Recruiter Platform';
     }
   };
 
   const getDefaultSubtitle = () => {
-    if (location.pathname === '/recruiter-dashboard') {
-      switch (activeTab) {
-        case 'overview':
-          return 'Your unified recruiting command center';
-        case 'candidates':
-          return 'Manage your candidate pipeline and track progress';
-        case 'jobs':
-          return 'AI-powered job matching and management';
-        case 'analytics':
-          return 'Schedule and manage candidate interviews';
-        case 'team':
-          return 'Manage team members and permissions';
-        default:
-          return 'Your unified recruiting command center';
-      }
-    }
-
     switch (location.pathname) {
       case '/candidates':
         return 'Discover and manage your top candidates';

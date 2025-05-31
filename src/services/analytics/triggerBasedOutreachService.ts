@@ -81,17 +81,12 @@ export class TriggerBasedOutreachService {
       };
     }
 
-    // Get the trigger rules for the events to determine priority
-    const triggerRules = triggeredEvents.map(event => 
-      smartOutreachTriggers.getTriggerRule(event.trigger_rule_id)
-    ).filter(rule => rule !== null);
-
-    const highPriorityRules = triggerRules.filter(rule => rule!.priority === 'urgent');
-    const priority = highPriorityRules.length > 0 ? 'high' : 'medium';
+    const highPriorityEvents = triggeredEvents.filter(e => e.trigger.priority === 'urgent');
+    const priority = highPriorityEvents.length > 0 ? 'high' : 'medium';
     
     return {
       should_trigger: true,
-      recommended_action: triggerRules[0]?.template_type || 'initial_outreach',
+      recommended_action: triggeredEvents[0].trigger.template_type,
       priority,
       timing: priority === 'high' ? 'immediate' : 'within_24h'
     };
