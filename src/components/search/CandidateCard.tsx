@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,6 +13,7 @@ interface CandidateCardProps {
   candidate: EnhancedCandidate;
   onViewProfile: (candidate: EnhancedCandidate) => void;
   onViewSnapshot: (candidate: EnhancedCandidate) => void;
+  onContactCandidate: (candidate: EnhancedCandidate) => void;
   onFeedback: (candidateId: string, isPositive: boolean) => void;
 }
 
@@ -21,6 +21,7 @@ const CandidateCard: React.FC<CandidateCardProps> = ({
   candidate, 
   onViewProfile, 
   onViewSnapshot, 
+  onContactCandidate,
   onFeedback 
 }) => {
   const getMatchSources = () => {
@@ -166,6 +167,18 @@ const CandidateCard: React.FC<CandidateCardProps> = ({
               <Radar className="h-4 w-4 mr-2" />
               <Sparkles className="h-3 w-3 mr-1" />
               AI Snapshot
+            </Button>
+            
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 border-green-200 hover:border-green-300 text-green-700 hover:text-green-800 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105"
+              onClick={(e) => {
+                e.stopPropagation();
+                onContactCandidate(candidate);
+              }}
+            >
+              Contact
             </Button>
             
             <div className="flex space-x-2">

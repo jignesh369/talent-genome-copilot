@@ -23,6 +23,12 @@ const SearchContainer = () => {
     handleFeedback
   } = useSearch();
 
+  const handleContactCandidate = (candidate: EnhancedCandidate) => {
+    console.log('Contacting candidate:', candidate.name);
+    // This could open a contact modal or trigger outreach sequence
+    // For now, just log the action
+  };
+
   return (
     <>
       <SearchInterface
@@ -39,6 +45,7 @@ const SearchContainer = () => {
           searchResult={searchResult}
           onViewProfile={setSelectedCandidate}
           onViewSnapshot={setFootprintCandidate}
+          onContactCandidate={handleContactCandidate}
           onFeedback={handleFeedback}
           onRefinementClick={setQuery}
         />
