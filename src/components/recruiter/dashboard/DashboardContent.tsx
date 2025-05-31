@@ -22,6 +22,14 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
 }) => {
   return (
     <Tabs value={activeTab} className="space-y-6">
+      <TabsList className="grid w-full grid-cols-5">
+        <TabsTrigger value="overview">Overview</TabsTrigger>
+        <TabsTrigger value="candidates">Pipeline</TabsTrigger>
+        <TabsTrigger value="jobs">AI Matching</TabsTrigger>
+        <TabsTrigger value="analytics">Interviews</TabsTrigger>
+        <TabsTrigger value="team">Team</TabsTrigger>
+      </TabsList>
+
       <TabsContent value="overview">
         <OverviewTab 
           userName={userName}
@@ -35,11 +43,23 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
       </TabsContent>
 
       <TabsContent value="jobs">
-        <JobsManagement />
+        <div className="space-y-6">
+          <div className="text-center py-12">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">AI Matching & Job Management</h3>
+            <p className="text-gray-600">Intelligent candidate matching and job posting management</p>
+          </div>
+          <JobsManagement />
+        </div>
       </TabsContent>
 
       <TabsContent value="analytics">
-        <EnhancedAnalyticsDashboard />
+        <div className="space-y-6">
+          <div className="text-center py-12">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Interview Management</h3>
+            <p className="text-gray-600">Schedule and manage candidate interviews</p>
+          </div>
+          <EnhancedAnalyticsDashboard />
+        </div>
       </TabsContent>
 
       <TabsContent value="team">
