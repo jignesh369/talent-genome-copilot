@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -142,7 +141,7 @@ const CandidateProfileCreator: React.FC<CandidateProfileCreatorProps> = ({ onPro
         platform: 'email',
         confidence: 0.8,
         best_time: '10:00 AM',
-        approach_style: 'professional'
+        approach_style: 'direct'
       },
       profile_last_updated: new Date().toISOString(),
       osint_last_fetched: new Date().toISOString()
