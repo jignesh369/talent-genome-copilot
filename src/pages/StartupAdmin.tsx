@@ -14,6 +14,7 @@ import StartupAdminWelcome from '@/components/admin/StartupAdminWelcome';
 import StartupAdminSidebar from '@/components/admin/StartupAdminSidebar';
 import StartupAdminOverview from '@/components/admin/StartupAdminOverview';
 import StartupAdminOrganizations from '@/components/admin/StartupAdminOrganizations';
+import StartupAdminCredentials from '@/components/auth/StartupAdminCredentials';
 import { Organization } from '@/types/organization';
 import { useBackendIntegration } from '@/hooks/useBackendIntegration';
 import { useToast } from '@/hooks/use-toast';
@@ -27,9 +28,16 @@ import {
 } from 'lucide-react';
 
 const StartupAdmin = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { user, signOut } = useAuthContext();
   const { loading: backendLoading, error: backendError } = useBackendIntegration();
   const { toast } = useToast();
+
+  // Show login screen if not authenticated
+  if (!isAuthenticated) {
+    return <StartupAdminCredentials onSuccess={() => setIsAuthenticated(true)} />;
+  }
+
   const [showOrgModal, setShowOrgModal] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create');
@@ -214,13 +222,20 @@ const StartupAdmin = () => {
     });
   };
 
+  const handleSignOut = () => {
+    setIsAuthenticated(false);
+    if (signOut) {
+      signOut();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 w-full overflow-x-hidden">
-      <StartupAdminHeader onSignOut={signOut} />
+      <StartupAdminHeader onSignOut={handleSignOut} />
 
       <div className="max-w-7xl mx-auto px-4 lg:px-8 py-4 lg:py-8 w-full">
         <div className="mb-6 lg:mb-8">
-          <StartupAdminWelcome userName={user?.user_metadata?.first_name || 'Admin'} />
+          <StartupAdminWelcome userName="Admin" />
           
           {/* Backend Connection Status */}
           {backendLoading && (
