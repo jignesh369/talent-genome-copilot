@@ -1,10 +1,10 @@
 
-import { useAnalyticsData } from './useAnalyticsData';
+import { useEnhancedCandidates } from './useEnhancedCandidates';
 import { usePredictiveAnalytics } from './usePredictiveAnalytics';
 import { useCandidateConversion } from './useCandidateConversion';
 
 export const useCandidatePredictions = () => {
-  const { enhancedCandidates } = useAnalyticsData();
+  const { enhancedCandidates } = useEnhancedCandidates();
   const { convertToSearchCandidate } = useCandidateConversion();
   const { predictJobSuccess, generateAssessment } = usePredictiveAnalytics();
 

@@ -1,16 +1,21 @@
 
-import { useOSINTAnalytics } from './useOSINTAnalytics';
-import { useCandidatePredictions } from './useCandidatePredictions';
-import { useCommunicationAutomation } from './useCommunicationAutomation';
+import { useAnalyticsData } from './useAnalyticsData';
 
 export const useRecruitingIntelligence = () => {
-  const osintAnalytics = useOSINTAnalytics();
-  const candidatePredictions = useCandidatePredictions();
-  const communicationAutomation = useCommunicationAutomation();
+  const analyticsData = useAnalyticsData();
 
   return {
-    ...osintAnalytics,
-    ...candidatePredictions,
-    ...communicationAutomation
+    // Direct access to analytics data
+    enhancedCandidates: analyticsData.enhancedCandidates,
+    osintMonitoring: analyticsData.osintMonitoring,
+    alerts: analyticsData.alerts,
+    
+    // Analytics methods
+    resolveAlert: analyticsData.resolveAlert,
+    getAlertStats: analyticsData.getAlertStats,
+    getCandidateAlerts: analyticsData.getCandidateAlerts,
+    
+    // Communication metrics
+    communicationMetrics: analyticsData.communicationMetrics
   };
 };

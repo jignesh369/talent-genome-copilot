@@ -1,10 +1,12 @@
 
-import { useAnalyticsData } from './useAnalyticsData';
+import { useEnhancedCandidates } from './useEnhancedCandidates';
+import { useCommunicationMetrics } from './useCommunicationMetrics';
 import { useOutreachGeneration } from './useOutreachGeneration';
 import { useCandidateConversion } from './useCandidateConversion';
 
 export const useCommunicationAutomation = () => {
-  const { enhancedCandidates, communicationMetrics } = useAnalyticsData();
+  const { enhancedCandidates } = useEnhancedCandidates();
+  const { communicationMetrics } = useCommunicationMetrics();
   const { convertToSearchCandidate } = useCandidateConversion();
   const { 
     generatePersonalizedOutreach, 

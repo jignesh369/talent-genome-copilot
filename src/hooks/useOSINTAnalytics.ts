@@ -1,8 +1,14 @@
 
-import { useAnalyticsData } from './useAnalyticsData';
+import { useOSINTMonitoring } from './useOSINTMonitoring';
+import { useRiskAlerts } from './useRiskAlerts';
+import { useEnhancedCandidates } from './useEnhancedCandidates';
 
 export const useOSINTAnalytics = () => {
-  const { osintMonitoring, alerts, resolveAlert, getAlertStats, getCandidateAlerts } = useAnalyticsData();
+  const { enhancedCandidates } = useEnhancedCandidates();
+  const candidateIds = enhancedCandidates.map(c => c.id);
+  
+  const { osintMonitoring } = useOSINTMonitoring(candidateIds);
+  const { alerts, resolveAlert, getAlertStats, getCandidateAlerts } = useRiskAlerts(enhancedCandidates);
 
   return {
     // Real-time monitoring
