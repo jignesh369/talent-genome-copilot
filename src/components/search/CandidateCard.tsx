@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,13 +13,15 @@ interface CandidateCardProps {
   candidate: EnhancedCandidate;
   onViewProfile: (candidate: EnhancedCandidate) => void;
   onViewSnapshot: (candidate: EnhancedCandidate) => void;
-  onFeedback: (candidateId: string, isPositive: boolean) => void;
+  onContactCandidate: (candidate: EnhancedCandidate) => void;
+  onFeedback: (candidateId: string, feedback: 'positive' | 'negative', reason?: string) => void;
 }
 
 const CandidateCard: React.FC<CandidateCardProps> = ({ 
   candidate, 
   onViewProfile, 
   onViewSnapshot, 
+  onContactCandidate,
   onFeedback 
 }) => {
   const getMatchSources = () => {
@@ -168,13 +169,24 @@ const CandidateCard: React.FC<CandidateCardProps> = ({
               AI Snapshot
             </Button>
             
+            <Button 
+              size="sm" 
+              className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+              onClick={(e) => {
+                e.stopPropagation();
+                onContactCandidate(candidate);
+              }}
+            >
+              Contact
+            </Button>
+            
             <div className="flex space-x-2">
               <Button 
                 size="sm" 
                 variant="outline"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onFeedback(candidate.id, true);
+                  onFeedback(candidate.id, 'positive');
                 }}
                 className="px-3 hover:bg-green-50 hover:border-green-200 hover:text-green-700 transition-all duration-200 hover:scale-110"
               >
@@ -185,7 +197,7 @@ const CandidateCard: React.FC<CandidateCardProps> = ({
                 variant="outline"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onFeedback(candidate.id, false);
+                  onFeedback(candidate.id, 'negative');
                 }}
                 className="px-3 hover:bg-red-50 hover:border-red-200 hover:text-red-700 transition-all duration-200 hover:scale-110"
               >
