@@ -1,3 +1,4 @@
+
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
 
 export interface OutreachSequence {
@@ -268,15 +269,15 @@ class OutreachSequenceService {
     }
 
     // Recent activity signals - using correct property names
-    if (candidate.osint_profile && candidate.osint_profile.activity_indicators) {
-      const recentActivity = candidate.osint_profile.activity_indicators[0];
+    if (candidate.osint_profile && candidate.osint_profile.availability_signals) {
+      const recentActivity = candidate.osint_profile.availability_signals[0];
       if (recentActivity) {
         insights.push({
           type: 'recent_activity',
           title: 'Recent Activity Signal',
-          content: `Recent ${recentActivity.type} activity detected`,
+          content: `Recent ${recentActivity.signal_type} activity detected: ${recentActivity.description}`,
           confidence: recentActivity.confidence,
-          source: recentActivity.source,
+          source: recentActivity.platform_source,
           suggested_usage: 'Reference their current activity and engagement in the field.'
         });
       }
