@@ -1,4 +1,3 @@
-
 import { EnhancedCandidate, CandidateInteraction, AvailabilitySignal, OSINTProfile } from '@/types/enhanced-recruiting';
 import { Candidate } from '@/types/recruiting';
 
@@ -140,7 +139,7 @@ class EnhancedCandidateService {
     // Factor in professional reputation (simplified scoring)
     if (osint.professional_reputation) {
       score += (osint.professional_reputation.industry_recognition || 0) * 0.2;
-      score += (osint.professional_reputation.community_involvement?.length || 0) * 5;
+      score += ((osint.professional_reputation.community_involvement?.length) || 0) * 5;
     }
 
     // Factor in social presence
