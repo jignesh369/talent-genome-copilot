@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,6 +11,10 @@ import InviteMemberModal from '@/components/modals/InviteMemberModal';
 import CreateJobForm from '@/components/forms/CreateJobForm';
 import UserRoleAssignment from '@/components/admin/UserRoleAssignment';
 import OrganizationBilling from '@/components/admin/OrganizationBilling';
+import PlatformIntegrationHub from '@/components/admin/PlatformIntegrationHub';
+import AutomationWorkflows from '@/components/admin/AutomationWorkflows';
+import AIConfiguration from '@/components/admin/AIConfiguration';
+import CustomizationThemes from '@/components/admin/CustomizationThemes';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -19,7 +22,11 @@ import {
   UserPlus, 
   Building,
   Search,
-  Filter
+  Filter,
+  Zap,
+  Link,
+  Brain,
+  Palette
 } from 'lucide-react';
 import TeamAnalytics from '@/components/admin/TeamAnalytics';
 import CandidatePipeline from '@/components/admin/CandidatePipeline';
@@ -64,7 +71,7 @@ const CustomerAdmin = () => {
     { id: '2', name: 'Mike Chen', email: 'mike@company.com', role: 'hiring_manager', status: 'Active', jobs: 2, department: 'Engineering', lastActive: '1 day ago' },
     { id: '3', name: 'Emily Davis', email: 'emily@company.com', role: 'recruiter', status: 'Active', jobs: 3, department: 'HR', lastActive: '30 mins ago' },
     { id: '4', name: 'Alex Wilson', email: 'alex@company.com', role: 'interviewer', status: 'Inactive', jobs: 0, department: 'Product', lastActive: '1 week ago' }
-  ]);
+  ];
 
   const handleInviteMember = (memberData: any) => {
     const newMember = {
@@ -131,7 +138,7 @@ const CustomerAdmin = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Organization Admin</h1>
-                <p className="text-sm text-gray-600">{currentOrganization.name} - Technical Configuration & Management</p>
+                <p className="text-sm text-gray-600">{currentOrganization.name} - Advanced Platform Management</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -153,7 +160,7 @@ const CustomerAdmin = () => {
             Welcome back, {user?.user_metadata?.first_name || 'Admin'}! 👋
           </h2>
           <p className="text-gray-600">
-            Manage your organization's technical integrations, monitor usage, and configure platform settings.
+            Manage your organization's advanced features, integrations, automation, and AI configuration.
           </p>
         </div>
 
@@ -165,13 +172,29 @@ const CustomerAdmin = () => {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-10">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="billing">Billing</TabsTrigger>
             <TabsTrigger value="team">Team</TabsTrigger>
             <TabsTrigger value="roles">Roles</TabsTrigger>
+            <TabsTrigger value="integrations" className="flex items-center space-x-1">
+              <Link className="w-3 h-3" />
+              <span>Integrations</span>
+            </TabsTrigger>
+            <TabsTrigger value="automation" className="flex items-center space-x-1">
+              <Zap className="w-3 h-3" />
+              <span>Automation</span>
+            </TabsTrigger>
+            <TabsTrigger value="ai-config" className="flex items-center space-x-1">
+              <Brain className="w-3 h-3" />
+              <span>AI Config</span>
+            </TabsTrigger>
+            <TabsTrigger value="themes" className="flex items-center space-x-1">
+              <Palette className="w-3 h-3" />
+              <span>Themes</span>
+            </TabsTrigger>
             <TabsTrigger value="system">System</TabsTrigger>
-            <TabsTrigger value="integrations">Integrations</TabsTrigger>
+            <TabsTrigger value="legacy">Legacy</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -244,11 +267,27 @@ const CustomerAdmin = () => {
             />
           </TabsContent>
 
+          <TabsContent value="integrations">
+            <PlatformIntegrationHub />
+          </TabsContent>
+
+          <TabsContent value="automation">
+            <AutomationWorkflows />
+          </TabsContent>
+
+          <TabsContent value="ai-config">
+            <AIConfiguration />
+          </TabsContent>
+
+          <TabsContent value="themes">
+            <CustomizationThemes />
+          </TabsContent>
+
           <TabsContent value="system">
             <SystemConfiguration />
           </TabsContent>
 
-          <TabsContent value="integrations">
+          <TabsContent value="legacy">
             <IntegrationSettings />
           </TabsContent>
         </Tabs>

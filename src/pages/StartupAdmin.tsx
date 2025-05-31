@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,6 +10,8 @@ import SystemConfiguration from '@/components/admin/SystemConfiguration';
 import AdvancedAnalytics from '@/components/admin/AdvancedAnalytics';
 import SystemHealth from '@/components/admin/SystemHealth';
 import AuditLogs from '@/components/admin/AuditLogs';
+import AIModelManagement from '@/components/admin/AIModelManagement';
+import FeatureReleaseControl from '@/components/admin/FeatureReleaseControl';
 import { 
   Building, 
   Users, 
@@ -26,7 +27,9 @@ import {
   Activity,
   Shield,
   Edit,
-  Search
+  Search,
+  Brain,
+  Flag
 } from 'lucide-react';
 
 const StartupAdmin = () => {
@@ -168,7 +171,7 @@ const StartupAdmin = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">TalentGenome Platform Admin</h1>
-                <p className="text-sm text-gray-600">Platform-wide Administration & Analytics</p>
+                <p className="text-sm text-gray-600">Platform-wide Administration & AI Management</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -190,13 +193,13 @@ const StartupAdmin = () => {
             Welcome back, {user?.user_metadata?.first_name || 'Admin'}! 👋
           </h2>
           <p className="text-gray-600">
-            Monitor platform performance, manage customer organizations, and oversee billing across all accounts.
+            Monitor platform performance, manage AI models, control feature releases, and oversee customer organizations.
           </p>
         </div>
 
         {/* Admin Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-9">
             <TabsTrigger value="overview" className="flex items-center space-x-2">
               <BarChart3 className="w-4 h-4" />
               <span>Overview</span>
@@ -205,13 +208,21 @@ const StartupAdmin = () => {
               <Building className="w-4 h-4" />
               <span>Organizations</span>
             </TabsTrigger>
+            <TabsTrigger value="ai-models" className="flex items-center space-x-2">
+              <Brain className="w-4 h-4" />
+              <span>AI Models</span>
+            </TabsTrigger>
+            <TabsTrigger value="features" className="flex items-center space-x-2">
+              <Flag className="w-4 h-4" />
+              <span>Features</span>
+            </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center space-x-2">
               <TrendingUp className="w-4 h-4" />
               <span>Analytics</span>
             </TabsTrigger>
             <TabsTrigger value="health" className="flex items-center space-x-2">
               <Activity className="w-4 h-4" />
-              <span>System Health</span>
+              <span>Health</span>
             </TabsTrigger>
             <TabsTrigger value="billing" className="flex items-center space-x-2">
               <CreditCard className="w-4 h-4" />
@@ -219,7 +230,7 @@ const StartupAdmin = () => {
             </TabsTrigger>
             <TabsTrigger value="audit" className="flex items-center space-x-2">
               <Shield className="w-4 h-4" />
-              <span>Audit Logs</span>
+              <span>Audit</span>
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center space-x-2">
               <Cog className="w-4 h-4" />
@@ -404,6 +415,14 @@ const StartupAdmin = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="ai-models">
+            <AIModelManagement />
+          </TabsContent>
+
+          <TabsContent value="features">
+            <FeatureReleaseControl />
           </TabsContent>
 
           <TabsContent value="analytics">
