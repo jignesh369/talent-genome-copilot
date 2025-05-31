@@ -1,10 +1,7 @@
 
 import React, { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAuth } from '@/components/auth/AuthProvider';
-import UserProfileDropdown from '@/components/navigation/UserProfileDropdown';
-import NotificationDropdown from '@/components/navigation/NotificationDropdown';
 import InviteMemberModal from '@/components/modals/InviteMemberModal';
 import CreateJobForm from '@/components/forms/CreateJobForm';
 import { useToast } from '@/hooks/use-toast';
@@ -15,34 +12,29 @@ import AIMatchingEngine from '@/components/recruiter/AIMatchingEngine';
 import EnhancedInterviewManagement from '@/components/recruiter/EnhancedInterviewManagement';
 import CommunicationHub from '@/components/recruiter/CommunicationHub';
 import WelcomeSection from '@/components/recruiter/WelcomeSection';
-import EnhancedStatsGrid from '@/components/recruiter/EnhancedStatsGrid';
 import QuickActionsGrid from '@/components/recruiter/QuickActionsGrid';
 import AnalyticsCharts from '@/components/recruiter/AnalyticsCharts';
 import RecentActivityCard from '@/components/recruiter/RecentActivityCard';
 import PipelineOverview from '@/components/recruiter/PipelineOverview';
 import TeamManagement from '@/components/recruiter/TeamManagement';
-import { Button } from '@/components/ui/button';
+import RecruiterSidebar from '@/components/recruiter/RecruiterSidebar';
+import RecruiterHeader from '@/components/recruiter/RecruiterHeader';
+import ConsistentStatsCard from '@/components/recruiter/ConsistentStatsCard';
 import { 
-  Building,
-  Search,
-  BarChart3,
-  Briefcase,
   Users,
+  Clock,
   TrendingUp,
-  Brain,
-  Calendar,
-  MessageSquare,
-  UserPlus,
-  Clock
+  Brain
 } from 'lucide-react';
 
 const RecruiterDashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState('overview');
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showCreateJobModal, setShowCreateJobModal] = useState(false);
 
-  // Enhanced stats with trend indicators
+  // Enhanced stats with consistent format
   const stats = [
     {
       title: "Active Candidates",
@@ -50,8 +42,7 @@ const RecruiterDashboard = () => {
       change: "+12%",
       trend: "up" as const,
       icon: Users,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
+      color: "blue",
       description: "vs last month"
     },
     {
@@ -60,8 +51,7 @@ const RecruiterDashboard = () => {
       change: "-30%",
       trend: "down" as const,
       icon: Clock,
-      color: "text-green-600",
-      bgColor: "bg-green-50",
+      color: "green",
       description: "avg reduction"
     },
     {
@@ -70,8 +60,7 @@ const RecruiterDashboard = () => {
       change: "+8%",
       trend: "up" as const,
       icon: TrendingUp,
-      color: "text-purple-600",
-      bgColor: "bg-purple-50",
+      color: "purple",
       description: "outreach success"
     },
     {
@@ -80,8 +69,7 @@ const RecruiterDashboard = () => {
       change: "+5%",
       trend: "up" as const,
       icon: Brain,
-      color: "text-emerald-600",
-      bgColor: "bg-emerald-50",
+      color: "emerald",
       description: "accuracy improved"
     }
   ];
@@ -102,77 +90,21 @@ const RecruiterDashboard = () => {
     setShowCreateJobModal(false);
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Enhanced Header with gradient */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <Building className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Recruiter Platform</h1>
-                <p className="text-sm text-gray-600">Your unified recruiting command center</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Button onClick={() => window.location.href = '/search'}>
-                <Search className="w-4 h-4 mr-2" />
-                AI Search
-              </Button>
-              <NotificationDropdown />
-              <UserProfileDropdown />
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8">
-            <TabsTrigger value="overview" className="flex items-center space-x-2">
-              <BarChart3 className="w-4 h-4" />
-              <span>Overview</span>
-            </TabsTrigger>
-            <TabsTrigger value="jobs" className="flex items-center space-x-2">
-              <Briefcase className="w-4 h-4" />
-              <span>Jobs</span>
-            </TabsTrigger>
-            <TabsTrigger value="candidates" className="flex items-center space-x-2">
-              <Users className="w-4 h-4" />
-              <span>Candidates</span>
-            </TabsTrigger>
-            <TabsTrigger value="pipeline" className="flex items-center space-x-2">
-              <TrendingUp className="w-4 h-4" />
-              <span>Pipeline</span>
-            </TabsTrigger>
-            <TabsTrigger value="ai-matching" className="flex items-center space-x-2">
-              <Brain className="w-4 h-4" />
-              <span>AI Matching</span>
-            </TabsTrigger>
-            <TabsTrigger value="interviews" className="flex items-center space-x-2">
-              <Calendar className="w-4 h-4" />
-              <span>Interviews</span>
-            </TabsTrigger>
-            <TabsTrigger value="communication" className="flex items-center space-x-2">
-              <MessageSquare className="w-4 h-4" />
-              <span>Communications</span>
-            </TabsTrigger>
-            <TabsTrigger value="team" className="flex items-center space-x-2">
-              <UserPlus className="w-4 h-4" />
-              <span>Team</span>
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="space-y-6">
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'overview':
+        return (
+          <div className="space-y-6">
             <WelcomeSection 
               userName={user?.user_metadata?.first_name} 
               onCreateJob={() => setShowCreateJobModal(true)} 
             />
             
-            <EnhancedStatsGrid stats={stats} />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {stats.map((stat) => (
+                <ConsistentStatsCard key={stat.title} {...stat} />
+              ))}
+            </div>
             
             <QuickActionsGrid onCreateJob={() => setShowCreateJobModal(true)} />
             
@@ -180,41 +112,59 @@ const RecruiterDashboard = () => {
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <RecentActivityCard />
-              <div className="lg:col-span-1">
-                <PipelineOverview />
-              </div>
+              <PipelineOverview />
             </div>
-          </TabsContent>
+          </div>
+        );
+      case 'jobs':
+        return <JobsManagement />;
+      case 'candidates':
+        return <CandidatesManagement />;
+      case 'pipeline':
+        return <CandidatePipeline showCandidates={true} />;
+      case 'ai-matching':
+        return <AIMatchingEngine />;
+      case 'interviews':
+        return <EnhancedInterviewManagement />;
+      case 'communication':
+        return <CommunicationHub />;
+      case 'team':
+        return <TeamManagement onInviteMember={() => setShowInviteModal(true)} />;
+      default:
+        return null;
+    }
+  };
 
-          <TabsContent value="jobs">
-            <JobsManagement />
-          </TabsContent>
+  const getPageTitle = () => {
+    const titles = {
+      overview: 'Recruiter Platform',
+      jobs: 'Jobs Management',
+      candidates: 'Talent Pipeline',
+      pipeline: 'Pipeline Analytics',
+      'ai-matching': 'AI Matching Engine',
+      interviews: 'Interview Management',
+      communication: 'Communication Hub',
+      team: 'Team Management'
+    };
+    return titles[activeTab as keyof typeof titles] || 'Recruiter Platform';
+  };
 
-          <TabsContent value="candidates">
-            <CandidatesManagement />
-          </TabsContent>
+  return (
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar */}
+      <RecruiterSidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
-          <TabsContent value="pipeline">
-            <CandidatePipeline showCandidates={true} />
-          </TabsContent>
+      {/* Main Content */}
+      <div className="flex-1">
+        <RecruiterHeader 
+          title={getPageTitle()}
+          subtitle={activeTab === 'candidates' ? 'Discover and manage your top candidates' : undefined}
+        />
 
-          <TabsContent value="ai-matching">
-            <AIMatchingEngine />
-          </TabsContent>
-
-          <TabsContent value="interviews">
-            <EnhancedInterviewManagement />
-          </TabsContent>
-
-          <TabsContent value="communication">
-            <CommunicationHub />
-          </TabsContent>
-
-          <TabsContent value="team">
-            <TeamManagement onInviteMember={() => setShowInviteModal(true)} />
-          </TabsContent>
-        </Tabs>
-      </main>
+        <main className="p-6">
+          {renderContent()}
+        </main>
+      </div>
 
       {/* Modals */}
       <InviteMemberModal

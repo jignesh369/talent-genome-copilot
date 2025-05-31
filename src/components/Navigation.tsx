@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -31,15 +32,18 @@ const Navigation = () => {
 
   return (
     <>
-      <nav className="bg-white border-b border-gray-200 px-6 py-4">
+      <nav className="bg-white border-b border-gray-200 px-6 py-4 shadow-sm">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center space-x-8">
-            <Link to="/" className="flex items-center space-x-2">
+            <Link to="/" className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
                 <Zap className="h-5 w-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-gray-900">HireAI Copilot</span>
+              <div>
+                <span className="text-xl font-bold text-gray-900">HireAI Copilot</span>
+                <p className="text-xs text-gray-500 hidden md:block">Intelligent Recruiting Platform</p>
+              </div>
             </Link>
 
             {/* Desktop Navigation Links */}
@@ -51,9 +55,9 @@ const Navigation = () => {
                     key={item.name}
                     to={item.href}
                     className={cn(
-                      "flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                      "flex items-center space-x-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                       isActive
-                        ? "bg-blue-50 text-blue-700"
+                        ? "bg-blue-50 text-blue-700 shadow-sm border border-blue-100"
                         : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                     )}
                   >
@@ -71,11 +75,11 @@ const Navigation = () => {
             <Button 
               variant="outline" 
               size="sm" 
-              className="hidden lg:flex"
+              className="hidden lg:flex items-center space-x-2"
               onClick={() => window.location.href = '/search'}
             >
-              <Search className="h-4 w-4 mr-2" />
-              Quick Search
+              <Search className="h-4 w-4" />
+              <span>Quick Search</span>
             </Button>
 
             {/* Notifications */}
@@ -99,7 +103,7 @@ const Navigation = () => {
 
       {/* Mobile Navigation Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-b border-gray-200 px-6 py-4">
+        <div className="md:hidden bg-white border-b border-gray-200 px-6 py-4 shadow-lg">
           <div className="space-y-2">
             {navItems.map((item) => {
               const isActive = location.pathname === item.href;
@@ -109,7 +113,7 @@ const Navigation = () => {
                   to={item.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className={cn(
-                    "flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors w-full",
+                    "flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors w-full",
                     isActive
                       ? "bg-blue-50 text-blue-700"
                       : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
