@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -10,17 +9,20 @@ import SearchSidebar from '@/components/search/SearchSidebar';
 import CandidateDetailsModal from '@/components/search/CandidateDetailsModal';
 import DigitalFootprintModal from '@/components/search/DigitalFootprintModal';
 import EmptyState from '@/components/search/EmptyState';
+import OutreachSequenceModal from '@/components/outreach/OutreachSequenceModal';
 import { useSearch } from '@/hooks/useSearch';
 import { useRecruitingIntelligence } from '@/hooks/useRecruitingIntelligence';
 import { Search as SearchIcon, History, Bell, Filter, SortDesc, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
+import { PersonalizedSequence } from '@/types/outreach-sequence';
 import { useToast } from '@/hooks/use-toast';
 
 const Search = () => {
   const [activeTab, setActiveTab] = useState('search');
   const [selectedCandidate, setSelectedCandidate] = useState<EnhancedCandidate | null>(null);
   const [footprintCandidate, setFootprintCandidate] = useState<EnhancedCandidate | null>(null);
+  const [outreachCandidate, setOutreachCandidate] = useState<EnhancedCandidate | null>(null);
   const { toast } = useToast();
   
   const {
@@ -37,37 +39,31 @@ const Search = () => {
   const { generatePersonalizedOutreach, processAutomaticOutreach } = useRecruitingIntelligence();
 
   const handleContactCandidate = async (candidate: EnhancedCandidate) => {
+    // Open the outreach sequence modal instead of the old flow
+    setOutreachCandidate(candidate);
+  };
+
+  const handleSequenceStart = async (personalizedSequence: PersonalizedSequence) => {
     try {
-      console.log('Contacting candidate:', candidate.name);
+      console.log('Starting outreach sequence:', personalizedSequence);
+      
+      // Here you would integrate with your outreach service
+      // await outreachSequenceService.enrollCandidateInSequence(
+      //   personalizedSequence.candidate_id,
+      //   personalizedSequence.template_id
+      // );
       
       toast({
-        title: "Generating Enhanced AI Outreach",
-        description: "Creating highly personalized message with quality scoring...",
+        title: "Outreach Sequence Started",
+        description: `Personalized sequence launched successfully for ${outreachCandidate?.name}`,
       });
-
-      const message = await generatePersonalizedOutreach(
-        candidate.id, 
-        'initial_outreach',
-        {
-          company_name: 'TechCorp',
-          role_title: 'Senior Software Engineer',
-          recruiter_name: 'Sarah',
-          role_benefits: 'Cutting-edge AI projects,Competitive salary + equity,Remote work flexibility'
-        }
-      );
-
-      if (message) {
-        console.log('Generated enhanced outreach message:', message);
-        toast({
-          title: "Enhanced AI Outreach Generated",
-          description: `High-quality personalized message created for ${candidate.name}. Quality-scored and optimized for response.`,
-        });
-      }
+      
+      setOutreachCandidate(null);
     } catch (error) {
-      console.error('Error generating outreach:', error);
+      console.error('Error starting sequence:', error);
       toast({
         title: "Error",
-        description: "Failed to generate AI outreach message. Please try again.",
+        description: "Failed to start outreach sequence. Please try again.",
         variant: "destructive"
       });
     }
@@ -205,6 +201,7 @@ const Search = () => {
           </TabsContent>
         </Tabs>
 
+        {/* Existing modals */}
         {selectedCandidate && (
           <CandidateDetailsModal 
             candidate={selectedCandidate}
@@ -219,6 +216,16 @@ const Search = () => {
           isOpen={!!footprintCandidate}
           onClose={() => setFootprintCandidate(null)}
         />
+
+        {/* New Outreach Sequence Modal */}
+        {outreachCandidate && (
+          <OutreachSequenceModal
+            isOpen={!!outreachCandidate}
+            onClose={() => setOutreachCandidate(null)}
+            candidate={outreachCandidate}
+            onSequenceStart={handleSequenceStart}
+          />
+        )}
       </div>
     </RecruiterLayout>
   );
