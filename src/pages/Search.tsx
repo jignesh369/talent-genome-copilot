@@ -11,14 +11,17 @@ import CandidateDetailsModal from '@/components/search/CandidateDetailsModal';
 import DigitalFootprintModal from '@/components/search/DigitalFootprintModal';
 import EmptyState from '@/components/search/EmptyState';
 import { useSearch } from '@/hooks/useSearch';
+import { useRecruitingIntelligence } from '@/hooks/useRecruitingIntelligence';
 import { Search as SearchIcon, History, Bell, Filter, SortDesc } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
+import { useToast } from '@/hooks/use-toast';
 
 const Search = () => {
   const [activeTab, setActiveTab] = useState('search');
   const [selectedCandidate, setSelectedCandidate] = useState<EnhancedCandidate | null>(null);
   const [footprintCandidate, setFootprintCandidate] = useState<EnhancedCandidate | null>(null);
+  const { toast } = useToast();
   
   const {
     query,
@@ -30,6 +33,43 @@ const Search = () => {
     handleVoiceInput,
     handleFeedback
   } = useSearch();
+
+  const { generatePersonalizedOutreach } = useRecruitingIntelligence();
+
+  const handleContactCandidate = async (candidate: EnhancedCandidate) => {
+    try {
+      toast({
+        title: "Generating AI Outreach",
+        description: "Creating personalized message for the candidate...",
+      });
+
+      const message = await generatePersonalizedOutreach(
+        candidate.id, 
+        'initial_outreach',
+        {
+          company_name: 'TechCorp',
+          role_title: 'Senior Software Engineer',
+          recruiter_name: 'Sarah'
+        }
+      );
+
+      if (message) {
+        toast({
+          title: "AI Outreach Generated",
+          description: `Personalized message created for ${candidate.name}. Review and send when ready.`,
+        });
+        
+        // Here you could open a modal to show the generated message
+        console.log('Generated outreach message:', message);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to generate AI outreach message. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
     <RecruiterLayout 
@@ -95,6 +135,7 @@ const Search = () => {
                         onViewProfile={setSelectedCandidate}
                         onViewSnapshot={setFootprintCandidate}
                         onFeedback={handleFeedback}
+                        onContactCandidate={handleContactCandidate}
                       />
                     ))}
                   </div>

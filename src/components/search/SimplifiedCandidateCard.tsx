@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Star, Clock, Target, User, Radar, Sparkles, ThumbsUp, ThumbsDown, Briefcase, Brain } from "lucide-react";
+import { Star, Clock, Target, User, Radar, Sparkles, ThumbsUp, ThumbsDown, Briefcase, Brain, Contact } from "lucide-react";
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
 import OSINTMetrics from './OSINTMetrics';
 import ScoreIndicator from './ScoreIndicator';
@@ -15,13 +15,15 @@ interface SimplifiedCandidateCardProps {
   onViewProfile: (candidate: EnhancedCandidate) => void;
   onViewSnapshot: (candidate: EnhancedCandidate) => void;
   onFeedback: (candidateId: string, isPositive: boolean) => void;
+  onContactCandidate: (candidate: EnhancedCandidate) => void;
 }
 
 const SimplifiedCandidateCard: React.FC<SimplifiedCandidateCardProps> = ({ 
   candidate, 
   onViewProfile, 
   onViewSnapshot, 
-  onFeedback 
+  onFeedback,
+  onContactCandidate
 }) => {
   const getMatchSources = () => {
     const sources = [];
@@ -119,24 +121,24 @@ const SimplifiedCandidateCard: React.FC<SimplifiedCandidateCardProps> = ({
           </div>
           
           {/* Right Section - Actions */}
-          <div className="flex flex-col gap-2 min-w-[120px]">
+          <div className="flex flex-col gap-2 min-w-[140px]">
             <Button 
               size="sm" 
-              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+              variant="outline"
+              className="bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
               onClick={() => onViewProfile(candidate)}
             >
               <User className="h-4 w-4 mr-2" />
-              View Profile
+              View Full Profile
             </Button>
             
             <Button 
               size="sm" 
-              variant="outline" 
-              className="bg-gradient-to-r from-blue-50 to-purple-50 border-purple-200 text-purple-700"
-              onClick={() => onViewSnapshot(candidate)}
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+              onClick={() => onContactCandidate(candidate)}
             >
-              <Radar className="h-4 w-4 mr-2" />
-              AI Snapshot
+              <Contact className="h-4 w-4 mr-2" />
+              Contact Candidate
             </Button>
             
             <div className="flex gap-1">
