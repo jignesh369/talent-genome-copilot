@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useAuth } from '../auth/AuthProvider';
 import { Loader2, Users, Building, Search, Settings, BarChart3, Briefcase } from 'lucide-react';
@@ -7,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import CandidatePortal from '@/pages/CandidatePortal';
 
 const SmartLanding = () => {
-  // TEMPORARY: Show development navigation instead of role-based routing
-  const SHOW_DEV_NAV = true;
+  // Re-enabled role-based routing for production
+  const SHOW_DEV_NAV = false;
   
   const { user, userRole, loading } = useAuth();
 

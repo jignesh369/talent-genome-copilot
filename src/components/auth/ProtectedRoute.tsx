@@ -14,9 +14,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   allowedRoles,
   fallback 
 }) => {
-  // TEMPORARY: Bypass authentication for development
-  // TODO: Re-enable authentication when ready for production
-  const BYPASS_AUTH = true;
+  // Re-enabled authentication for production
+  const BYPASS_AUTH = false;
   
   if (BYPASS_AUTH) {
     return <>{children}</>;
