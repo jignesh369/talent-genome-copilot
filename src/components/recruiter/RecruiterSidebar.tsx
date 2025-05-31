@@ -37,7 +37,6 @@ const RecruiterSidebar: React.FC<RecruiterSidebarProps> = ({ activeTab, onTabCha
     { id: 'analytics', label: 'Analytics', icon: BarChart3, href: '/analytics', isDashboardTab: false },
     { id: 'search', label: 'Search', icon: Search, href: '/search', isDashboardTab: false },
     { id: 'team', label: 'Team', icon: UserPlus, href: '/recruiter-dashboard', isDashboardTab: true },
-    { id: 'platform-settings', label: 'Platform', icon: Settings, href: '/platform-settings', isDashboardTab: false },
     { id: 'settings', label: 'Settings', icon: Settings, href: '/settings', isDashboardTab: false },
   ];
 
