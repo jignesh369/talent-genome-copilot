@@ -28,6 +28,7 @@ import CandidateOffers from "./pages/CandidateOffers";
 import CandidateProfile from "./pages/CandidateProfile";
 import CandidateAssessments from "./pages/CandidateAssessments";
 import HiringManagerDashboard from "./pages/HiringManagerDashboard";
+import RecruiterDashboard from "./pages/RecruiterDashboard";
 
 const queryClient = new QueryClient();
 
@@ -98,6 +99,13 @@ const App = () => (
             <Route path="/hiring-manager" element={
               <ProtectedRoute allowedRoles={['hiring_manager']}>
                 <HiringManagerDashboard />
+              </ProtectedRoute>
+            } />
+            
+            {/* Recruiter Dashboard Route */}
+            <Route path="/recruiter-dashboard" element={
+              <ProtectedRoute allowedRoles={['recruiter', 'hiring_manager']}>
+                <RecruiterDashboard />
               </ProtectedRoute>
             } />
             
