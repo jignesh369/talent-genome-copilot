@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useEnhancedCandidates } from './useEnhancedCandidates';
 import { useToast } from '@/hooks/use-toast';
@@ -17,9 +16,9 @@ export const useEnhancedCandidateOperations = () => {
     try {
       moveToStage(candidateId, newStage, 'recruiter', reason);
       
-      // Add interaction record
+      // Add interaction record using valid interaction type
       const interaction = {
-        type: 'stage_change' as const,
+        type: 'portal_visit' as const,
         direction: 'outbound' as const,
         content_summary: `Candidate moved to ${newStage} stage`,
         timestamp: new Date().toISOString(),
