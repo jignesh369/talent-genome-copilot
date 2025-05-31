@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,7 +11,6 @@ import AuthPage from "./components/auth/AuthPage";
 import StartupAdmin from "./pages/StartupAdmin";
 import CustomerAdmin from "./pages/CustomerAdmin";
 import Navigation from "./components/Navigation";
-import Dashboard from "./pages/Dashboard";
 import Candidates from "./pages/Candidates";
 import Jobs from "./pages/Jobs";
 import Analytics from "./pages/Analytics";
@@ -108,7 +108,7 @@ const App = () => (
               </ProtectedRoute>
             } />
             
-            {/* Main Dashboard - Now redirects to RecruiterDashboard for recruiters/hiring managers */}
+            {/* Main Dashboard - Redirects to RecruiterDashboard for recruiters/hiring managers */}
             <Route path="/dashboard" element={
               <ProtectedRoute allowedRoles={['recruiter', 'hiring_manager']}>
                 <RecruiterDashboard />
