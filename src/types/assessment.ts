@@ -1,7 +1,6 @@
-
 export interface AssessmentQuestion {
   id: string;
-  type: 'mcq' | 'slider' | 'emoji' | 'text' | 'scenario';
+  type: 'mcq' | 'slider' | 'emoji' | 'text' | 'scenario' | 'conversation' | 'roleplay';
   category: 'technical' | 'communication' | 'culture' | 'speed';
   question: string;
   options?: string[];
@@ -10,6 +9,13 @@ export interface AssessmentQuestion {
   max?: number;
   timeLimit?: number; // in seconds
   difficulty: 'easy' | 'medium' | 'hard';
+  // New fields for interactive scenarios
+  scenario?: {
+    context: string;
+    roleDescription: string;
+    objectives: string[];
+    expectedInteractions: number;
+  };
 }
 
 export interface AssessmentAnswer {
@@ -17,6 +23,12 @@ export interface AssessmentAnswer {
   answer: string | number;
   timeSpent: number; // in milliseconds
   timestamp: Date;
+  // Additional context for scenario-based answers
+  metadata?: {
+    interactionCount?: number;
+    responseQuality?: 'poor' | 'fair' | 'good' | 'excellent';
+    keyPoints?: string[];
+  };
 }
 
 export interface AssessmentSession {

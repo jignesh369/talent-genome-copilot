@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,9 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { AssessmentQuestion, AssessmentAnswer, AssessmentSession } from '@/types/assessment';
-import { Bot, Clock, Zap, Heart } from 'lucide-react';
+import { Bot, Clock, Zap, Heart, Users, MessageSquare } from 'lucide-react';
+import ConversationalScenario from './ConversationalScenario';
+import RolePlaySimulation from './RolePlaySimulation';
 
 interface AssessmentInterfaceProps {
   session: AssessmentSession;
@@ -57,6 +58,110 @@ const AssessmentInterface: React.FC<AssessmentInterfaceProps> = ({
       onComplete();
     }
   };
+
+  // Handle conversational scenario completion
+  const handleConversationalComplete = (responses: string[]) => {
+    const answer: AssessmentAnswer = {
+      questionId: currentQuestion.id,
+      answer: JSON.stringify(responses),
+      timeSpent,
+      timestamp: new Date()
+    };
+
+    onAnswerSubmit(answer);
+
+    if (isLastQuestion) {
+      onComplete();
+    }
+  };
+
+  // Handle role-play simulation completion
+  const handleRolePlayComplete = (responses: { situation: string; action: string; result: string }) => {
+    const answer: AssessmentAnswer = {
+      questionId: currentQuestion.id,
+      answer: JSON.stringify(responses),
+      timeSpent,
+      timestamp: new Date()
+    };
+
+    onAnswerSubmit(answer);
+
+    if (isLastQuestion) {
+      onComplete();
+    }
+  };
+
+  // Special handling for conversational scenarios
+  if (currentQuestion.type === 'scenario' && currentQuestion.category === 'communication') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4">
+        <div className="max-w-4xl mx-auto">
+          {/* Progress Bar */}
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm font-medium text-gray-600">
+                Question {session.currentQuestionIndex + 1} of {session.questions.length}
+              </span>
+              <span className="text-sm text-gray-500">
+                {Math.round(progress)}% Complete
+              </span>
+            </div>
+            <Progress value={progress} className="h-2" />
+          </div>
+
+          <ConversationalScenario
+            scenario={{
+              title: "Technical Communication Challenge",
+              context: currentQuestion.question,
+              initialMessage: "Hi! I'm here to understand this new feature you've been working on. Can you walk me through what it does and why it's important for our users?",
+              expectedResponses: []
+            }}
+            onComplete={handleConversationalComplete}
+            timeLimit={300}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Special handling for role-play simulations
+  if (currentQuestion.type === 'scenario' && currentQuestion.category === 'culture') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-4">
+        <div className="max-w-4xl mx-auto">
+          {/* Progress Bar */}
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm font-medium text-gray-600">
+                Question {session.currentQuestionIndex + 1} of {session.questions.length}
+              </span>
+              <span className="text-sm text-gray-500">
+                {Math.round(progress)}% Complete
+              </span>
+            </div>
+            <Progress value={progress} className="h-2" />
+          </div>
+
+          <RolePlaySimulation
+            simulation={{
+              title: "Team Conflict Resolution",
+              scenario: currentQuestion.question,
+              yourRole: "Senior Developer and Team Lead",
+              otherRole: "Junior Developer who missed a critical deadline",
+              objectives: [
+                "Address the missed deadline professionally",
+                "Understand the root cause of the issue",
+                "Provide constructive feedback and support",
+                "Establish a plan to prevent future issues"
+              ],
+              timeLimit: 240
+            }}
+            onComplete={handleRolePlayComplete}
+          />
+        </div>
+      </div>
+    );
+  }
 
   const renderQuestionInput = () => {
     switch (currentQuestion.type) {
@@ -118,7 +223,6 @@ const AssessmentInterface: React.FC<AssessmentInterfaceProps> = ({
         );
 
       case 'text':
-      case 'scenario':
         return (
           <Textarea
             value={currentAnswer.toString()}
@@ -149,6 +253,7 @@ const AssessmentInterface: React.FC<AssessmentInterfaceProps> = ({
       case 'technical': return <Zap className="w-5 h-5 text-blue-500" />;
       case 'speed': return <Clock className="w-5 h-5 text-orange-500" />;
       case 'culture': return <Heart className="w-5 h-5 text-pink-500" />;
+      case 'communication': return <MessageSquare className="w-5 h-5 text-green-500" />;
       default: return <Bot className="w-5 h-5 text-purple-500" />;
     }
   };
