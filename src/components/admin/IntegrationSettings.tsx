@@ -1,23 +1,13 @@
+
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Settings, 
-  Calendar, 
-  Mail, 
-  Linkedin, 
-  Slack, 
-  Chrome,
-  Link,
-  CheckCircle,
-  AlertCircle,
-  RefreshCw
-} from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
+import CalendarIntegrations from './integration/CalendarIntegrations';
+import EmailIntegrations from './integration/EmailIntegrations';
+import ProfessionalNetworkIntegrations from './integration/ProfessionalNetworkIntegrations';
+import CommunicationIntegrations from './integration/CommunicationIntegrations';
+import ATSIntegration from './integration/ATSIntegration';
 
 const IntegrationSettings: React.FC = () => {
   const { toast } = useToast();
@@ -78,9 +68,10 @@ const IntegrationSettings: React.FC = () => {
     });
     // Simulate OAuth flow
     setTimeout(() => {
+      const key = integration.toLowerCase().replace(' ', '');
       setIntegrations(prev => ({
         ...prev,
-        [integration]: { ...prev[integration], connected: true }
+        [key]: { ...prev[key], connected: true }
       }));
       toast({
         title: "Integration Connected",
@@ -101,20 +92,6 @@ const IntegrationSettings: React.FC = () => {
     });
   };
 
-  const handleSync = (integration: string) => {
-    toast({
-      title: "Syncing Data",
-      description: `Syncing data with ${integration}...`,
-    });
-    
-    setTimeout(() => {
-      toast({
-        title: "Sync Complete",
-        description: `Successfully synced with ${integration}.`,
-      });
-    }, 3000);
-  };
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -126,265 +103,33 @@ const IntegrationSettings: React.FC = () => {
         </Button>
       </div>
 
-      {/* Calendar Integrations */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Calendar className="w-5 h-5 mr-2" />
-            Calendar Integrations
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Google Calendar */}
-          <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                <Calendar className="w-5 h-5 text-red-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Google Calendar</h3>
-                <p className="text-sm text-gray-600">
-                  {integrations.googleCalendar.connected 
-                    ? `Connected: ${integrations.googleCalendar.email}`
-                    : 'Not connected'
-                  }
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              {integrations.googleCalendar.connected && (
-                <div className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-green-600" />
-                  <span className="text-sm text-green-600">Connected</span>
-                </div>
-              )}
-              <Switch
-                checked={integrations.googleCalendar.enabled}
-                onCheckedChange={(checked) => handleToggleIntegration('googleCalendar', checked)}
-              />
-              {integrations.googleCalendar.connected ? (
-                <Button variant="outline" size="sm" onClick={() => handleDisconnect('googleCalendar')}>
-                  Disconnect
-                </Button>
-              ) : (
-                <Button size="sm" onClick={() => handleConnect('Google Calendar')}>
-                  Connect
-                </Button>
-              )}
-            </div>
-          </div>
+      <CalendarIntegrations 
+        integrations={integrations}
+        onToggleIntegration={handleToggleIntegration}
+        onConnect={handleConnect}
+        onDisconnect={handleDisconnect}
+      />
 
-          {/* Outlook Calendar */}
-          <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Calendar className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Outlook Calendar</h3>
-                <p className="text-sm text-gray-600">
-                  {integrations.outlook.connected 
-                    ? `Connected: ${integrations.outlook.email}`
-                    : 'Not connected'
-                  }
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              {integrations.outlook.connected && (
-                <div className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-green-600" />
-                  <span className="text-sm text-green-600">Connected</span>
-                </div>
-              )}
-              <Switch
-                checked={integrations.outlook.enabled}
-                onCheckedChange={(checked) => handleToggleIntegration('outlook', checked)}
-              />
-              <Button size="sm" onClick={() => handleConnect('Outlook Calendar')}>
-                Connect
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <EmailIntegrations 
+        integrations={integrations}
+        onToggleIntegration={handleToggleIntegration}
+      />
 
-      {/* Email Integrations */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Mail className="w-5 h-5 mr-2" />
-            Email Integrations
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Gmail */}
-          <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                <Mail className="w-5 h-5 text-red-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Gmail</h3>
-                <p className="text-sm text-gray-600">
-                  {integrations.gmail.connected 
-                    ? `${integrations.gmail.templates} email templates configured`
-                    : 'Not connected'
-                  }
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              {integrations.gmail.connected && (
-                <div className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-green-600" />
-                  <span className="text-sm text-green-600">Connected</span>
-                </div>
-              )}
-              <Switch
-                checked={integrations.gmail.enabled}
-                onCheckedChange={(checked) => handleToggleIntegration('gmail', checked)}
-              />
-              <Button variant="outline" size="sm">
-                Configure Templates
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <ProfessionalNetworkIntegrations 
+        integrations={integrations}
+        onToggleIntegration={handleToggleIntegration}
+        onConnect={handleConnect}
+      />
 
-      {/* Professional Networks */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Linkedin className="w-5 h-5 mr-2" />
-            Professional Networks
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* LinkedIn */}
-          <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Linkedin className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold">LinkedIn Recruiter</h3>
-                <p className="text-sm text-gray-600">
-                  {integrations.linkedin.connected 
-                    ? 'Connected - Premium recruiting features enabled'
-                    : 'Connect to access talent pool and messaging'
-                  }
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              {!integrations.linkedin.connected && (
-                <div className="flex items-center space-x-2">
-                  <AlertCircle className="w-4 h-4 text-orange-600" />
-                  <span className="text-sm text-orange-600">Not Connected</span>
-                </div>
-              )}
-              <Switch
-                checked={integrations.linkedin.enabled}
-                onCheckedChange={(checked) => handleToggleIntegration('linkedin', checked)}
-              />
-              <Button size="sm" onClick={() => handleConnect('LinkedIn')}>
-                Connect
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <CommunicationIntegrations 
+        integrations={integrations}
+        onToggleIntegration={handleToggleIntegration}
+      />
 
-      {/* Communication Tools */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Slack className="w-5 h-5 mr-2" />
-            Communication Tools
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Slack */}
-          <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <Slack className="w-5 h-5 text-green-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Slack</h3>
-                <p className="text-sm text-gray-600">
-                  {integrations.slack.connected 
-                    ? `Connected to ${integrations.slack.workspace}`
-                    : 'Not connected'
-                  }
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              {integrations.slack.connected && (
-                <div className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-green-600" />
-                  <span className="text-sm text-green-600">Connected</span>
-                </div>
-              )}
-              <Switch
-                checked={integrations.slack.enabled}
-                onCheckedChange={(checked) => handleToggleIntegration('slack', checked)}
-              />
-              <Button variant="outline" size="sm">
-                Configure Channels
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* ATS Integration */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Link className="w-5 h-5 mr-2" />
-            ATS Integration
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="atsProvider">ATS Provider</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select ATS" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="workday">Workday</SelectItem>
-                  <SelectItem value="greenhouse">Greenhouse</SelectItem>
-                  <SelectItem value="lever">Lever</SelectItem>
-                  <SelectItem value="bamboohr">BambooHR</SelectItem>
-                  <SelectItem value="successfactors">SuccessFactors</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="apiKey">API Key</Label>
-              <Input
-                id="apiKey"
-                type="password"
-                placeholder="Enter API key"
-              />
-            </div>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Switch
-              checked={integrations.ats.enabled}
-              onCheckedChange={(checked) => handleToggleIntegration('ats', checked)}
-            />
-            <Label>Enable ATS Sync</Label>
-          </div>
-          <Button>Test Connection</Button>
-        </CardContent>
-      </Card>
+      <ATSIntegration 
+        integrations={integrations}
+        onToggleIntegration={handleToggleIntegration}
+      />
     </div>
   );
 };

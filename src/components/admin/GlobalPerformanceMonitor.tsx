@@ -1,12 +1,9 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { 
   Server, 
   Database, 
@@ -20,6 +17,10 @@ import {
   Activity,
   Users
 } from 'lucide-react';
+import PlatformMetrics from './performance/PlatformMetrics';
+import ResourceUtilization from './performance/ResourceUtilization';
+import RegionalPerformance from './performance/RegionalPerformance';
+import AlertsAndIncidents from './performance/AlertsAndIncidents';
 
 const GlobalPerformanceMonitor: React.FC = () => {
   const [timeRange, setTimeRange] = useState('24h');
@@ -130,26 +131,6 @@ const GlobalPerformanceMonitor: React.FC = () => {
     }
   ];
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'excellent': return 'text-green-600';
-      case 'normal': return 'text-blue-600';
-      case 'warning': return 'text-yellow-600';
-      case 'critical': return 'text-red-600';
-      case 'healthy': return 'bg-green-100 text-green-800';
-      default: return 'text-gray-600';
-    }
-  };
-
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'critical': return 'bg-red-100 text-red-800';
-      case 'warning': return 'bg-yellow-100 text-yellow-800';
-      case 'info': return 'bg-blue-100 text-blue-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
   const chartConfig = {
     cpu: { label: "CPU %", color: "#8884d8" },
     memory: { label: "Memory %", color: "#82ca9d" },
@@ -178,103 +159,11 @@ const GlobalPerformanceMonitor: React.FC = () => {
         </Select>
       </div>
 
-      {/* Platform Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {platformMetrics.map((metric, index) => (
-          <Card key={index}>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">{metric.title}</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">{metric.value}</p>
-                  <div className="flex items-center mt-2">
-                    {metric.trend === 'up' ? (
-                      <TrendingUp className="w-4 h-4 text-green-600 mr-1" />
-                    ) : (
-                      <TrendingDown className="w-4 h-4 text-red-600 mr-1" />
-                    )}
-                    <span className={`text-sm ${metric.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
-                      {metric.change}
-                    </span>
-                  </div>
-                </div>
-                <div className={`w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center ${metric.color}`}>
-                  <metric.icon className="w-6 h-6" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <PlatformMetrics metrics={platformMetrics} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Resource Utilization */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Cpu className="w-5 h-5 mr-2" />
-              Resource Utilization
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              {resourceUtilization.map((resource, index) => (
-                <div key={index}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium">{resource.name}</span>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-600">
-                        {resource.current}%
-                      </span>
-                      <div className="flex items-center">
-                        {resource.trend > 0 ? (
-                          <TrendingUp className="w-3 h-3 text-red-600" />
-                        ) : (
-                          <TrendingDown className="w-3 h-3 text-green-600" />
-                        )}
-                        <span className={`text-xs ml-1 ${resource.trend > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                          {Math.abs(resource.trend)}%
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <Progress 
-                    value={resource.current} 
-                    className="h-2"
-                  />
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Regional Performance */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Globe className="w-5 h-5 mr-2" />
-              Regional Performance
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {regionalData.map((region, index) => (
-                <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <h3 className="font-medium">{region.region}</h3>
-                    <p className="text-sm text-gray-600">{region.users} active users</p>
-                  </div>
-                  <div className="text-right">
-                    <Badge className={getStatusColor(region.status)}>
-                      {region.status}
-                    </Badge>
-                    <p className="text-xs text-gray-500 mt-1">{region.latency}ms avg</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <ResourceUtilization resources={resourceUtilization} />
+        <RegionalPerformance regionalData={regionalData} />
       </div>
 
       {/* Performance Trends Chart */}
@@ -298,38 +187,7 @@ const GlobalPerformanceMonitor: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Alerts and Incidents */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <AlertTriangle className="w-5 h-5 mr-2" />
-            Recent Alerts & Incidents
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {alertsAndIncidents.map((alert, index) => (
-              <div key={index} className="p-4 border rounded-lg">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <Badge className={getSeverityColor(alert.severity)}>
-                        {alert.severity}
-                      </Badge>
-                      <h3 className="font-semibold">{alert.title}</h3>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-2">{alert.description}</p>
-                    <p className="text-xs text-gray-500">{alert.time}</p>
-                  </div>
-                  <Badge variant="outline">
-                    {alert.status}
-                  </Badge>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <AlertsAndIncidents alerts={alertsAndIncidents} />
     </div>
   );
 };
