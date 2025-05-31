@@ -13,7 +13,7 @@ import CustomerAdminSidebar from '@/components/admin/CustomerAdminSidebar';
 import CustomerAdminContent from '@/components/admin/CustomerAdminContent';
 import { TeamMember, Organization } from '@/types/organization';
 import { UserRole } from '@/types/auth';
-import { Users } from 'lucide-react';
+import { Users, Briefcase, TrendingUp, CheckCircle } from 'lucide-react';
 
 const CustomerAdmin = () => {
   const { user } = useAuth();
@@ -23,12 +23,11 @@ const CustomerAdmin = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('all');
 
-  // Organization-specific stats for Customer Admin
+  // Simplified stats for cleaner layout
   const organizationStats = [
     { label: 'Team Members', value: '12', icon: Users, color: 'text-blue-600', change: '+2 this month' },
-    { label: 'Active Jobs', value: '8', icon: Users, color: 'text-green-600', change: '+3 this week' },
-    { label: 'Monthly Usage', value: '87%', icon: Users, color: 'text-purple-600', change: 'Within limits' },
-    { label: 'Account Health', value: '98%', icon: Users, color: 'text-orange-600', change: 'All systems operational' }
+    { label: 'Active Jobs', value: '8', icon: Briefcase, color: 'text-green-600', change: '+3 this week' },
+    { label: 'Account Health', value: '98%', icon: CheckCircle, color: 'text-emerald-600', change: 'Excellent' }
   ];
 
   // Current organization data
@@ -116,33 +115,37 @@ const CustomerAdmin = () => {
     <div className="min-h-screen bg-gray-50">
       <CustomerAdminHeader organizationName={currentOrganization.name} />
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <CustomerAdminWelcome userName={user?.user_metadata?.first_name} />
+      <div className="max-w-7xl mx-auto px-8 py-8">
+        <div className="mb-8">
+          <CustomerAdminWelcome userName={user?.user_metadata?.first_name} />
+        </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Improved Stats Grid - 3 columns instead of 4 for better spacing */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
           {organizationStats.map((stat, index) => (
             <StatCard key={index} {...stat} />
           ))}
         </div>
 
-        {/* Main Content with Tabs */}
+        {/* Main Content with improved spacing */}
         <Tabs defaultValue="overview" className="w-full">
-          <div className="grid grid-cols-12 gap-6">
+          <div className="grid grid-cols-12 gap-8">
             <CustomerAdminSidebar />
-            <CustomerAdminContent
-              currentOrganization={currentOrganization}
-              teamMembers={teamMembers}
-              filteredMembers={filteredMembers}
-              searchTerm={searchTerm}
-              filterRole={filterRole}
-              setSearchTerm={setSearchTerm}
-              setFilterRole={setFilterRole}
-              setShowInviteModal={setShowInviteModal}
-              handleEditMember={handleEditMember}
-              handleRemoveMember={handleRemoveMember}
-              handleUpdateRole={handleUpdateRole}
-            />
+            <div className="col-span-9">
+              <CustomerAdminContent
+                currentOrganization={currentOrganization}
+                teamMembers={teamMembers}
+                filteredMembers={filteredMembers}
+                searchTerm={searchTerm}
+                filterRole={filterRole}
+                setSearchTerm={setSearchTerm}
+                setFilterRole={setFilterRole}
+                setShowInviteModal={setShowInviteModal}
+                handleEditMember={handleEditMember}
+                handleRemoveMember={handleRemoveMember}
+                handleUpdateRole={handleUpdateRole}
+              />
+            </div>
           </div>
         </Tabs>
       </div>

@@ -20,8 +20,7 @@ import { Organization } from '@/types/organization';
 import { 
   Building, 
   Users, 
-  Briefcase, 
-  TrendingUp
+  DollarSign
 } from 'lucide-react';
 
 const StartupAdmin = () => {
@@ -92,12 +91,11 @@ const StartupAdmin = () => {
     }
   ]);
 
-  // Platform-wide stats for Startup Admin
+  // Simplified stats for cleaner layout
   const platformStats = [
-    { label: 'Total Organizations', value: organizations.length.toString(), icon: Building, color: 'text-blue-600' },
+    { label: 'Organizations', value: organizations.length.toString(), icon: Building, color: 'text-blue-600' },
     { label: 'Platform Users', value: '347', icon: Users, color: 'text-green-600' },
-    { label: 'Active Jobs', value: '89', icon: Briefcase, color: 'text-purple-600' },
-    { label: 'Monthly Revenue', value: '$47.3k', icon: TrendingUp, color: 'text-orange-600' }
+    { label: 'Monthly Revenue', value: '$47.3k', icon: DollarSign, color: 'text-emerald-600' }
   ];
 
   const recentActivities = [
@@ -154,13 +152,31 @@ const StartupAdmin = () => {
     <div className="min-h-screen bg-gray-50">
       <StartupAdminHeader onSignOut={signOut} />
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <StartupAdminWelcome userName={user?.user_metadata?.first_name} />
-        <StartupAdminStats stats={platformStats} />
+      <div className="max-w-7xl mx-auto px-8 py-8">
+        <div className="mb-8">
+          <StartupAdminWelcome userName={user?.user_metadata?.first_name} />
+        </div>
 
-        {/* Main Content with Tabs */}
+        {/* Improved Stats Grid - 3 columns instead of 4 for better spacing */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+          {platformStats.map((stat, index) => (
+            <div key={index} className="bg-white rounded-lg p-6 shadow-sm border">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">{stat.label}</p>
+                  <p className="text-2xl font-semibold text-gray-900 mt-1">{stat.value}</p>
+                </div>
+                <div className={`p-3 rounded-lg bg-gray-50`}>
+                  <stat.icon className={`w-6 h-6 ${stat.color}`} />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Main Content with improved spacing */}
         <Tabs defaultValue="overview" className="w-full">
-          <div className="grid grid-cols-12 gap-6">
+          <div className="grid grid-cols-12 gap-8">
             <StartupAdminSidebar />
 
             {/* Main Content Area */}

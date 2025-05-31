@@ -2,7 +2,7 @@
 import React from 'react';
 import { TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  BarChart3, 
+  LayoutDashboard, 
   Users, 
   Building, 
   CreditCard, 
@@ -10,81 +10,73 @@ import {
   Brain, 
   Flag, 
   Globe, 
-  DollarSign 
+  DollarSign,
+  BarChart3
 } from 'lucide-react';
 
 const StartupAdminSidebar: React.FC = () => {
+  const menuSections = [
+    {
+      items: [
+        { value: "overview", label: "Dashboard", icon: LayoutDashboard }
+      ]
+    },
+    {
+      title: "Analytics",
+      items: [
+        { value: "performance", label: "Global Performance", icon: Globe },
+        { value: "revenue", label: "Revenue", icon: DollarSign },
+        { value: "analytics", label: "Advanced Analytics", icon: BarChart3 },
+        { value: "team", label: "Team Analytics", icon: Users }
+      ]
+    },
+    {
+      title: "System",
+      items: [
+        { value: "health", label: "System Health", icon: Activity },
+        { value: "ai-models", label: "AI Models", icon: Brain },
+        { value: "features", label: "Features", icon: Flag }
+      ]
+    },
+    {
+      title: "Management",
+      items: [
+        { value: "organizations", label: "Organizations", icon: Building },
+        { value: "billing", label: "Billing", icon: CreditCard }
+      ]
+    }
+  ];
+
   return (
     <div className="col-span-3">
-      <TabsList className="flex flex-col h-auto w-full p-1 bg-white border shadow-sm space-y-1">
-        {/* Dashboard Section */}
-        <div className="w-full">
-          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide px-3 py-2">
-            Dashboard
-          </div>
-          <TabsTrigger value="overview" className="w-full justify-start data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900">
-            <BarChart3 className="w-4 h-4 mr-3" />
-            Overview
-          </TabsTrigger>
-        </div>
-
-        {/* Performance & Analytics Section */}
-        <div className="w-full">
-          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide px-3 py-2">
-            Performance & Analytics
-          </div>
-          <TabsTrigger value="performance" className="w-full justify-start data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900">
-            <Globe className="w-4 h-4 mr-3" />
-            Global Performance
-          </TabsTrigger>
-          <TabsTrigger value="revenue" className="w-full justify-start data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900">
-            <DollarSign className="w-4 h-4 mr-3" />
-            Revenue Analytics
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="w-full justify-start data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900">
-            <BarChart3 className="w-4 h-4 mr-3" />
-            Advanced Analytics
-          </TabsTrigger>
-          <TabsTrigger value="team" className="w-full justify-start data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900">
-            <Users className="w-4 h-4 mr-3" />
-            Team Analytics
-          </TabsTrigger>
-        </div>
-
-        {/* System Management Section */}
-        <div className="w-full">
-          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide px-3 py-2">
-            System Management
-          </div>
-          <TabsTrigger value="health" className="w-full justify-start data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900">
-            <Activity className="w-4 h-4 mr-3" />
-            System Health
-          </TabsTrigger>
-          <TabsTrigger value="ai-models" className="w-full justify-start data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900">
-            <Brain className="w-4 h-4 mr-3" />
-            AI Models
-          </TabsTrigger>
-          <TabsTrigger value="features" className="w-full justify-start data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900">
-            <Flag className="w-4 h-4 mr-3" />
-            Feature Control
-          </TabsTrigger>
-        </div>
-
-        {/* Customer Management Section */}
-        <div className="w-full">
-          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide px-3 py-2">
-            Customer Management
-          </div>
-          <TabsTrigger value="organizations" className="w-full justify-start data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900">
-            <Building className="w-4 h-4 mr-3" />
-            Organizations
-          </TabsTrigger>
-          <TabsTrigger value="billing" className="w-full justify-start data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900">
-            <CreditCard className="w-4 h-4 mr-3" />
-            Billing Management
-          </TabsTrigger>
-        </div>
-      </TabsList>
+      <div className="bg-white border rounded-lg shadow-sm">
+        <TabsList className="flex flex-col h-auto w-full p-0 bg-transparent space-y-0">
+          {menuSections.map((section, sectionIndex) => (
+            <div key={sectionIndex} className="w-full">
+              {section.title && (
+                <div className="px-4 py-3 border-b border-gray-100">
+                  <h3 className="text-sm font-medium text-gray-600">{section.title}</h3>
+                </div>
+              )}
+              <div className="p-2 space-y-1">
+                {section.items.map((item) => (
+                  <TabsTrigger 
+                    key={item.value}
+                    value={item.value} 
+                    className="w-full justify-start h-10 px-3 py-2 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 data-[state=active]:border-blue-200 rounded-md transition-colors"
+                  >
+                    <item.icon className="w-4 h-4 mr-3 flex-shrink-0" />
+                    <span className="text-sm">{item.label}</span>
+                  </TabsTrigger>
+                ))}
+              </div>
+              {sectionIndex < menuSections.length - 1 && (
+                <div className="border-b border-gray-100" />
+              )}
+            </div>
+          ))}
+        </TabsList>
+      </div>
     </div>
   );
 };
