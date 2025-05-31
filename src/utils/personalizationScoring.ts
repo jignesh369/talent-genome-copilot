@@ -9,8 +9,7 @@ export const generatePersonalizationVariables = (candidate: EnhancedCandidate): 
     currentCompany: candidate.current_company || '',
     experience: `${candidate.experience_years} years`,
     topSkills: candidate.skills.slice(0, 3).join(', '),
-    location: candidate.location || '',
-    industry: candidate.industry || 'Technology'
+    location: candidate.location || ''
   };
 };
 
