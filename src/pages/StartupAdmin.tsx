@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { useAuthContext } from '@/hooks/useAuthContext';
 import OrganizationModal from '@/components/modals/OrganizationModal';
 import BillingManagement from '@/components/admin/BillingManagement';
 import AdvancedAnalytics from '@/components/admin/AdvancedAnalytics';
@@ -15,6 +15,8 @@ import StartupAdminSidebar from '@/components/admin/StartupAdminSidebar';
 import StartupAdminOverview from '@/components/admin/StartupAdminOverview';
 import StartupAdminOrganizations from '@/components/admin/StartupAdminOrganizations';
 import { Organization } from '@/types/organization';
+import { useBackendIntegration } from '@/hooks/useBackendIntegration';
+import { useToast } from '@/hooks/use-toast';
 import { 
   Building, 
   Users, 
@@ -25,7 +27,9 @@ import {
 } from 'lucide-react';
 
 const StartupAdmin = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut } = useAuthContext();
+  const { loading: backendLoading, error: backendError } = useBackendIntegration();
+  const { toast } = useToast();
   const [showOrgModal, setShowOrgModal] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create');
@@ -144,6 +148,17 @@ const StartupAdmin = () => {
     { action: 'Performance optimization', organization: 'Infrastructure', time: '4 hours ago', type: 'performance' }
   ];
 
+  // Show backend connection errors if any
+  React.useEffect(() => {
+    if (backendError) {
+      toast({
+        title: "Backend Connection Error",
+        description: `Backend service error: ${backendError}`,
+        variant: "destructive"
+      });
+    }
+  }, [backendError, toast]);
+
   const handleCreateOrganization = () => {
     setSelectedOrg(null);
     setModalMode('create');
@@ -173,10 +188,18 @@ const StartupAdmin = () => {
         updated_at: new Date().toISOString()
       };
       setOrganizations(prev => [...prev, newOrg]);
+      toast({
+        title: "Organization Created",
+        description: `${newOrg.name} has been successfully created.`,
+      });
     } else {
       setOrganizations(prev => 
         prev.map(org => org.id === selectedOrg?.id ? { ...org, ...data } : org)
       );
+      toast({
+        title: "Organization Updated",
+        description: `${selectedOrg?.name} has been successfully updated.`,
+      });
     }
     setShowOrgModal(false);
   };
@@ -185,6 +208,10 @@ const StartupAdmin = () => {
     setOrganizations(prev =>
       prev.map(org => org.id === orgId ? { ...org, ...data } : org)
     );
+    toast({
+      title: "Billing Updated",
+      description: "Billing information has been successfully updated.",
+    });
   };
 
   return (
@@ -193,7 +220,20 @@ const StartupAdmin = () => {
 
       <div className="max-w-7xl mx-auto px-4 lg:px-8 py-4 lg:py-8 w-full">
         <div className="mb-6 lg:mb-8">
-          <StartupAdminWelcome userName={user?.user_metadata?.first_name} />
+          <StartupAdminWelcome userName={user?.user_metadata?.first_name || 'Admin'} />
+          
+          {/* Backend Connection Status */}
+          {backendLoading && (
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-blue-700 text-sm">Connecting to backend services...</p>
+            </div>
+          )}
+          
+          {backendError && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-700 text-sm">Backend connection error: {backendError}</p>
+            </div>
+          )}
         </div>
 
         {/* Enhanced Stats Grid - Better responsive design */}

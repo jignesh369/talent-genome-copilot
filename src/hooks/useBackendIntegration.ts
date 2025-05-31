@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthContext } from './useAuthContext';
@@ -17,22 +18,17 @@ export const useBackendIntegration = () => {
       throw new Error(errorMessage);
     }
 
-    if (!organizationId) {
-      const errorMessage = 'No organization found for user';
-      console.error('useBackendIntegration: No organization found');
-      setError(errorMessage);
-      throw new Error(errorMessage);
-    }
-
     setLoading(true);
     setError(null);
     
     try {
+      const finalPayload = organizationId ? {
+        ...payload,
+        organization_id: organizationId
+      } : payload;
+
       const { data, error } = await supabase.functions.invoke(functionName, {
-        body: {
-          ...payload,
-          organization_id: organizationId
-        }
+        body: finalPayload
       });
       
       console.log(`useBackendIntegration: Function ${functionName} response:`, { data, error });
@@ -61,13 +57,7 @@ export const useBackendIntegration = () => {
     job_requirements?: string[];
   }) => {
     console.log('useBackendIntegration: searchCandidates called with params:', searchParams);
-    
-    const fullParams = {
-      ...searchParams,
-      organization_id: organizationId
-    };
-    
-    return invokeFunction('ai-candidate-search', fullParams);
+    return invokeFunction('ai-candidate-search', searchParams);
   };
 
   const collectOSINTData = async (params: {
@@ -131,7 +121,7 @@ export const useBackendIntegration = () => {
   };
 
   const generateAnalyticsReport = async (params: {
-    organization_id: string;
+    organization_id?: string;
     report_type: 'hiring_pipeline' | 'recruiter_performance' | 'source_effectiveness' | 'candidate_insights';
     date_range: {
       start: string;
@@ -139,19 +129,23 @@ export const useBackendIntegration = () => {
     };
     filters?: Record<string, any>;
   }) => {
-    return invokeFunction('analytics-processor', params);
+    const finalParams = organizationId ? {
+      ...params,
+      organization_id: organizationId
+    } : params;
+    return invokeFunction('analytics-processor', finalParams);
   };
 
   return {
     loading,
     error,
     searchCandidates,
-    collectOSINTData: async (params: any) => invokeFunction('osint-data-collector', params),
-    generateAssessment: async (params: any) => invokeFunction('assessment-generator', params),
-    generatePersonalizedOutreach: async (params: any) => invokeFunction('outreach-personalization', params),
-    getPredictiveAnalytics: async (params: any) => invokeFunction('predictive-analytics', params),
-    sendEmail: async (params: any) => invokeFunction('email-service', params),
-    processDocument: async (params: any) => invokeFunction('document-processor', params),
-    generateAnalyticsReport: async (params: any) => invokeFunction('analytics-processor', params)
+    collectOSINTData,
+    generateAssessment,
+    generatePersonalizedOutreach,
+    getPredictiveAnalytics,
+    sendEmail,
+    processDocument,
+    generateAnalyticsReport
   };
 };
