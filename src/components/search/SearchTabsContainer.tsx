@@ -46,6 +46,12 @@ const SearchTabsContainer: React.FC<SearchTabsContainerProps> = ({
   onViewSnapshot,
   onContactCandidate
 }) => {
+  // Adapter function to convert boolean feedback to string format for CandidateCard
+  const handleCandidateFeedback = (candidateId: string, isPositive: boolean) => {
+    const feedback = isPositive ? 'positive' : 'negative';
+    handleFeedback(candidateId, feedback);
+  };
+
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
       <TabsList className="grid w-full grid-cols-3">
@@ -108,7 +114,7 @@ const SearchTabsContainer: React.FC<SearchTabsContainerProps> = ({
                     onViewProfile={onViewProfile}
                     onViewSnapshot={onViewSnapshot}
                     onContactCandidate={onContactCandidate}
-                    onFeedback={handleFeedback}
+                    onFeedback={handleCandidateFeedback}
                   />
                 )) || (
                   <div className="text-center py-8 text-gray-500">

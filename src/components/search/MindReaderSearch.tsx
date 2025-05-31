@@ -35,6 +35,12 @@ const MindReaderSearch = () => {
     // This will be handled by the parent component
   };
 
+  // Adapter function to convert boolean feedback to string format
+  const handleCandidateFeedback = (candidateId: string, isPositive: boolean) => {
+    const feedback = isPositive ? 'positive' : 'negative';
+    handleFeedback(candidateId, feedback);
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-6 sm:space-y-10 p-4 sm:p-6">
       <SearchHeader />
@@ -95,7 +101,7 @@ const MindReaderSearch = () => {
                     onViewProfile={setSelectedCandidate}
                     onViewSnapshot={setFootprintCandidate}
                     onContactCandidate={handleContactCandidate}
-                    onFeedback={handleFeedback}
+                    onFeedback={handleCandidateFeedback}
                   />
                 ))
               ) : (
@@ -121,7 +127,7 @@ const MindReaderSearch = () => {
         <CandidateDetailsModal 
           candidate={selectedCandidate}
           onClose={() => setSelectedCandidate(null)}
-          onFeedback={handleFeedback}
+          onFeedback={handleCandidateFeedback}
         />
       )}
 
