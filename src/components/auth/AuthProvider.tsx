@@ -4,121 +4,116 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthContext, AuthContextType } from '@/hooks/useAuthContext';
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+interface AuthProviderProps {
+  children: React.ReactNode;
+}
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchUserOrganization = async (userId: string) => {
-    try {
-      console.log('AuthProvider: Fetching organization for user:', userId);
-      
-      // First try to get organization from organization_members table
-      const { data: memberData, error: memberError } = await supabase
-        .from('organization_members')
-        .select(`
-          organization_id,
-          role,
-          organizations (*)
-        `)
-        .eq('user_id', userId)
-        .single();
-
-      if (memberError) {
-        console.log('AuthProvider: No organization membership found, checking user_roles');
-        
-        // Fallback to user_roles table
-        const { data: roleData, error: roleError } = await supabase
-          .from('user_roles')
-          .select('role, organization_id')
-          .eq('user_id', userId)
-          .single();
-
-        if (roleError) {
-          console.log('AuthProvider: No user role found, using defaults');
-          setUserRole('candidate');
-          setOrganizationId(null);
-        } else {
-          console.log('AuthProvider: User role found:', roleData);
-          setUserRole(roleData.role);
-          setOrganizationId(roleData.organization_id);
-        }
-      } else {
-        console.log('AuthProvider: Organization membership found:', memberData);
-        setUserRole(memberData.role);
-        setOrganizationId(memberData.organization_id);
-      }
-    } catch (error) {
-      console.error('AuthProvider: Error fetching user organization:', error);
-      setUserRole('candidate');
-      setOrganizationId(null);
-    }
-  };
-
   const refreshAuth = async () => {
-    if (user) {
-      await fetchUserOrganization(user.id);
-    }
-  };
-
-  useEffect(() => {
-    console.log('AuthProvider: Setting up auth state listener');
-    
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('AuthProvider: Auth state changed:', event, !!session);
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          await fetchUserOrganization(session.user.id);
-        } else {
-          setUserRole(null);
-          setOrganizationId(null);
-        }
-        
-        setLoading(false);
-      }
-    );
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      console.log('AuthProvider: Initial session check:', !!session);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
       setSession(session);
       setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        await fetchUserOrganization(session.user.id);
-      }
-      
-      setLoading(false);
-    });
 
-    return () => subscription.unsubscribe();
-  }, []);
+      if (session?.user) {
+        // Fetch user organization and role
+        const { data: orgMember } = await supabase
+          .from('organization_members')
+          .select(`
+            organization_id,
+            role,
+            organizations (*)
+          `)
+          .eq('user_id', session.user.id)
+          .single();
+
+        if (orgMember) {
+          setOrganizationId(orgMember.organization_id);
+          setUserRole(orgMember.role);
+        }
+      } else {
+        setOrganizationId(null);
+        setUserRole(null);
+      }
+    } catch (error) {
+      console.error('Auth refresh error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
+      // Clean up state first
       setUser(null);
       setSession(null);
       setUserRole(null);
       setOrganizationId(null);
+      
+      // Sign out from Supabase
+      await supabase.auth.signOut({ scope: 'global' });
+      
+      // Redirect to auth page
+      window.location.href = '/auth';
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error('Sign out error:', error);
+      // Force redirect even if sign out fails
+      window.location.href = '/auth';
     }
   };
+
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state change:', event, session?.user?.id);
+        setSession(session);
+        setUser(session?.user ?? null);
+
+        if (event === 'SIGNED_IN' && session?.user) {
+          // Defer organization data fetching
+          setTimeout(async () => {
+            try {
+              const { data: orgMember } = await supabase
+                .from('organization_members')
+                .select(`
+                  organization_id,
+                  role,
+                  organizations (*)
+                `)
+                .eq('user_id', session.user.id)
+                .single();
+
+              if (orgMember) {
+                setOrganizationId(orgMember.organization_id);
+                setUserRole(orgMember.role);
+              }
+            } catch (error) {
+              console.error('Error fetching organization:', error);
+            }
+          }, 0);
+        } else if (event === 'SIGNED_OUT') {
+          setOrganizationId(null);
+          setUserRole(null);
+        }
+
+        if (event !== 'TOKEN_REFRESHED') {
+          setLoading(false);
+        }
+      }
+    );
+
+    // Check for existing session
+    refreshAuth();
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const value: AuthContextType = {
     user,
@@ -127,7 +122,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     organizationId,
     loading,
     signOut,
-    refreshAuth,
+    refreshAuth
   };
 
   return (
@@ -136,3 +131,5 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     </AuthContext.Provider>
   );
 };
+
+export default AuthProvider;

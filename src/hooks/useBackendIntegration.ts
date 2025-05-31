@@ -31,7 +31,7 @@ export const useBackendIntegration = () => {
       const { data, error } = await supabase.functions.invoke(functionName, {
         body: {
           ...payload,
-          organization_id: organizationId // Ensure organization_id is always included
+          organization_id: organizationId
         }
       });
       
@@ -53,7 +53,6 @@ export const useBackendIntegration = () => {
     }
   };
 
-  // AI-powered candidate search with proper organization context
   const searchCandidates = async (searchParams: {
     query: string;
     skills?: string[];
@@ -63,7 +62,6 @@ export const useBackendIntegration = () => {
   }) => {
     console.log('useBackendIntegration: searchCandidates called with params:', searchParams);
     
-    // Ensure organization_id is included in the search
     const fullParams = {
       ...searchParams,
       organization_id: organizationId
@@ -72,7 +70,6 @@ export const useBackendIntegration = () => {
     return invokeFunction('ai-candidate-search', fullParams);
   };
 
-  // OSINT data collection
   const collectOSINTData = async (params: {
     candidate_id: string;
     platforms?: string[];
@@ -83,7 +80,6 @@ export const useBackendIntegration = () => {
     return invokeFunction('osint-data-collector', params);
   };
 
-  // Generate dynamic assessments
   const generateAssessment = async (params: {
     job_id: string;
     candidate_id?: string;
@@ -95,7 +91,6 @@ export const useBackendIntegration = () => {
     return invokeFunction('assessment-generator', params);
   };
 
-  // Create personalized outreach
   const generatePersonalizedOutreach = async (params: {
     candidate_id: string;
     job_id?: string;
@@ -106,7 +101,6 @@ export const useBackendIntegration = () => {
     return invokeFunction('outreach-personalization', params);
   };
 
-  // Get predictive analytics
   const getPredictiveAnalytics = async (params: {
     candidate_id: string;
     job_id: string;
@@ -115,7 +109,6 @@ export const useBackendIntegration = () => {
     return invokeFunction('predictive-analytics', params);
   };
 
-  // Send emails
   const sendEmail = async (params: {
     to: string;
     subject: string;
@@ -128,7 +121,6 @@ export const useBackendIntegration = () => {
     return invokeFunction('email-service', params);
   };
 
-  // Process documents
   const processDocument = async (params: {
     file_path: string;
     entity_type: 'candidate' | 'job' | 'application';
@@ -138,7 +130,6 @@ export const useBackendIntegration = () => {
     return invokeFunction('document-processor', params);
   };
 
-  // Generate analytics reports
   const generateAnalyticsReport = async (params: {
     organization_id: string;
     report_type: 'hiring_pipeline' | 'recruiter_performance' | 'source_effectiveness' | 'candidate_insights';
