@@ -16,6 +16,7 @@ import CandidatesManagement from '@/components/recruiter/CandidatesManagement';
 import AIMatchingEngine from '@/components/recruiter/AIMatchingEngine';
 import EnhancedInterviewManagement from '@/components/recruiter/EnhancedInterviewManagement';
 import CommunicationHub from '@/components/recruiter/CommunicationHub';
+import RecruiterInterviewScheduling from '@/components/recruiter/RecruiterInterviewScheduling';
 import { 
   Users, 
   Briefcase, 
@@ -27,7 +28,8 @@ import {
   Calendar,
   Target,
   BarChart3,
-  MessageSquare
+  MessageSquare,
+  Brain
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -177,7 +179,7 @@ const RecruiterDashboard = () => {
               <span>Pipeline</span>
             </TabsTrigger>
             <TabsTrigger value="ai-matching" className="flex items-center space-x-2">
-              <Target className="w-4 h-4" />
+              <Brain className="w-4 h-4" />
               <span>AI Matching</span>
             </TabsTrigger>
             <TabsTrigger value="interviews" className="flex items-center space-x-2">
