@@ -151,7 +151,9 @@ const CandidatesManagement: React.FC = () => {
             
             <Select 
               value={searchParams.status || 'all'} 
-              onValueChange={(value) => handleSearch({ status: value === 'all' ? undefined : value })}
+              onValueChange={(value) => handleSearch({ 
+                status: value === 'all' ? undefined : value as 'new' | 'screening' | 'interviewing' | 'offer' | 'hired' | 'rejected'
+              })}
             >
               <SelectTrigger>
                 <Filter className="w-4 h-4 mr-2" />

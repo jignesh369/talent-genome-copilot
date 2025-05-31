@@ -14,7 +14,7 @@ export const convertToAnalyticsCandidate = (candidate: RecruitingCandidate): Ana
     experience_years: candidate.experience_years,
     skills: candidate.skills,
     bio: candidate.ai_summary || '',
-    avatar_url: candidate.avatar_url,
+    avatar_url: candidate.avatar_url || null,
     ai_summary: candidate.ai_summary || '',
     career_trajectory_analysis: {
       progression_type: 'ascending' as const,
