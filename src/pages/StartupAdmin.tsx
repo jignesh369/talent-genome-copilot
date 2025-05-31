@@ -8,10 +8,13 @@ import OrganizationModal from '@/components/modals/OrganizationModal';
 import BillingManagement from '@/components/admin/BillingManagement';
 import SystemConfiguration from '@/components/admin/SystemConfiguration';
 import AdvancedAnalytics from '@/components/admin/AdvancedAnalytics';
+import TeamAnalytics from '@/components/admin/TeamAnalytics';
 import SystemHealth from '@/components/admin/SystemHealth';
 import AuditLogs from '@/components/admin/AuditLogs';
 import AIModelManagement from '@/components/admin/AIModelManagement';
 import FeatureReleaseControl from '@/components/admin/FeatureReleaseControl';
+import GlobalPerformanceMonitor from '@/components/admin/GlobalPerformanceMonitor';
+import AdvancedRevenueAnalytics from '@/components/admin/AdvancedRevenueAnalytics';
 import { 
   Building, 
   Users, 
@@ -37,7 +40,7 @@ const StartupAdmin = () => {
   const [showOrgModal, setShowOrgModal] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState(null);
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create');
-  const [analyticsDateRange, setAnalyticsDateRange] = useState('30d');
+  const [dateRange, setDateRange] = useState('30d');
 
   // Standardized organization data
   const [organizations, setOrganizations] = useState([
@@ -199,46 +202,20 @@ const StartupAdmin = () => {
 
         {/* Admin Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-9">
-            <TabsTrigger value="overview" className="flex items-center space-x-2">
-              <BarChart3 className="w-4 h-4" />
-              <span>Overview</span>
-            </TabsTrigger>
-            <TabsTrigger value="organizations" className="flex items-center space-x-2">
-              <Building className="w-4 h-4" />
-              <span>Organizations</span>
-            </TabsTrigger>
-            <TabsTrigger value="ai-models" className="flex items-center space-x-2">
-              <Brain className="w-4 h-4" />
-              <span>AI Models</span>
-            </TabsTrigger>
-            <TabsTrigger value="features" className="flex items-center space-x-2">
-              <Flag className="w-4 h-4" />
-              <span>Features</span>
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center space-x-2">
-              <TrendingUp className="w-4 h-4" />
-              <span>Analytics</span>
-            </TabsTrigger>
-            <TabsTrigger value="health" className="flex items-center space-x-2">
-              <Activity className="w-4 h-4" />
-              <span>Health</span>
-            </TabsTrigger>
-            <TabsTrigger value="billing" className="flex items-center space-x-2">
-              <CreditCard className="w-4 h-4" />
-              <span>Billing</span>
-            </TabsTrigger>
-            <TabsTrigger value="audit" className="flex items-center space-x-2">
-              <Shield className="w-4 h-4" />
-              <span>Audit</span>
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center space-x-2">
-              <Cog className="w-4 h-4" />
-              <span>Settings</span>
-            </TabsTrigger>
+          <TabsList className="grid w-full grid-cols-10">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="performance">Global Performance</TabsTrigger>
+            <TabsTrigger value="revenue">Revenue Analytics</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="team">Team Analytics</TabsTrigger>
+            <TabsTrigger value="health">System Health</TabsTrigger>
+            <TabsTrigger value="organizations">Organizations</TabsTrigger>
+            <TabsTrigger value="billing">Billing</TabsTrigger>
+            <TabsTrigger value="ai-models">AI Models</TabsTrigger>
+            <TabsTrigger value="features">Feature Control</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview">
+          <TabsContent value="overview" className="space-y-6">
             {/* Platform Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               {platformStats.map((stat, index) => (
@@ -342,6 +319,29 @@ const StartupAdmin = () => {
             </Card>
           </TabsContent>
 
+          <TabsContent value="performance">
+            <GlobalPerformanceMonitor />
+          </TabsContent>
+
+          <TabsContent value="revenue">
+            <AdvancedRevenueAnalytics />
+          </TabsContent>
+
+          <TabsContent value="analytics">
+            <AdvancedAnalytics 
+              dateRange={dateRange}
+              onDateRangeChange={setDateRange}
+            />
+          </TabsContent>
+
+          <TabsContent value="team">
+            <TeamAnalytics />
+          </TabsContent>
+
+          <TabsContent value="health">
+            <SystemHealth />
+          </TabsContent>
+
           <TabsContent value="organizations">
             <Card>
               <CardHeader>
@@ -423,17 +423,6 @@ const StartupAdmin = () => {
 
           <TabsContent value="features">
             <FeatureReleaseControl />
-          </TabsContent>
-
-          <TabsContent value="analytics">
-            <AdvancedAnalytics 
-              dateRange={analyticsDateRange}
-              onDateRangeChange={setAnalyticsDateRange}
-            />
-          </TabsContent>
-
-          <TabsContent value="health">
-            <SystemHealth />
           </TabsContent>
 
           <TabsContent value="billing">

@@ -35,6 +35,10 @@ import SystemConfiguration from '@/components/admin/SystemConfiguration';
 import StatCard from '@/components/shared/StatCard';
 import TeamMemberCard from '@/components/admin/TeamMemberCard';
 import QuickActionsGrid from '@/components/admin/QuickActionsGrid';
+import AdvancedAnalyticsDashboard from '@/components/admin/AdvancedAnalyticsDashboard';
+import PerformanceOptimizationHub from '@/components/admin/PerformanceOptimizationHub';
+import AdvancedCommunicationCenter from '@/components/admin/AdvancedCommunicationCenter';
+import SmartNotificationsSystem from '@/components/admin/SmartNotificationsSystem';
 
 const CustomerAdmin = () => {
   const { user } = useAuth();
@@ -172,8 +176,12 @@ const CustomerAdmin = () => {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-10">
+          <TabsList className="grid w-full grid-cols-12">
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="performance">Performance</TabsTrigger>
+            <TabsTrigger value="communication">Communication</TabsTrigger>
+            <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="billing">Billing</TabsTrigger>
             <TabsTrigger value="team">Team</TabsTrigger>
             <TabsTrigger value="roles">Roles</TabsTrigger>
@@ -193,13 +201,27 @@ const CustomerAdmin = () => {
               <Palette className="w-3 h-3" />
               <span>Themes</span>
             </TabsTrigger>
-            <TabsTrigger value="system">System</TabsTrigger>
-            <TabsTrigger value="legacy">Legacy</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
             <QuickActionsGrid />
             <CandidatePipeline showCandidates={false} />
+          </TabsContent>
+
+          <TabsContent value="analytics">
+            <AdvancedAnalyticsDashboard />
+          </TabsContent>
+
+          <TabsContent value="performance">
+            <PerformanceOptimizationHub />
+          </TabsContent>
+
+          <TabsContent value="communication">
+            <AdvancedCommunicationCenter />
+          </TabsContent>
+
+          <TabsContent value="notifications">
+            <SmartNotificationsSystem />
           </TabsContent>
 
           <TabsContent value="billing">
