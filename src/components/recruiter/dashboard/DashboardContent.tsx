@@ -1,11 +1,11 @@
 
 import React from 'react';
-import CandidatePipeline from '@/components/admin/CandidatePipeline';
-import AIMatchingEngine from '@/components/recruiter/AIMatchingEngine';
-import EnhancedInterviewManagement from '@/components/recruiter/EnhancedInterviewManagement';
-import EnhancedCommunicationHub from '@/components/recruiter/EnhancedCommunicationHub';
-import TeamManagement from '@/components/recruiter/TeamManagement';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import OverviewTab from './OverviewTab';
+import CandidatesManagement from '../CandidatesManagement';
+import JobsManagement from '../JobsManagement';
+import TeamManagement from '../TeamManagement';
+import EnhancedAnalyticsDashboard from '@/components/analytics/EnhancedAnalyticsDashboard';
 
 interface DashboardContentProps {
   activeTab: string;
@@ -14,28 +14,39 @@ interface DashboardContentProps {
   onInviteMember: () => void;
 }
 
-const DashboardContent: React.FC<DashboardContentProps> = ({
-  activeTab,
-  userName,
-  onCreateJob,
-  onInviteMember
+const DashboardContent: React.FC<DashboardContentProps> = ({ 
+  activeTab, 
+  userName, 
+  onCreateJob, 
+  onInviteMember 
 }) => {
-  switch (activeTab) {
-    case 'overview':
-      return <OverviewTab userName={userName} onCreateJob={onCreateJob} />;
-    case 'pipeline':
-      return <CandidatePipeline showCandidates={true} />;
-    case 'ai-matching':
-      return <AIMatchingEngine />;
-    case 'interviews':
-      return <EnhancedInterviewManagement />;
-    case 'communication':
-      return <EnhancedCommunicationHub />;
-    case 'team':
-      return <TeamManagement onInviteMember={onInviteMember} />;
-    default:
-      return <OverviewTab userName={userName} onCreateJob={onCreateJob} />;
-  }
+  return (
+    <Tabs value={activeTab} className="space-y-6">
+      <TabsContent value="overview">
+        <OverviewTab 
+          userName={userName}
+          onCreateJob={onCreateJob}
+          onInviteMember={onInviteMember}
+        />
+      </TabsContent>
+
+      <TabsContent value="candidates">
+        <CandidatesManagement />
+      </TabsContent>
+
+      <TabsContent value="jobs">
+        <JobsManagement />
+      </TabsContent>
+
+      <TabsContent value="analytics">
+        <EnhancedAnalyticsDashboard />
+      </TabsContent>
+
+      <TabsContent value="team">
+        <TeamManagement />
+      </TabsContent>
+    </Tabs>
+  );
 };
 
 export default DashboardContent;
