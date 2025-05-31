@@ -31,7 +31,7 @@ class PredictiveAnalyticsEngine {
     const skillMatchScore = this.calculateSkillMatch(candidate, jobRequirements);
     const culturalFitScore = candidate.cultural_fit_score || 75;
     const engagementScore = candidate.engagement_score || 70;
-    const osintScore = candidate.osint_profile?.influence_score || 8;
+    const osintScore = candidate.osint_profile?.overall_score || 8;
     
     const successProbability = this.calculateSuccessProbability(
       skillMatchScore,
@@ -128,28 +128,28 @@ class PredictiveAnalyticsEngine {
     const indicators: SuccessIndicator[] = [];
 
     // High technical depth
-    if (candidate.technical_depth_score && candidate.technical_depth_score > 8) {
+    if (candidate.osint_profile?.technical_depth && candidate.osint_profile.technical_depth > 8) {
       indicators.push({
         indicator: 'Strong technical expertise',
-        strength: candidate.technical_depth_score,
+        strength: candidate.osint_profile.technical_depth,
         evidence: ['High GitHub activity', 'Technical publications', 'Open source contributions']
       });
     }
 
     // Community involvement
-    if (candidate.community_influence_score && candidate.community_influence_score > 7) {
+    if (candidate.osint_profile?.community_engagement && candidate.osint_profile.community_engagement > 7) {
       indicators.push({
         indicator: 'Active community participation',
-        strength: candidate.community_influence_score,
+        strength: candidate.osint_profile.community_engagement,
         evidence: ['Speaking engagements', 'Mentoring activities', 'Technical writing']
       });
     }
 
     // Learning velocity
-    if (candidate.learning_velocity_score && candidate.learning_velocity_score > 8) {
+    if (candidate.osint_profile?.learning_velocity && candidate.osint_profile.learning_velocity > 8) {
       indicators.push({
         indicator: 'Continuous learning mindset',
-        strength: candidate.learning_velocity_score,
+        strength: candidate.osint_profile.learning_velocity,
         evidence: ['Recent skill acquisitions', 'Course completions', 'Technology adoption']
       });
     }

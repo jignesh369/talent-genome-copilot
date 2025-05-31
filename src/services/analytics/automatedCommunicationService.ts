@@ -206,25 +206,25 @@ Looking forward to seeing your approach to these challenges!
   }
 
   private extractAchievement(candidate: EnhancedCandidate): string {
-    if (candidate.osint_profile?.github_profile?.public_repos > 20) {
-      return `${candidate.osint_profile.github_profile.public_repos}+ open source projects`;
+    if (candidate.osint_profile?.github?.public_repos && candidate.osint_profile.github.public_repos > 20) {
+      return `${candidate.osint_profile.github.public_repos}+ open source projects`;
     }
-    if (candidate.technical_depth_score && candidate.technical_depth_score > 8) {
+    if (candidate.osint_profile?.technical_depth && candidate.osint_profile.technical_depth > 8) {
       return 'exceptional technical depth';
     }
     return 'strong technical background';
   }
 
   private extractTechnicalHighlight(candidate: EnhancedCandidate): string {
-    const github = candidate.osint_profile?.github_profile;
-    if (github?.contribution_activity > 100) {
-      return `Active contributor with ${github.contribution_activity} contributions`;
+    const github = candidate.osint_profile?.github;
+    if (github?.contributions_last_year && github.contributions_last_year > 100) {
+      return `Active contributor with ${github.contributions_last_year} contributions`;
     }
     return `Expertise in ${candidate.skills.slice(0, 2).join(' and ')}`;
   }
 
   private extractCommunityInvolvement(candidate: EnhancedCandidate): string {
-    if (candidate.community_influence_score && candidate.community_influence_score > 7) {
+    if (candidate.osint_profile?.community_engagement && candidate.osint_profile.community_engagement > 7) {
       return 'Active community leadership and mentoring';
     }
     return 'Engaged in developer communities';
