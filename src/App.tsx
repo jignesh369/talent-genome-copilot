@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -30,6 +29,7 @@ import CandidateAssessment from "./pages/CandidateAssessment";
 import HiringManagerDashboard from "./pages/HiringManagerDashboard";
 import RecruiterDashboard from "./pages/RecruiterDashboard";
 import ResumeParser from "./pages/ResumeParser";
+import Communication from "./pages/Communication";
 
 const queryClient = new QueryClient();
 
@@ -141,6 +141,13 @@ const App = () => (
               <ProtectedRoute allowedRoles={['recruiter', 'hiring_manager']}>
                 <RecruiterLayout>
                   <Analytics />
+                </RecruiterLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/communication" element={
+              <ProtectedRoute allowedRoles={['recruiter', 'hiring_manager']}>
+                <RecruiterLayout>
+                  <Communication />
                 </RecruiterLayout>
               </ProtectedRoute>
             } />

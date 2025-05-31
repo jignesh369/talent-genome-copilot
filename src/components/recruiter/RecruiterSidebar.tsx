@@ -33,7 +33,7 @@ const RecruiterSidebar: React.FC<RecruiterSidebarProps> = ({ activeTab, onTabCha
     { id: 'pipeline', label: 'Pipeline', icon: TrendingUp, href: '/recruiter-dashboard', isDashboardTab: true },
     { id: 'ai-matching', label: 'AI Matching', icon: Brain, href: '/recruiter-dashboard', isDashboardTab: true },
     { id: 'interviews', label: 'Interviews', icon: Calendar, href: '/recruiter-dashboard', isDashboardTab: true },
-    { id: 'communication', label: 'Communications', icon: MessageSquare, href: '/recruiter-dashboard', isDashboardTab: true },
+    { id: 'communication', label: 'Communications', icon: MessageSquare, href: '/communication', isDashboardTab: false },
     { id: 'analytics', label: 'Analytics', icon: BarChart3, href: '/analytics', isDashboardTab: false },
     { id: 'search', label: 'Search', icon: Search, href: '/search', isDashboardTab: false },
     { id: 'team', label: 'Team', icon: UserPlus, href: '/recruiter-dashboard', isDashboardTab: true },
