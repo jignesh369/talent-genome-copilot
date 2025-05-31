@@ -291,7 +291,7 @@ const MindReaderSearch = () => {
               <p className="text-gray-600 italic">"{candidate.bio}"</p>
             </div>
 
-            <OSINTDataCard candidate={candidate} />
+            <OSINTMetrics candidate={candidate} />
 
             <div className="grid grid-cols-2 gap-4">
               <div>
