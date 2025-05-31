@@ -28,6 +28,7 @@ import CandidateProfile from "./pages/CandidateProfile";
 import CandidateAssessments from "./pages/CandidateAssessments";
 import HiringManagerDashboard from "./pages/HiringManagerDashboard";
 import RecruiterDashboard from "./pages/RecruiterDashboard";
+import ResumeParser from "./pages/ResumeParser";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,7 @@ const App = () => (
             <Route path="/" element={<SmartLanding />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/candidate-portal" element={<CandidatePortal />} />
+            <Route path="/resume-parser" element={<ResumeParser />} />
             
             {/* Admin Routes */}
             <Route path="/startup-admin" element={
