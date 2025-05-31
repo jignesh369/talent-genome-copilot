@@ -18,7 +18,9 @@ const OSINTMetrics: React.FC<OSINTMetricsProps> = ({ candidate }) => {
     return sources;
   };
 
-  const getCommunityS.push('twitter');
+  const getCommunitySources = () => {
+    const sources = [];
+    if (candidate.osint_profile.twitter) sources.push('twitter');
     if (candidate.osint_profile.reddit) sources.push('reddit');
     if (candidate.osint_profile.devto) sources.push('devto');
     return sources;
