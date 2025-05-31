@@ -1,15 +1,6 @@
 
 export interface OSINTProfile {
   candidate_id: string;
-  github?: GitHubProfile;
-  stackoverflow?: StackOverflowProfile;
-  twitter?: TwitterProfile;
-  linkedin?: LinkedInProfile;
-  reddit?: RedditProfile;
-  devto?: DevToProfile;
-  medium?: MediumProfile;
-  hackernews?: HackerNewsProfile;
-  kaggle?: KaggleProfile;
   overall_score: number;
   influence_score: number;
   technical_depth: number;
@@ -17,224 +8,128 @@ export interface OSINTProfile {
   learning_velocity: number;
   last_updated: string;
   availability_signals: AvailabilitySignal[];
+  
+  // Platform profiles
+  github?: GitHubProfile;
+  linkedin?: LinkedInProfile;
+  twitter?: TwitterProfile;
+  stackoverflow?: StackOverflowProfile;
+  reddit?: RedditProfile;
+  devto?: DevToProfile;
+  medium?: MediumProfile;
+  kaggle?: KaggleProfile;
 }
 
 export interface GitHubProfile {
   username: string;
-  followers: number;
-  following: number;
+  profile_url: string;
   public_repos: number;
-  total_stars: number;
-  total_commits_last_year: number;
-  top_languages: LanguageStats[];
-  recent_activity: GitHubActivity[];
-  notable_repos: Repository[];
-  contribution_streak: number;
-  code_quality_score: number;
-}
-
-export interface StackOverflowProfile {
-  user_id: number;
-  reputation: number;
-  badges: BadgeCount;
-  top_tags: TagStats[];
-  answer_count: number;
-  question_count: number;
-  helpfulness_score: number;
-  recent_activity: StackOverflowActivity[];
-}
-
-export interface TwitterProfile {
-  username: string;
   followers: number;
   following: number;
-  tweet_count: number;
-  tech_engagement_score: number;
-  thought_leadership_score: number;
-  recent_tech_tweets: Tweet[];
-  influence_metrics: InfluenceMetrics;
+  contributions_last_year: number;
+  star_count: number;
+  fork_count: number;
+  primary_languages: string[];
+  recent_activity_score: number;
+  contribution_streak: number;
+  account_created: string;
+  last_activity: string;
 }
 
 export interface LinkedInProfile {
   profile_url: string;
+  connections: number;
   current_position: string;
-  current_company: string;
+  company: string;
+  industry: string;
+  location: string;
   experience_years: number;
-  education: Education[];
-  skills: SkillEndorsement[];
+  education: string[];
+  skills: string[];
   recommendations_count: number;
-  connections_count: number;
-  career_progression_score: number;
+  posts_last_month: number;
+  engagement_rate: number;
+}
+
+export interface TwitterProfile {
+  username: string;
+  profile_url: string;
+  followers: number;
+  following: number;
+  tweets_count: number;
+  listed_count: number;
+  verified: boolean;
+  account_created: string;
+  recent_activity_score: number;
+  engagement_rate: number;
+  tech_mention_frequency: number;
+}
+
+export interface StackOverflowProfile {
+  user_id: number;
+  profile_url: string;
+  reputation: number;
+  questions_count: number;
+  answers_count: number;
+  badges: {
+    gold: number;
+    silver: number;
+    bronze: number;
+  };
+  top_tags: string[];
+  answer_acceptance_rate: number;
+  last_activity: string;
+  member_since: string;
 }
 
 export interface RedditProfile {
   username: string;
+  profile_url: string;
   karma: number;
-  account_age_days: number;
-  active_subreddits: SubredditActivity[];
-  tech_contributions: RedditContribution[];
-  expertise_areas: string[];
-  community_standing: number;
+  post_karma: number;
+  comment_karma: number;
+  account_created: string;
+  active_subreddits: string[];
+  recent_activity_score: number;
+  tech_community_participation: number;
 }
 
 export interface DevToProfile {
   username: string;
+  profile_url: string;
   followers: number;
   posts_count: number;
-  recent_articles: Article[];
   tags: string[];
-  engagement_score: number;
+  total_reactions: number;
+  total_comments: number;
+  recent_activity_score: number;
 }
 
 export interface MediumProfile {
   username: string;
+  profile_url: string;
   followers: number;
-  articles: Article[];
-  claps_received: number;
-  technical_writing_score: number;
-}
-
-export interface HackerNewsProfile {
-  username: string;
-  karma: number;
-  submissions: HNSubmission[];
-  comments: HNComment[];
-  technical_depth_score: number;
+  posts_count: number;
+  total_claps: number;
+  topics: string[];
+  recent_activity_score: number;
 }
 
 export interface KaggleProfile {
   username: string;
+  profile_url: string;
   tier: string;
   competitions_entered: number;
-  datasets_published: number;
-  notebooks_published: number;
-  medals: MedalCount;
-  expertise_areas: string[];
-}
-
-export interface LanguageStats {
-  language: string;
-  percentage: number;
-  lines_of_code: number;
-  projects_count: number;
-}
-
-export interface Repository {
-  name: string;
-  description: string;
-  stars: number;
-  forks: number;
-  language: string;
-  last_updated: string;
-  complexity_score: number;
-  innovation_score: number;
+  datasets_count: number;
+  notebooks_count: number;
+  total_votes: number;
+  ranking: number;
 }
 
 export interface AvailabilitySignal {
-  signal_type: 'job_search' | 'open_to_opportunities' | 'career_transition' | 'side_project_focus';
+  signal_type: 'job_change' | 'profile_update' | 'increased_activity' | 'skill_learning';
   confidence: number;
-  source: string;
-  detected_at: string;
-  details: string;
-}
-
-export interface InfluenceMetrics {
-  retweets_avg: number;
-  mentions_count: number;
-  engagement_rate: number;
-  thought_leadership_topics: string[];
-}
-
-export interface TagStats {
-  tag: string;
-  score: number;
-  posts_count: number;
-  badges_earned: number;
-}
-
-export interface BadgeCount {
-  gold: number;
-  silver: number;
-  bronze: number;
-}
-
-export interface SkillEndorsement {
-  skill: string;
-  endorsements: number;
-  verified: boolean;
-}
-
-export interface SubredditActivity {
-  subreddit: string;
-  posts_count: number;
-  karma: number;
-  expertise_level: 'beginner' | 'intermediate' | 'expert';
-}
-
-export interface Article {
-  title: string;
-  url: string;
-  published_date: string;
-  views: number;
-  engagement: number;
-  tags: string[];
-}
-
-export interface MedalCount {
-  gold: number;
-  silver: number;
-  bronze: number;
-}
-
-export interface GitHubActivity {
-  type: 'commit' | 'pr' | 'issue' | 'release';
-  repo: string;
-  date: string;
+  detected_date: string;
   description: string;
-}
-
-export interface StackOverflowActivity {
-  type: 'answer' | 'question' | 'badge';
-  title: string;
-  date: string;
-  score: number;
-}
-
-export interface Tweet {
-  content: string;
-  date: string;
-  retweets: number;
-  likes: number;
-  tech_relevance: number;
-}
-
-export interface RedditContribution {
-  subreddit: string;
-  title: string;
-  type: 'post' | 'comment';
-  score: number;
-  date: string;
-}
-
-export interface HNSubmission {
-  title: string;
-  url: string;
-  score: number;
-  comments: number;
-  date: string;
-}
-
-export interface HNComment {
-  content: string;
-  score: number;
-  date: string;
-  thread_title: string;
-}
-
-export interface Education {
-  institution: string;
-  degree: string;
-  field: string;
-  start_year: number;
-  end_year?: number;
+  platform_source: string;
 }

@@ -34,6 +34,17 @@ const OSINTMetrics: React.FC<OSINTMetricsProps> = ({ candidate }) => {
     return sources;
   };
 
+  const getScoreColor = (score: number) => {
+    if (score >= 8) return { bg: 'bg-green-100', text: 'text-green-700', hover: 'group-hover:text-green-800', progress: 'bg-green-100' };
+    if (score >= 6) return { bg: 'bg-blue-100', text: 'text-blue-700', hover: 'group-hover:text-blue-800', progress: 'bg-blue-100' };
+    if (score >= 4) return { bg: 'bg-yellow-100', text: 'text-yellow-700', hover: 'group-hover:text-yellow-800', progress: 'bg-yellow-100' };
+    return { bg: 'bg-red-100', text: 'text-red-700', hover: 'group-hover:text-red-800', progress: 'bg-red-100' };
+  };
+
+  const technicalColor = getScoreColor(candidate.technical_depth_score);
+  const communityColor = getScoreColor(candidate.community_influence_score);
+  const learningColor = getScoreColor(candidate.learning_velocity_score);
+
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-3 gap-4 p-4 bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-50 rounded-xl border border-blue-200 shadow-sm">
@@ -41,11 +52,11 @@ const OSINTMetrics: React.FC<OSINTMetricsProps> = ({ candidate }) => {
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="text-center group cursor-pointer">
-                <div className="text-xl font-bold text-blue-700 group-hover:text-blue-800 transition-colors">
+                <div className={`text-xl font-bold ${technicalColor.text} ${technicalColor.hover} transition-colors`}>
                   {candidate.technical_depth_score.toFixed(1)}
                 </div>
                 <div className="text-xs text-gray-600 font-medium">Technical Depth</div>
-                <Progress value={candidate.technical_depth_score * 10} className="h-2 mt-2 bg-blue-100" />
+                <Progress value={candidate.technical_depth_score * 10} className={`h-2 mt-2 ${technicalColor.progress}`} />
               </div>
             </TooltipTrigger>
             <TooltipContent>
@@ -68,11 +79,11 @@ const OSINTMetrics: React.FC<OSINTMetricsProps> = ({ candidate }) => {
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="text-center group cursor-pointer">
-                <div className="text-xl font-bold text-green-700 group-hover:text-green-800 transition-colors">
+                <div className={`text-xl font-bold ${communityColor.text} ${communityColor.hover} transition-colors`}>
                   {candidate.community_influence_score.toFixed(1)}
                 </div>
                 <div className="text-xs text-gray-600 font-medium">Community Impact</div>
-                <Progress value={candidate.community_influence_score * 10} className="h-2 mt-2 bg-green-100" />
+                <Progress value={candidate.community_influence_score * 10} className={`h-2 mt-2 ${communityColor.progress}`} />
               </div>
             </TooltipTrigger>
             <TooltipContent>
@@ -95,11 +106,11 @@ const OSINTMetrics: React.FC<OSINTMetricsProps> = ({ candidate }) => {
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="text-center group cursor-pointer">
-                <div className="text-xl font-bold text-purple-700 group-hover:text-purple-800 transition-colors">
+                <div className={`text-xl font-bold ${learningColor.text} ${learningColor.hover} transition-colors`}>
                   {candidate.learning_velocity_score.toFixed(1)}
                 </div>
                 <div className="text-xs text-gray-600 font-medium">Learning Velocity</div>
-                <Progress value={candidate.learning_velocity_score * 10} className="h-2 mt-2 bg-purple-100" />
+                <Progress value={candidate.learning_velocity_score * 10} className={`h-2 mt-2 ${learningColor.progress}`} />
               </div>
             </TooltipTrigger>
             <TooltipContent>
