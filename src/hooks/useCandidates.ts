@@ -1,75 +1,138 @@
 
 import { useState, useEffect } from 'react';
-import { Candidate, CandidateSearch } from '@/types/recruiting';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/components/auth/AuthProvider';
+import { useToast } from '@/hooks/use-toast';
+
+// Updated types to match database schema
+export interface CandidateEducation {
+  id: string;
+  institution: string;
+  degree: string;
+  field: string;
+  start_year: number;
+  end_year: number | null;
+}
+
+export interface CandidateNote {
+  id: string;
+  content: string;
+  author: string;
+  created_at: string;
+}
+
+export interface Candidate {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string | null;
+  location: string;
+  current_title: string | null;
+  current_company: string | null;
+  experience_years: number;
+  skills: string[];
+  education: CandidateEducation[];
+  score: number;
+  status: 'new' | 'screening' | 'interviewing' | 'offer' | 'hired' | 'rejected';
+  source: 'direct' | 'referral' | 'job_board' | 'linkedin' | 'agency' | 'other';
+  resume_url: string | null;
+  linkedin_url: string | null;
+  portfolio_url: string | null;
+  avatar_url: string | null;
+  notes: CandidateNote[];
+  applications: any[];
+  interviews: any[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CandidateSearch {
+  query?: string;
+  skills?: string[];
+  status?: string;
+  experience_min?: number;
+  experience_max?: number;
+  sort_by?: 'score' | 'date' | 'name';
+  sort_order?: 'asc' | 'desc';
+}
 
 export const useCandidates = () => {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [filteredCandidates, setFilteredCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { organizationId } = useAuth();
+  const { toast } = useToast();
 
-  // Mock data for candidates
+  // Fetch candidates from database
+  const fetchCandidates = async () => {
+    if (!organizationId) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+
+      const { data, error: fetchError } = await supabase
+        .from('candidates')
+        .select(`
+          *,
+          education (*),
+          candidate_skills (
+            skill_id,
+            proficiency_level,
+            skills (name)
+          ),
+          notes (
+            id,
+            content,
+            author_name,
+            created_at
+          ),
+          applications (
+            id,
+            status,
+            jobs (title)
+          )
+        `)
+        .eq('organization_id', organizationId)
+        .order('created_at', { ascending: false });
+
+      if (fetchError) throw fetchError;
+
+      // Transform data to match expected interface
+      const transformedCandidates: Candidate[] = data?.map(candidate => ({
+        ...candidate,
+        skills: candidate.candidate_skills?.map((cs: any) => cs.skills.name) || [],
+        notes: candidate.notes?.map((note: any) => ({
+          id: note.id,
+          content: note.content,
+          author: note.author_name,
+          created_at: note.created_at
+        })) || [],
+        interviews: [], // Will be populated from applications if needed
+      })) || [];
+
+      setCandidates(transformedCandidates);
+      setFilteredCandidates(transformedCandidates);
+    } catch (err: any) {
+      console.error('Error fetching candidates:', err);
+      setError(err.message);
+      toast({
+        title: 'Error loading candidates',
+        description: err.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const mockCandidates: Candidate[] = [
-      {
-        id: '1',
-        first_name: 'Alex',
-        last_name: 'Kumar',
-        email: 'alex.kumar@email.com',
-        phone: '+1-555-0123',
-        location: 'San Francisco, CA',
-        current_title: 'Senior Software Engineer',
-        current_company: 'TechCorp',
-        experience_years: 7,
-        skills: ['React', 'TypeScript', 'Node.js', 'Python', 'AWS'],
-        education: [{
-          institution: 'Stanford University',
-          degree: 'MS',
-          field: 'Computer Science',
-          start_year: 2015,
-          end_year: 2017
-        }],
-        score: 85,
-        status: 'interviewing',
-        source: 'linkedin',
-        notes: [],
-        applications: [],
-        interviews: [],
-        created_at: '2024-01-10T10:00:00Z',
-        updated_at: '2024-01-15T10:00:00Z'
-      },
-      {
-        id: '2',
-        first_name: 'Sarah',
-        last_name: 'Johnson',
-        email: 'sarah.johnson@email.com',
-        phone: '+1-555-0124',
-        location: 'Austin, TX',
-        current_title: 'Product Manager',
-        current_company: 'StartupXYZ',
-        experience_years: 5,
-        skills: ['Product Management', 'Analytics', 'Agile', 'SQL', 'Figma'],
-        education: [{
-          institution: 'UT Austin',
-          degree: 'MBA',
-          field: 'Business Administration',
-          start_year: 2018,
-          end_year: 2020
-        }],
-        score: 92,
-        status: 'offer',
-        source: 'referral',
-        notes: [],
-        applications: [],
-        interviews: [],
-        created_at: '2024-01-05T10:00:00Z',
-        updated_at: '2024-01-20T10:00:00Z'
-      }
-    ];
-
-    setCandidates(mockCandidates);
-    setFilteredCandidates(mockCandidates);
-    setLoading(false);
-  }, []);
+    if (organizationId) {
+      fetchCandidates();
+    }
+  }, [organizationId]);
 
   const searchCandidates = (searchParams: CandidateSearch) => {
     let filtered = [...candidates];
@@ -140,33 +203,191 @@ export const useCandidates = () => {
     setFilteredCandidates(filtered);
   };
 
-  const updateCandidate = (candidateId: string, updates: Partial<Candidate>) => {
-    setCandidates(prev => prev.map(candidate =>
-      candidate.id === candidateId
-        ? { ...candidate, ...updates, updated_at: new Date().toISOString() }
-        : candidate
-    ));
+  const createCandidate = async (candidateData: Partial<Candidate>) => {
+    if (!organizationId) {
+      toast({
+        title: 'Error',
+        description: 'Organization not found',
+        variant: 'destructive',
+      });
+      return null;
+    }
+
+    try {
+      setError(null);
+
+      const newCandidateData = {
+        first_name: candidateData.first_name || '',
+        last_name: candidateData.last_name || '',
+        email: candidateData.email || '',
+        phone: candidateData.phone || null,
+        location: candidateData.location || '',
+        current_title: candidateData.current_title || null,
+        current_company: candidateData.current_company || null,
+        experience_years: candidateData.experience_years || 0,
+        score: candidateData.score || 0,
+        status: candidateData.status || 'new' as const,
+        source: candidateData.source || 'direct' as const,
+        resume_url: candidateData.resume_url || null,
+        linkedin_url: candidateData.linkedin_url || null,
+        portfolio_url: candidateData.portfolio_url || null,
+        avatar_url: candidateData.avatar_url || null,
+        organization_id: organizationId,
+      };
+
+      const { data, error: createError } = await supabase
+        .from('candidates')
+        .insert(newCandidateData)
+        .select()
+        .single();
+
+      if (createError) throw createError;
+
+      const newCandidate: Candidate = {
+        ...data,
+        skills: [],
+        education: [],
+        notes: [],
+        applications: [],
+        interviews: [],
+      };
+
+      setCandidates(prev => [newCandidate, ...prev]);
+      setFilteredCandidates(prev => [newCandidate, ...prev]);
+      
+      toast({
+        title: 'Success',
+        description: 'Candidate created successfully',
+      });
+
+      return newCandidate;
+    } catch (err: any) {
+      console.error('Error creating candidate:', err);
+      setError(err.message);
+      toast({
+        title: 'Error creating candidate',
+        description: err.message,
+        variant: 'destructive',
+      });
+      return null;
+    }
   };
 
-  const addNote = (candidateId: string, content: string) => {
-    const note = {
-      id: Date.now().toString(),
-      content,
-      author: 'Current User',
-      created_at: new Date().toISOString()
-    };
+  const updateCandidate = async (candidateId: string, updates: Partial<Candidate>) => {
+    try {
+      setError(null);
 
-    updateCandidate(candidateId, {
-      notes: [...(candidates.find(c => c.id === candidateId)?.notes || []), note]
-    });
+      const { data, error: updateError } = await supabase
+        .from('candidates')
+        .update(updates)
+        .eq('id', candidateId)
+        .select()
+        .single();
+
+      if (updateError) throw updateError;
+
+      const updateCandidates = (candidates: Candidate[]) =>
+        candidates.map(candidate =>
+          candidate.id === candidateId
+            ? { ...candidate, ...data, updated_at: new Date().toISOString() }
+            : candidate
+        );
+
+      setCandidates(updateCandidates);
+      setFilteredCandidates(updateCandidates);
+
+      toast({
+        title: 'Success',
+        description: 'Candidate updated successfully',
+      });
+
+      return data;
+    } catch (err: any) {
+      console.error('Error updating candidate:', err);
+      setError(err.message);
+      toast({
+        title: 'Error updating candidate',
+        description: err.message,
+        variant: 'destructive',
+      });
+      return null;
+    }
+  };
+
+  const addNote = async (candidateId: string, content: string) => {
+    try {
+      setError(null);
+
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) throw new Error('User not authenticated');
+
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('id', userData.user.id)
+        .single();
+
+      const authorName = profileData 
+        ? `${profileData.first_name} ${profileData.last_name}`
+        : userData.user.email || 'Unknown User';
+
+      const { data, error: noteError } = await supabase
+        .from('notes')
+        .insert({
+          candidate_id: candidateId,
+          content,
+          author_id: userData.user.id,
+          author_name: authorName
+        })
+        .select()
+        .single();
+
+      if (noteError) throw noteError;
+
+      const newNote: CandidateNote = {
+        id: data.id,
+        content: data.content,
+        author: data.author_name,
+        created_at: data.created_at
+      };
+
+      const updateCandidateNotes = (candidates: Candidate[]) =>
+        candidates.map(candidate =>
+          candidate.id === candidateId
+            ? { ...candidate, notes: [...candidate.notes, newNote] }
+            : candidate
+        );
+
+      setCandidates(updateCandidateNotes);
+      setFilteredCandidates(updateCandidateNotes);
+
+      toast({
+        title: 'Success',
+        description: 'Note added successfully',
+      });
+
+      return newNote;
+    } catch (err: any) {
+      console.error('Error adding note:', err);
+      setError(err.message);
+      toast({
+        title: 'Error adding note',
+        description: err.message,
+        variant: 'destructive',
+      });
+      return null;
+    }
   };
 
   return {
     candidates: filteredCandidates,
     allCandidates: candidates,
     loading,
+    error,
     searchCandidates,
+    createCandidate,
     updateCandidate,
-    addNote
+    addNote,
+    refetch: fetchCandidates,
   };
 };
