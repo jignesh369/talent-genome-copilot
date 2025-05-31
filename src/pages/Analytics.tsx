@@ -14,7 +14,10 @@ const Analytics = () => {
   const [activeTab, setActiveTab] = useState('overview');
 
   return (
-    <RecruiterLayout title="Analytics & Intelligence" subtitle="Advanced insights and custom reporting">
+    <RecruiterLayout 
+      title="Analytics & Intelligence" 
+      subtitle="Advanced insights and custom reporting"
+    >
       <div className="space-y-6">
         {/* Enhanced Header with Quick Actions */}
         <div className="flex justify-between items-center">

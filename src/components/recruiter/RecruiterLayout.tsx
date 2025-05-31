@@ -31,7 +31,7 @@ const RecruiterLayout: React.FC<RecruiterLayoutProps> = ({
       case '/jobs':
         return 'Job Openings';
       case '/analytics':
-        return 'Analytics & Genome';
+        return 'Analytics & Intelligence';
       case '/search':
         return 'AI-Powered Talent Discovery';
       case '/settings':
@@ -50,9 +50,9 @@ const RecruiterLayout: React.FC<RecruiterLayoutProps> = ({
       case '/jobs':
         return 'Manage your open positions and hiring pipeline';
       case '/analytics':
-        return 'Insights that compound over time';
+        return 'Advanced insights and custom reporting';
       case '/search':
-        return 'Discover exceptional talent with comprehensive OSINT analysis and AI insights';
+        return 'Discover exceptional talent with comprehensive analysis and AI insights';
       case '/settings':
         return 'Manage your account and preferences';
       default:
@@ -62,18 +62,18 @@ const RecruiterLayout: React.FC<RecruiterLayoutProps> = ({
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
+      {/* Single Sidebar Instance */}
       <RecruiterSidebar activeTab={activeTab} onTabChange={onTabChange} />
 
-      {/* Main Content */}
-      <div className="flex-1">
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col">
         <RecruiterHeader 
           title={title || getDefaultTitle()}
           subtitle={subtitle || getDefaultSubtitle()}
           showSearch={showSearch}
         />
 
-        <main className="p-6">
+        <main className="flex-1 p-6 overflow-auto">
           {children}
         </main>
       </div>
