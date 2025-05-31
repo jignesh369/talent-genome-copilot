@@ -26,6 +26,7 @@ import CandidateMessages from "./pages/CandidateMessages";
 import CandidateOffers from "./pages/CandidateOffers";
 import CandidateProfile from "./pages/CandidateProfile";
 import CandidateAssessments from "./pages/CandidateAssessments";
+import CandidateAssessment from "./pages/CandidateAssessment";
 import HiringManagerDashboard from "./pages/HiringManagerDashboard";
 import RecruiterDashboard from "./pages/RecruiterDashboard";
 import ResumeParser from "./pages/ResumeParser";
