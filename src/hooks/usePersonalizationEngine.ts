@@ -78,7 +78,7 @@ export const usePersonalizationEngine = () => {
     });
 
     const highlights = generatePersonalizationHighlights(candidate, personalizations);
-    const qualityScore = calculateQualityScore(personalizedContent, highlights);
+    const qualityScore = calculateQualityScore(personalizedContent, highlights, candidate);
 
     return {
       personalized_content: personalizedContent,
@@ -89,8 +89,8 @@ export const usePersonalizationEngine = () => {
   };
 
   const generateRecentAchievement = (candidate: EnhancedCandidate): string => {
-    if (candidate.osint_profile?.github?.notable_projects?.length > 0) {
-      return `your work on ${candidate.osint_profile.github.notable_projects[0]}`;
+    if (candidate.osint_profile?.github?.public_repos && candidate.osint_profile.github.public_repos > 10) {
+      return `your active GitHub contributions with ${candidate.osint_profile.github.public_repos} repositories`;
     }
     if (candidate.skills.length > 3) {
       return `your expertise across ${candidate.skills.slice(0, 3).join(', ')}`;
@@ -104,8 +104,8 @@ export const usePersonalizationEngine = () => {
   };
 
   const generateProjectName = (candidate: EnhancedCandidate): string => {
-    if (candidate.osint_profile?.github?.notable_projects?.length > 0) {
-      return candidate.osint_profile.github.notable_projects[0];
+    if (candidate.osint_profile?.github?.public_repos && candidate.osint_profile.github.public_repos > 0) {
+      return 'your recent GitHub projects';
     }
     const projectNames = ['the platform architecture', 'the API redesign', 'the performance optimization'];
     return projectNames[Math.floor(Math.random() * projectNames.length)];
@@ -131,7 +131,7 @@ export const usePersonalizationEngine = () => {
       highlights.push('Highlighted relevant technical skills');
     }
     
-    if (candidate.osint_profile?.github?.public_repos > 10) {
+    if (candidate.osint_profile?.github?.public_repos && candidate.osint_profile.github.public_repos > 10) {
       highlights.push('Referenced GitHub activity');
     }
     
@@ -149,7 +149,7 @@ export const usePersonalizationEngine = () => {
     return highlights.slice(0, 4);
   };
 
-  const calculateQualityScore = (content: string, highlights: string[]): number => {
+  const calculateQualityScore = (content: string, highlights: string[], candidate: EnhancedCandidate): number => {
     let score = 5; // Base score
     
     // Add points for personalization
