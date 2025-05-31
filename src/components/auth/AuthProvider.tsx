@@ -55,6 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session check:', session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
       
@@ -70,7 +71,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUserData = async (user: User) => {
     try {
-      console.log('Fetching user data for:', user.email);
+      console.log('Fetching user data for:', user.email, 'User ID:', user.id);
       
       // Fetch user profile - use maybeSingle to avoid errors if no profile exists
       const { data: profileData, error: profileError } = await supabase
@@ -102,9 +103,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('Role data:', roleData);
         setUserRole(roleData?.role || null);
       }
+      
+      // Force a small delay to ensure state is updated
+      setTimeout(() => {
+        setLoading(false);
+      }, 100);
+      
     } catch (error) {
       console.error('Error fetching user data:', error);
-    } finally {
       setLoading(false);
     }
   };
@@ -121,6 +127,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Error signing out:', error);
     }
   };
+
+  console.log('Auth state - User:', user?.email, 'Role:', userRole, 'Loading:', loading);
 
   return (
     <AuthContext.Provider
