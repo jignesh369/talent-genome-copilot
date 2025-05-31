@@ -201,8 +201,12 @@ export class BackendService {
     return { organization: org, membership };
   }
 
-  // User role management
-  static async assignUserRole(userId: string, role: string, organizationId: string) {
+  // User role management - Fixed TypeScript error
+  static async assignUserRole(
+    userId: string, 
+    role: 'startup_admin' | 'customer_admin' | 'recruiter' | 'hiring_manager' | 'candidate', 
+    organizationId: string
+  ) {
     const { data, error } = await supabase
       .from('user_roles')
       .insert({
