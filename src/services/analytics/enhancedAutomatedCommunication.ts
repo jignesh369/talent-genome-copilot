@@ -62,15 +62,19 @@ export class EnhancedAutomatedCommunication {
     );
 
     // Step 2: Use the recommended template and personalization
-    const customData = {
-      ...request.context,
+    const customData: Record<string, string> = {
+      company_name: request.context.company_name,
+      role_title: request.context.role_title,
+      recruiter_name: request.context.recruiter_name,
       candidate_name: personalizationData.candidate_name,
       personalized_greeting: personalizationData.personalized_greeting,
       technical_highlight: personalizationData.technical_highlights.join(', '),
       career_story_hook: personalizationData.career_story_hook,
       value_add_content: personalizationData.value_propositions.join('\n• '),
       call_to_action: personalizationData.call_to_action,
-      optimal_channel: personalizationData.preferred_channel
+      optimal_channel: personalizationData.preferred_channel,
+      role_benefits: request.context.role_benefits ? request.context.role_benefits.join(', ') : '',
+      urgency_level: request.context.urgency_level || 'medium'
     };
 
     // Step 3: Generate the message using enhanced data
@@ -139,7 +143,7 @@ export class EnhancedAutomatedCommunication {
           scheduled++;
         }
       } catch (error) {
-        errors.push(`Error processing ${candidate.name}: ${error.message}`);
+        errors.push(`Error processing ${candidate.name}: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     }
 
@@ -200,7 +204,7 @@ export class EnhancedAutomatedCommunication {
         job.results.push({
           candidate_id: candidateId,
           success: false,
-          error: error.message,
+          error: error instanceof Error ? error.message : 'Unknown error',
           personalization_score: 0
         });
       }

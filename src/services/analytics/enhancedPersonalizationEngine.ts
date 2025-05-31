@@ -1,4 +1,3 @@
-
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
 
 interface PersonalizationContext {
@@ -57,7 +56,7 @@ export class EnhancedPersonalizationEngine {
       career_story_hook: this.generateCareerStoryHook(candidate),
       value_propositions: this.generateValuePropositions(candidate, context),
       call_to_action: this.generateOptimalCTA(candidate, context),
-      personalization_score,
+      personalization_score: personalizationScore,
       recommended_template: templateType,
       optimal_send_time: this.predictOptimalSendTime(candidate),
       preferred_channel: this.determinePreferredChannel(candidate)
@@ -136,8 +135,8 @@ export class EnhancedPersonalizationEngine {
   private extractTechnicalHighlights(candidate: EnhancedCandidate, context: PersonalizationContext): string[] {
     const highlights = [];
     
-    if (candidate.osint_profile?.github?.public_repos && candidate.osint_profile.github.public_repos > 10) {
-      highlights.push(`${candidate.osint_profile.github.public_repos}+ open source projects`);
+    if (candidate.osint_profile?.github_profile?.public_repos && candidate.osint_profile.github_profile.public_repos > 10) {
+      highlights.push(`${candidate.osint_profile.github_profile.public_repos}+ open source projects`);
     }
     
     if (candidate.technical_depth_score > 8) {
@@ -204,8 +203,8 @@ export class EnhancedPersonalizationEngine {
       achievements.push(candidate.skills[0]);
     }
     
-    if (candidate.osint_profile?.github?.notable_projects) {
-      achievements.push(...candidate.osint_profile.github.notable_projects.slice(0, 1));
+    if (candidate.osint_profile?.github_profile?.top_languages) {
+      achievements.push(...candidate.osint_profile.github_profile.top_languages.slice(0, 1));
     }
     
     return achievements;
