@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { 
   LayoutDashboard, 
@@ -23,6 +23,7 @@ interface RecruiterSidebarProps {
 
 const RecruiterSidebar: React.FC<RecruiterSidebarProps> = ({ activeTab, onTabChange }) => {
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Navigation items for both dashboard tabs and page routes
   const navItems = [
@@ -48,10 +49,16 @@ const RecruiterSidebar: React.FC<RecruiterSidebarProps> = ({ activeTab, onTabCha
   };
 
   const handleItemClick = (item: any) => {
-    if (item.isDashboardTab && onTabChange) {
-      onTabChange(item.id);
+    if (item.isDashboardTab) {
+      // For dashboard tabs, navigate to dashboard and set the tab
+      if (location.pathname !== '/recruiter-dashboard') {
+        navigate('/recruiter-dashboard');
+      }
+      if (onTabChange) {
+        onTabChange(item.id);
+      }
     }
-    // For non-dashboard tabs, Link will handle navigation
+    // For non-dashboard tabs, Link component will handle navigation
   };
 
   return (

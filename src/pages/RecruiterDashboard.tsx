@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAuth } from '@/components/auth/AuthProvider';
 import InviteMemberModal from '@/components/modals/InviteMemberModal';
@@ -89,6 +89,12 @@ const RecruiterDashboard = () => {
     setShowCreateJobModal(false);
   };
 
+  // Handle tab changes from URL or direct navigation
+  const handleTabChange = (newTab: string) => {
+    console.log('Tab changed to:', newTab);
+    setActiveTab(newTab);
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case 'overview':
@@ -115,10 +121,6 @@ const RecruiterDashboard = () => {
             </div>
           </div>
         );
-      case 'jobs':
-        return <JobsManagement />;
-      case 'candidates':
-        return <CandidatesManagement />;
       case 'pipeline':
         return <CandidatePipeline showCandidates={true} />;
       case 'ai-matching':
@@ -130,15 +132,35 @@ const RecruiterDashboard = () => {
       case 'team':
         return <TeamManagement onInviteMember={() => setShowInviteModal(true)} />;
       default:
-        return null;
+        return (
+          <div className="space-y-6">
+            <WelcomeSection 
+              userName={user?.user_metadata?.first_name} 
+              onCreateJob={() => setShowCreateJobModal(true)} 
+            />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {stats.map((stat) => (
+                <ConsistentStatsCard key={stat.title} {...stat} />
+              ))}
+            </div>
+            
+            <QuickActionsGrid onCreateJob={() => setShowCreateJobModal(true)} />
+            
+            <AnalyticsCharts />
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <RecentActivityCard />
+              <PipelineOverview />
+            </div>
+          </div>
+        );
     }
   };
 
   const getPageTitle = () => {
     const titles = {
       overview: 'Recruiter Platform',
-      jobs: 'Jobs Management',
-      candidates: 'Talent Pipeline',
       pipeline: 'Pipeline Analytics',
       'ai-matching': 'AI Matching Engine',
       interviews: 'Interview Management',
@@ -151,8 +173,6 @@ const RecruiterDashboard = () => {
   const getPageSubtitle = () => {
     const subtitles = {
       overview: 'Your unified recruiting command center',
-      jobs: 'Manage your open positions and hiring pipeline',
-      candidates: 'Discover and manage your top candidates',
       pipeline: 'Track and optimize your hiring funnel',
       'ai-matching': 'Leverage AI to find the perfect candidates',
       interviews: 'Schedule and manage candidate interviews',
@@ -167,7 +187,7 @@ const RecruiterDashboard = () => {
       title={getPageTitle()}
       subtitle={getPageSubtitle()}
       activeTab={activeTab}
-      onTabChange={setActiveTab}
+      onTabChange={handleTabChange}
     >
       {renderContent()}
 

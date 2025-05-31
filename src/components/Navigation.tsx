@@ -21,6 +21,26 @@ const Navigation = () => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Only show this navigation for non-recruiter pages or when specifically needed
+  const shouldShowNavigation = () => {
+    const recruiterPaths = [
+      '/recruiter-dashboard',
+      '/candidates', 
+      '/jobs', 
+      '/analytics', 
+      '/search', 
+      '/settings'
+    ];
+    
+    // Don't show this navigation if we're on a recruiter page that uses RecruiterLayout
+    return !recruiterPaths.some(path => location.pathname === path);
+  };
+
+  // If we shouldn't show navigation, return null
+  if (!shouldShowNavigation()) {
+    return null;
+  }
+
   const navItems = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Candidates", href: "/candidates", icon: Users },
