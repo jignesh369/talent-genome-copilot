@@ -1,80 +1,129 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  PieChart as RechartsPieChart,
-  Pie,
-  Cell
-} from 'recharts';
+import { Progress } from '@/components/ui/progress';
+import { TrendingUp, Users, Clock, Target, Award, Activity } from 'lucide-react';
 
 const PerformanceTabContent = () => {
-  const hiringVelocityData = [
-    { month: 'Jan', hires: 12, applications: 150 },
-    { month: 'Feb', hires: 15, applications: 180 },
-    { month: 'Mar', hires: 18, applications: 200 },
-    { month: 'Apr', hires: 22, applications: 220 },
-    { month: 'May', hires: 25, applications: 250 },
-    { month: 'Jun', hires: 28, applications: 280 }
+  const performanceMetrics = [
+    {
+      title: "Overall Hiring Success Rate",
+      value: 73,
+      change: "+8%",
+      trend: "up",
+      icon: Target,
+      color: "text-green-600"
+    },
+    {
+      title: "Candidate Engagement Rate", 
+      value: 84,
+      change: "+12%",
+      trend: "up",
+      icon: Activity,
+      color: "text-blue-600"
+    },
+    {
+      title: "Time to Fill Improvement",
+      value: 67,
+      change: "-15%",
+      trend: "up",
+      icon: Clock,
+      color: "text-purple-600"
+    },
+    {
+      title: "Quality of Hire Score",
+      value: 91,
+      change: "+5%",
+      trend: "up", 
+      icon: Award,
+      color: "text-orange-600"
+    }
   ];
 
-  const pipelineData = [
-    { stage: 'Sourced', candidates: 45, color: '#8884d8' },
-    { stage: 'Qualified', candidates: 32, color: '#82ca9d' },
-    { stage: 'Interviewing', candidates: 18, color: '#ffc658' },
-    { stage: 'Offer', candidates: 8, color: '#ff7300' },
-    { stage: 'Hired', candidates: 5, color: '#00ff00' }
+  const pipelineMetrics = [
+    { stage: "Sourced", count: 234, conversion: 68 },
+    { stage: "Qualified", count: 159, conversion: 45 },
+    { stage: "Interviewing", count: 71, conversion: 72 },
+    { stage: "Offer Stage", count: 51, conversion: 89 },
+    { stage: "Hired", count: 45, conversion: 100 }
   ];
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="space-y-6">
+      {/* Performance Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {performanceMetrics.map((metric) => (
+          <Card key={metric.title}>
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-3">
+                <div className={`p-2 rounded-lg bg-gray-100`}>
+                  <metric.icon className={`h-5 w-5 ${metric.color}`} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-gray-600">{metric.title}</p>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-2xl font-bold">{metric.value}%</span>
+                    <span className="text-sm text-green-600">{metric.change}</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Pipeline Performance */}
       <Card>
         <CardHeader>
-          <CardTitle>Hiring Velocity Trend</CardTitle>
+          <CardTitle className="flex items-center space-x-2">
+            <TrendingUp className="h-5 w-5 text-blue-600" />
+            <span>Pipeline Performance</span>
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={hiringVelocityData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip />
-              <Line type="monotone" dataKey="hires" stroke="#8884d8" strokeWidth={2} />
-              <Line type="monotone" dataKey="applications" stroke="#82ca9d" strokeWidth={2} />
-            </LineChart>
-          </ResponsiveContainer>
+          <div className="space-y-4">
+            {pipelineMetrics.map((stage) => (
+              <div key={stage.stage} className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">{stage.stage}</span>
+                  <div className="flex items-center space-x-4">
+                    <span className="text-sm text-gray-600">{stage.count} candidates</span>
+                    <span className="text-sm font-medium">{stage.conversion}% conversion</span>
+                  </div>
+                </div>
+                <Progress value={stage.conversion} className="h-2" />
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
 
+      {/* Team Performance */}
       <Card>
         <CardHeader>
-          <CardTitle>Pipeline Distribution</CardTitle>
+          <CardTitle className="flex items-center space-x-2">
+            <Users className="h-5 w-5 text-purple-600" />
+            <span>Team Performance</span>
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <RechartsPieChart>
-              <Pie
-                data={pipelineData}
-                cx="50%"
-                cy="50%"
-                outerRadius={100}
-                fill="#8884d8"
-                dataKey="candidates"
-                label={({ name, value }) => `${name}: ${value}`}
-              >
-                {pipelineData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </RechartsPieChart>
-          </ResponsiveContainer>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="text-center p-4 border rounded-lg">
+              <TrendingUp className="h-8 w-8 mx-auto mb-2 text-green-600" />
+              <p className="text-2xl font-bold">156</p>
+              <p className="text-sm text-gray-600">Active Placements</p>
+            </div>
+            <div className="text-center p-4 border rounded-lg">
+              <Clock className="h-8 w-8 mx-auto mb-2 text-blue-600" />
+              <p className="text-2xl font-bold">18.5</p>
+              <p className="text-sm text-gray-600">Avg. Days to Hire</p>
+            </div>
+            <div className="text-center p-4 border rounded-lg">
+              <Target className="h-8 w-8 mx-auto mb-2 text-purple-600" />
+              <p className="text-2xl font-bold">94%</p>
+              <p className="text-sm text-gray-600">Client Satisfaction</p>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
