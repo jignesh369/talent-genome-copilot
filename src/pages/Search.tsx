@@ -39,7 +39,7 @@ const Search = () => {
   const { generatePersonalizedOutreach, processAutomaticOutreach } = useRecruitingIntelligence();
 
   const handleContactCandidate = async (candidate: EnhancedCandidate) => {
-    // Open the outreach sequence modal instead of the old flow
+    console.log('Opening outreach sequence modal for candidate:', candidate.name);
     setOutreachCandidate(candidate);
   };
 
@@ -217,7 +217,7 @@ const Search = () => {
           onClose={() => setFootprintCandidate(null)}
         />
 
-        {/* New Outreach Sequence Modal */}
+        {/* Outreach Sequence Modal */}
         {outreachCandidate && (
           <OutreachSequenceModal
             isOpen={!!outreachCandidate}

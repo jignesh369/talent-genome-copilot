@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -19,7 +18,8 @@ import {
   CheckCircle,
   AlertCircle,
   TrendingUp,
-  Edit
+  Edit,
+  Loader2
 } from 'lucide-react';
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
 import { OutreachTemplate, SequenceRecommendation, PersonalizedSequence } from '@/types/outreach-sequence';
@@ -43,36 +43,48 @@ const OutreachSequenceModal: React.FC<OutreachSequenceModalProps> = ({
   const [selectedTemplate, setSelectedTemplate] = useState<OutreachTemplate | null>(null);
   const [recommendations, setRecommendations] = useState<SequenceRecommendation[]>([]);
   const [personalizedSequence, setPersonalizedSequence] = useState<PersonalizedSequence | null>(null);
-  const [isPersonalizing, setIsPersonalizing] = useState(false);
   const [editingStep, setEditingStep] = useState<number | null>(null);
-  const { generatePersonalizedSequence } = usePersonalizationEngine();
+  const { generatePersonalizedSequence, isGenerating } = usePersonalizationEngine();
   const { toast } = useToast();
 
   useEffect(() => {
     if (isOpen && candidate) {
-      const recs = OutreachTemplateService.getRecommendedTemplates(candidate);
-      setRecommendations(recs);
-      if (recs.length > 0) {
-        setSelectedTemplate(recs[0].template);
+      console.log('OutreachSequenceModal opened for candidate:', candidate.name);
+      try {
+        const recs = OutreachTemplateService.getRecommendedTemplates(candidate);
+        console.log('Generated recommendations:', recs);
+        setRecommendations(recs);
+        if (recs.length > 0) {
+          setSelectedTemplate(recs[0].template);
+          console.log('Auto-selected template:', recs[0].template.name);
+        }
+      } catch (error) {
+        console.error('Error getting recommendations:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load template recommendations.",
+          variant: "destructive"
+        });
       }
     }
-  }, [isOpen, candidate]);
+  }, [isOpen, candidate, toast]);
 
   const handleTemplateSelect = async (template: OutreachTemplate) => {
+    console.log('Template selected:', template.name);
     setSelectedTemplate(template);
-    setIsPersonalizing(true);
     
     try {
+      console.log('Starting personalization for template:', template.name);
       const personalized = await generatePersonalizedSequence(candidate, template);
+      console.log('Personalized sequence generated:', personalized);
       setPersonalizedSequence(personalized);
     } catch (error) {
+      console.error('Personalization error:', error);
       toast({
         title: "Personalization Error",
         description: "Failed to generate personalized content. Please try again.",
         variant: "destructive"
       });
-    } finally {
-      setIsPersonalizing(false);
     }
   };
 
@@ -92,11 +104,8 @@ const OutreachSequenceModal: React.FC<OutreachSequenceModalProps> = ({
 
   const handleStartSequence = () => {
     if (personalizedSequence) {
+      console.log('Starting sequence with:', personalizedSequence);
       onSequenceStart(personalizedSequence);
-      toast({
-        title: "Sequence Started",
-        description: `${selectedTemplate?.name} sequence initiated for ${candidate.name}`,
-      });
       onClose();
     }
   };
@@ -115,6 +124,8 @@ const OutreachSequenceModal: React.FC<OutreachSequenceModalProps> = ({
     if (score >= 6) return 'text-yellow-600';
     return 'text-red-600';
   };
+
+  if (!isOpen) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -155,71 +166,82 @@ const OutreachSequenceModal: React.FC<OutreachSequenceModalProps> = ({
             </TabsList>
 
             <TabsContent value="templates" className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {recommendations.map((rec, index) => (
-                  <Card 
-                    key={rec.template.id}
-                    className={`cursor-pointer transition-all hover:shadow-lg ${
-                      selectedTemplate?.id === rec.template.id 
-                        ? 'ring-2 ring-purple-500 bg-purple-50' 
-                        : 'hover:bg-gray-50'
-                    }`}
-                    onClick={() => handleTemplateSelect(rec.template)}
-                  >
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg">{rec.template.name}</CardTitle>
-                        {index === 0 && (
-                          <Badge className="bg-green-100 text-green-800">
-                            <Star className="h-3 w-3 mr-1" />
-                            Recommended
-                          </Badge>
-                        )}
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <p className="text-sm text-gray-600">{rec.template.description}</p>
-                      
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center text-gray-500">
-                          <Clock className="h-4 w-4 mr-1" />
-                          {rec.template.steps} steps • {rec.template.duration_days} days
+              {recommendations.length === 0 ? (
+                <div className="text-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+                  <p className="text-gray-600">Loading template recommendations...</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {recommendations.map((rec, index) => (
+                    <Card 
+                      key={rec.template.id}
+                      className={`cursor-pointer transition-all hover:shadow-lg ${
+                        selectedTemplate?.id === rec.template.id 
+                          ? 'ring-2 ring-purple-500 bg-purple-50' 
+                          : 'hover:bg-gray-50'
+                      }`}
+                      onClick={() => handleTemplateSelect(rec.template)}
+                    >
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-lg">{rec.template.name}</CardTitle>
+                          {index === 0 && (
+                            <Badge className="bg-green-100 text-green-800">
+                              <Star className="h-3 w-3 mr-1" />
+                              Recommended
+                            </Badge>
+                          )}
                         </div>
-                        <div className="flex items-center text-green-600">
-                          <TrendingUp className="h-4 w-4 mr-1" />
-                          {rec.predicted_success_rate}%
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="text-xs font-medium text-gray-700">Why this template:</div>
-                        {rec.reasoning.slice(0, 2).map((reason, idx) => (
-                          <div key={idx} className="text-xs text-gray-600 flex items-start">
-                            <CheckCircle className="h-3 w-3 mr-1 mt-0.5 text-green-500 flex-shrink-0" />
-                            {reason}
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <p className="text-sm text-gray-600">{rec.template.description}</p>
+                        
+                        <div className="flex items-center justify-between text-sm">
+                          <div className="flex items-center text-gray-500">
+                            <Clock className="h-4 w-4 mr-1" />
+                            {rec.template.steps} steps • {rec.template.duration_days} days
                           </div>
-                        ))}
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="text-xs text-gray-500">
-                          Confidence: {Math.round(rec.confidence * 100)}%
+                          <div className="flex items-center text-green-600">
+                            <TrendingUp className="h-4 w-4 mr-1" />
+                            {rec.predicted_success_rate}%
+                          </div>
                         </div>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          disabled={isPersonalizing}
-                        >
-                          {isPersonalizing && selectedTemplate?.id === rec.template.id 
-                            ? 'Personalizing...' 
-                            : 'Select & Personalize'
-                          }
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+
+                        <div className="space-y-2">
+                          <div className="text-xs font-medium text-gray-700">Why this template:</div>
+                          {rec.reasoning.slice(0, 2).map((reason, idx) => (
+                            <div key={idx} className="text-xs text-gray-600 flex items-start">
+                              <CheckCircle className="h-3 w-3 mr-1 mt-0.5 text-green-500 flex-shrink-0" />
+                              {reason}
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <div className="text-xs text-gray-500">
+                            Confidence: {Math.round(rec.confidence * 100)}%
+                          </div>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            disabled={isGenerating && selectedTemplate?.id === rec.template.id}
+                          >
+                            {isGenerating && selectedTemplate?.id === rec.template.id ? (
+                              <>
+                                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                Personalizing...
+                              </>
+                            ) : (
+                              'Select & Personalize'
+                            )}
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="preview" className="space-y-4">
