@@ -1,4 +1,3 @@
-
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
 
 interface TriggerRule {
@@ -199,6 +198,10 @@ export class SmartOutreachTriggers {
       return true;
     }
     return false;
+  }
+
+  getTriggerRule(ruleId: string): TriggerRule | null {
+    return this.triggers.find(trigger => trigger.id === ruleId) || null;
   }
 }
 
