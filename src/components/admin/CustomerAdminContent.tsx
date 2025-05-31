@@ -37,10 +37,14 @@ const CustomerAdminContent: React.FC<CustomerAdminContentProps> = ({
   handleUpdateRole
 }) => {
   return (
-    <div className="col-span-9">
+    <div className="w-full min-w-0 overflow-hidden">
       <TabsContent value="overview" className="mt-0 space-y-6">
-        <QuickActionsGrid />
-        <CandidatePipeline showCandidates={false} />
+        <div className="w-full overflow-hidden">
+          <QuickActionsGrid />
+        </div>
+        <div className="w-full overflow-hidden">
+          <CandidatePipeline showCandidates={false} />
+        </div>
       </TabsContent>
 
       <AnalyticsTabsWrapper />

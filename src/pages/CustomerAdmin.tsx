@@ -112,26 +112,28 @@ const CustomerAdmin = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
       <CustomerAdminHeader organizationName={currentOrganization.name} />
 
-      <div className="max-w-7xl mx-auto px-8 py-8">
-        <div className="mb-8">
+      <div className="max-w-7xl mx-auto px-4 lg:px-8 py-4 lg:py-8">
+        <div className="mb-6 lg:mb-8">
           <CustomerAdminWelcome userName={user?.user_metadata?.first_name} />
         </div>
 
-        {/* Improved Stats Grid - 3 columns instead of 4 for better spacing */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+        {/* Improved Stats Grid - 3 columns with better responsive design */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-8 mb-6 lg:mb-10">
           {organizationStats.map((stat, index) => (
             <StatCard key={index} {...stat} />
           ))}
         </div>
 
-        {/* Main Content with improved spacing */}
+        {/* Main Content with improved spacing and overflow handling */}
         <Tabs defaultValue="overview" className="w-full">
-          <div className="grid grid-cols-12 gap-8">
-            <CustomerAdminSidebar />
-            <div className="col-span-9">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-8">
+            <div className="lg:col-span-3">
+              <CustomerAdminSidebar />
+            </div>
+            <div className="lg:col-span-9 min-w-0 overflow-hidden">
               <CustomerAdminContent
                 currentOrganization={currentOrganization}
                 teamMembers={teamMembers}

@@ -10,21 +10,21 @@ interface ResourceUtilizationProps {
 
 const ResourceUtilization: React.FC<ResourceUtilizationProps> = ({ resources }) => {
   return (
-    <Card>
+    <Card className="w-full overflow-hidden">
       <CardHeader>
-        <CardTitle className="flex items-center">
-          <Cpu className="w-5 h-5 mr-2" />
-          Resource Utilization
+        <CardTitle className="flex items-center text-sm lg:text-base">
+          <Cpu className="w-4 h-4 lg:w-5 lg:h-5 mr-2 flex-shrink-0" />
+          <span className="truncate">Resource Utilization</span>
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-6">
+      <CardContent className="p-3 lg:p-6">
+        <div className="space-y-4 lg:space-y-6">
           {resources.map((resource, index) => (
-            <div key={index}>
+            <div key={index} className="w-full">
               <div className="flex items-center justify-between mb-2">
-                <span className="font-medium">{resource.name}</span>
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm text-gray-600">
+                <span className="font-medium text-sm lg:text-base truncate mr-2">{resource.name}</span>
+                <div className="flex items-center space-x-2 flex-shrink-0">
+                  <span className="text-xs lg:text-sm text-gray-600">
                     {resource.current}%
                   </span>
                   <div className="flex items-center">
@@ -41,7 +41,7 @@ const ResourceUtilization: React.FC<ResourceUtilizationProps> = ({ resources }) 
               </div>
               <Progress 
                 value={resource.current} 
-                className="h-2"
+                className="h-2 w-full"
               />
             </div>
           ))}
