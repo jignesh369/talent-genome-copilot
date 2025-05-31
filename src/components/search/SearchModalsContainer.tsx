@@ -14,7 +14,7 @@ interface SearchModalsContainerProps {
   onCloseFootprint: () => void;
   onCloseOutreach: () => void;
   onContactCandidate: (candidate: EnhancedCandidate) => void;
-  onFeedback: (candidateId: string, isPositive: boolean) => void;
+  onFeedback: (candidateId: string, feedback: 'positive' | 'negative', reason?: string) => void;
   onSequenceStart: (sequence: PersonalizedSequence) => void;
 }
 

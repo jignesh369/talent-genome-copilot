@@ -11,7 +11,7 @@ interface SearchResultsContainerProps {
   onViewProfile: (candidate: EnhancedCandidate) => void;
   onViewSnapshot: (candidate: EnhancedCandidate) => void;
   onContactCandidate: (candidate: EnhancedCandidate) => void;
-  onFeedback: (candidateId: string, isPositive: boolean) => void;
+  onFeedback: (candidateId: string, feedback: 'positive' | 'negative', reason?: string) => void;
   onRefinementClick: (refinement: string) => void;
 }
 
