@@ -1,42 +1,87 @@
 
 import React from 'react';
-import { Card, CardContent } from "@/components/ui/card";
-import { Brain, Sparkles, Github, Users } from "lucide-react";
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Search, Lightbulb, Users } from 'lucide-react';
 
-const EmptyState: React.FC = () => {
+interface EmptyStateProps {
+  onStartSearch?: () => void;
+}
+
+const EmptyState: React.FC<EmptyStateProps> = ({ onStartSearch }) => {
+  const searchExamples = [
+    "Find React developers with 5+ years experience in San Francisco",
+    "Senior Python engineers with machine learning background",
+    "Frontend developers who know TypeScript and have startup experience",
+    "DevOps engineers with AWS certification in remote locations"
+  ];
+
   return (
-    <Card className="max-w-3xl mx-auto shadow-lg border-0 bg-gradient-to-br from-white to-gray-50">
-      <CardContent className="text-center py-16">
-        <div className="relative mb-6">
-          <Brain className="h-16 w-16 text-purple-400 mx-auto" />
-          <div className="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
-            <Sparkles className="h-3 w-3 text-white" />
+    <div className="w-full max-w-4xl mx-auto">
+      <Card>
+        <CardContent className="text-center py-12">
+          <div className="mb-8">
+            <div className="w-16 h-16 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Search className="w-8 h-8 text-blue-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">AI-Powered Candidate Search</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto mb-8">
+              Use natural language to find the perfect candidates. Our AI understands your requirements 
+              and matches them with real candidate profiles from across the web.
+            </p>
           </div>
-        </div>
-        <h3 className="text-2xl font-bold text-gray-900 mb-3">Ready to discover exceptional talent?</h3>
-        <p className="text-gray-600 mb-6 leading-relaxed max-w-lg mx-auto">
-          Use natural language to describe your ideal candidate. Our AI analyzes public data across 
-          multiple platforms to find perfect matches with comprehensive insights.
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 text-sm">
-          <div className="p-4 bg-blue-50 rounded-lg">
-            <Github className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-            <div className="font-medium text-blue-800">GitHub Analysis</div>
-            <div className="text-blue-600">Code quality & contributions</div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="text-left">
+              <div className="flex items-center gap-2 mb-3">
+                <Lightbulb className="w-5 h-5 text-yellow-500" />
+                <h3 className="font-semibold text-gray-900">Search Examples</h3>
+              </div>
+              <ul className="space-y-2 text-sm text-gray-600">
+                {searchExamples.map((example, index) => (
+                  <li key={index} className="flex items-start gap-2">
+                    <span className="text-blue-500 mt-1">•</span>
+                    <span>"{example}"</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            
+            <div className="text-left">
+              <div className="flex items-center gap-2 mb-3">
+                <Users className="w-5 h-5 text-green-500" />
+                <h3 className="font-semibold text-gray-900">What You'll Get</h3>
+              </div>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li className="flex items-start gap-2">
+                  <span className="text-green-500 mt-1">✓</span>
+                  <span>Real candidate profiles with contact information</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-500 mt-1">✓</span>
+                  <span>AI-powered matching scores and insights</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-500 mt-1">✓</span>
+                  <span>Social media and professional network data</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-500 mt-1">✓</span>
+                  <span>Skills analysis and experience verification</span>
+                </li>
+              </ul>
+            </div>
           </div>
-          <div className="p-4 bg-green-50 rounded-lg">
-            <Users className="h-8 w-8 text-green-600 mx-auto mb-2" />
-            <div className="font-medium text-green-800">Community Presence</div>
-            <div className="text-green-600">Stack Overflow, Twitter, LinkedIn</div>
-          </div>
-          <div className="p-4 bg-purple-50 rounded-lg">
-            <Brain className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-            <div className="font-medium text-purple-800">AI Insights</div>
-            <div className="text-purple-600">Career trajectory & fit analysis</div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+
+          {onStartSearch && (
+            <Button onClick={onStartSearch} size="lg" className="px-8">
+              <Search className="w-5 h-5 mr-2" />
+              Start Your Search
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

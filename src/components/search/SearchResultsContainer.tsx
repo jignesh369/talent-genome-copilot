@@ -1,71 +1,117 @@
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Filter, SortDesc } from 'lucide-react';
+import React, { useState } from 'react';
+import { useSearch } from '@/hooks/useSearch';
 import SimplifiedCandidateCard from './SimplifiedCandidateCard';
-import SearchSidebar from './SearchSidebar';
-import { SearchResult, EnhancedCandidate } from '@/types/enhanced-candidate';
+import CandidateDetailsModal from './CandidateDetailsModal';
+import DigitalFootprintModal from './DigitalFootprintModal';
+import { EnhancedCandidate } from '@/types/enhanced-candidate';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Users, TrendingUp, Clock } from 'lucide-react';
 
-interface SearchResultsContainerProps {
-  searchResult: SearchResult;
-  onViewProfile: (candidate: EnhancedCandidate) => void;
-  onViewSnapshot: (candidate: EnhancedCandidate) => void;
-  onContactCandidate: (candidate: EnhancedCandidate) => void;
-  onFeedback: (candidateId: string, feedback: 'positive' | 'negative', reason?: string) => void;
-  onRefinementClick: (refinement: string) => void;
-}
+const SearchResultsContainer: React.FC = () => {
+  const { searchResult, handleFeedback } = useSearch();
+  const [selectedCandidate, setSelectedCandidate] = useState<EnhancedCandidate | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showDigitalFootprint, setShowDigitalFootprint] = useState(false);
 
-const SearchResultsContainer: React.FC<SearchResultsContainerProps> = ({
-  searchResult,
-  onViewProfile,
-  onViewSnapshot,
-  onContactCandidate,
-  onFeedback,
-  onRefinementClick
-}) => {
+  if (!searchResult) {
+    return null;
+  }
+
+  const { candidates, search_metadata } = searchResult;
+
+  const handleCandidateClick = (candidate: EnhancedCandidate) => {
+    setSelectedCandidate(candidate);
+    setShowDetailsModal(true);
+  };
+
+  const handleViewDigitalFootprint = (candidate: EnhancedCandidate) => {
+    setSelectedCandidate(candidate);
+    setShowDigitalFootprint(true);
+  };
+
+  const handleCloseModals = () => {
+    setShowDetailsModal(false);
+    setShowDigitalFootprint(false);
+    setSelectedCandidate(null);
+  };
+
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-      <div className="xl:col-span-3">
-        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4 mb-6">
-          <div className="flex-1">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Best Matches ({searchResult.candidates.length})
-            </h2>
-            <p className="text-gray-600">Ranked by AI relevance and digital footprint analysis</p>
-          </div>
-          
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="hover:bg-purple-50 hover:border-purple-200">
-              <Filter className="h-4 w-4 mr-2" />
-              Refine
-            </Button>
-            <Button variant="outline" size="sm" className="hover:bg-blue-50 hover:border-blue-200">
-              <SortDesc className="h-4 w-4 mr-2" />
-              Sort
-            </Button>
-          </div>
-        </div>
+    <div className="w-full space-y-6">
+      {/* Search Metadata */}
+      {search_metadata && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5" />
+              Search Results Summary
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-blue-500" />
+                <span className="text-sm text-gray-600">Total Found:</span>
+                <Badge variant="secondary">{candidates?.length || 0}</Badge>
+              </div>
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-green-500" />
+                <span className="text-sm text-gray-600">Search Time:</span>
+                <Badge variant="secondary">{search_metadata.search_time_ms}ms</Badge>
+              </div>
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-purple-500" />
+                <span className="text-sm text-gray-600">Avg Score:</span>
+                <Badge variant="secondary">
+                  {search_metadata.average_match_score?.toFixed(1) || 'N/A'}
+                </Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-        <div className="space-y-4">
-          {searchResult.candidates.map((candidate) => (
-            <SimplifiedCandidateCard 
-              key={candidate.id} 
+      {/* Candidates Grid */}
+      {candidates && candidates.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {candidates.map((candidate) => (
+            <SimplifiedCandidateCard
+              key={candidate.id}
               candidate={candidate}
-              onViewProfile={onViewProfile}
-              onViewSnapshot={onViewSnapshot}
-              onFeedback={onFeedback}
-              onContactCandidate={onContactCandidate}
+              onClick={() => handleCandidateClick(candidate)}
+              onViewDigitalFootprint={() => handleViewDigitalFootprint(candidate)}
+              onFeedback={(feedback, reason) => handleFeedback(candidate.id, feedback, reason)}
             />
           ))}
         </div>
-      </div>
+      ) : (
+        <Card>
+          <CardContent className="text-center py-12">
+            <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No Candidates Found</h3>
+            <p className="text-gray-600">
+              Try adjusting your search criteria or using different keywords.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
-      <div className="xl:col-span-1">
-        <SearchSidebar 
-          searchResult={searchResult} 
-          onRefinementClick={onRefinementClick}
-        />
-      </div>
+      {/* Modals */}
+      {selectedCandidate && (
+        <>
+          <CandidateDetailsModal
+            candidate={selectedCandidate}
+            isOpen={showDetailsModal}
+            onClose={handleCloseModals}
+          />
+          <DigitalFootprintModal
+            candidate={selectedCandidate}
+            isOpen={showDigitalFootprint}
+            onClose={handleCloseModals}
+          />
+        </>
+      )}
     </div>
   );
 };

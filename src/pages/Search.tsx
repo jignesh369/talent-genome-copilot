@@ -1,124 +1,59 @@
 
-import React, { useState } from 'react';
-import RecruiterLayout from '@/components/recruiter/RecruiterLayout';
+import React from 'react';
 import SearchTabsContainer from '@/components/search/SearchTabsContainer';
-import SearchModalsContainer from '@/components/search/SearchModalsContainer';
-import { useSearch } from '@/hooks/useSearch';
-import { useSearchModals } from '@/hooks/useSearchModals';
-import { useRecruitingIntelligence } from '@/hooks/useRecruitingIntelligence';
-import { EnhancedCandidate } from '@/types/enhanced-candidate';
-import { PersonalizedSequence } from '@/types/outreach-sequence';
-import { useToast } from '@/hooks/use-toast';
+import SearchHeader from '@/components/search/SearchHeader';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import { useAuthContext } from '@/hooks/useAuthContext';
 
-const Search = () => {
-  const [activeTab, setActiveTab] = useState('search');
-  const { toast } = useToast();
-  
-  const {
-    query,
-    setQuery,
-    isSearching,
-    searchResult,
-    isListening,
-    handleSearch,
-    handleVoiceInput,
-    handleFeedback
-  } = useSearch();
+const Search: React.FC = () => {
+  const { user, loading, organizationId } = useAuthContext();
 
-  const {
-    selectedCandidate,
-    footprintCandidate,
-    outreachCandidate,
-    openCandidateDetails,
-    openDigitalFootprint,
-    openOutreachSequence,
-    setSelectedCandidate,
-    setFootprintCandidate,
-    setOutreachCandidate
-  } = useSearchModals();
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading search interface...</p>
+        </div>
+      </div>
+    );
+  }
 
-  const { processAutomaticOutreach } = useRecruitingIntelligence();
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center bg-white p-8 rounded-lg shadow-sm border">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Authentication Required</h2>
+          <p className="text-gray-600 mb-4">Please log in to access the search functionality.</p>
+          <button 
+            onClick={() => window.location.href = '/auth'} 
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-  const handleContactCandidate = async (candidate: EnhancedCandidate) => {
-    console.log('Opening outreach sequence modal for candidate:', candidate.name);
-    openOutreachSequence(candidate);
-  };
-
-  const handleSequenceStart = async (personalizedSequence: PersonalizedSequence) => {
-    try {
-      console.log('Starting outreach sequence:', personalizedSequence);
-      
-      toast({
-        title: "Outreach Sequence Started",
-        description: `Personalized sequence launched successfully for ${outreachCandidate?.name}`,
-      });
-      
-      setOutreachCandidate(null);
-    } catch (error) {
-      console.error('Error starting sequence:', error);
-      toast({
-        title: "Error",
-        description: "Failed to start outreach sequence. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleAutomaticOutreach = async () => {
-    try {
-      toast({
-        title: "Processing Automatic Outreach",
-        description: "Analyzing candidates and generating triggered outreach...",
-      });
-
-      await processAutomaticOutreach();
-    } catch (error) {
-      console.error('Error in automatic outreach:', error);
-      toast({
-        title: "Error",
-        description: "Failed to process automatic outreach.",
-        variant: "destructive"
-      });
-    }
-  };
+  if (!organizationId) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center bg-white p-8 rounded-lg shadow-sm border">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Organization Required</h2>
+          <p className="text-gray-600 mb-4">No organization found for your account. Please contact your administrator.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <RecruiterLayout 
-      title="AI-Powered Talent Discovery" 
-      subtitle="Discover exceptional talent with enhanced AI outreach and smart triggers"
-      showSearch={false}
-    >
-      <div className="max-w-7xl mx-auto space-y-6">
-        <SearchTabsContainer
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          query={query}
-          setQuery={setQuery}
-          isSearching={isSearching}
-          searchResult={searchResult}
-          isListening={isListening}
-          handleSearch={handleSearch}
-          handleVoiceInput={handleVoiceInput}
-          handleFeedback={handleFeedback}
-          handleAutomaticOutreach={handleAutomaticOutreach}
-          onViewProfile={openCandidateDetails}
-          onViewSnapshot={openDigitalFootprint}
-          onContactCandidate={handleContactCandidate}
-        />
-
-        <SearchModalsContainer
-          selectedCandidate={selectedCandidate}
-          footprintCandidate={footprintCandidate}
-          outreachCandidate={outreachCandidate}
-          onCloseCandidate={() => setSelectedCandidate(null)}
-          onCloseFootprint={() => setFootprintCandidate(null)}
-          onCloseOutreach={() => setOutreachCandidate(null)}
-          onContactCandidate={handleContactCandidate}
-          onFeedback={handleFeedback}
-          onSequenceStart={handleSequenceStart}
-        />
+    <ErrorBoundary>
+      <div className="min-h-screen bg-gray-50">
+        <SearchHeader />
+        <SearchTabsContainer />
       </div>
-    </RecruiterLayout>
+    </ErrorBoundary>
   );
 };
 
