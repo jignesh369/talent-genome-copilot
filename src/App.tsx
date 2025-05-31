@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,7 +10,6 @@ import SmartLanding from "./components/smart-landing/SmartLanding";
 import AuthPage from "./components/auth/AuthPage";
 import StartupAdmin from "./pages/StartupAdmin";
 import CustomerAdmin from "./pages/CustomerAdmin";
-import RecruiterLayout from "./components/recruiter/RecruiterLayout";
 import Candidates from "./pages/Candidates";
 import Jobs from "./pages/Jobs";
 import Analytics from "./pages/Analytics";
@@ -122,47 +122,35 @@ const App = () => (
               </ProtectedRoute>
             } />
             
-            {/* Individual Pages with Unified Layout */}
+            {/* Individual Pages - These use RecruiterLayout internally, no wrapping needed */}
             <Route path="/candidates" element={
               <ProtectedRoute allowedRoles={['recruiter', 'hiring_manager']}>
-                <RecruiterLayout>
-                  <Candidates />
-                </RecruiterLayout>
+                <Candidates />
               </ProtectedRoute>
             } />
             <Route path="/jobs" element={
               <ProtectedRoute allowedRoles={['recruiter', 'hiring_manager']}>
-                <RecruiterLayout>
-                  <Jobs />
-                </RecruiterLayout>
+                <Jobs />
               </ProtectedRoute>
             } />
             <Route path="/analytics" element={
               <ProtectedRoute allowedRoles={['recruiter', 'hiring_manager']}>
-                <RecruiterLayout>
-                  <Analytics />
-                </RecruiterLayout>
+                <Analytics />
               </ProtectedRoute>
             } />
             <Route path="/communication" element={
               <ProtectedRoute allowedRoles={['recruiter', 'hiring_manager']}>
-                <RecruiterLayout>
-                  <Communication />
-                </RecruiterLayout>
+                <Communication />
               </ProtectedRoute>
             } />
             <Route path="/search" element={
               <ProtectedRoute allowedRoles={['recruiter', 'hiring_manager']}>
-                <RecruiterLayout>
-                  <Search />
-                </RecruiterLayout>
+                <Search />
               </ProtectedRoute>
             } />
             <Route path="/settings" element={
               <ProtectedRoute>
-                <RecruiterLayout>
-                  <Settings />
-                </RecruiterLayout>
+                <Settings />
               </ProtectedRoute>
             } />
             <Route path="*" element={<NotFound />} />

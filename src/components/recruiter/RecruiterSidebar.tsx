@@ -53,9 +53,16 @@ const RecruiterSidebar: React.FC<RecruiterSidebarProps> = ({ activeTab, onTabCha
       // For dashboard tabs, navigate to dashboard and set the tab
       if (location.pathname !== '/recruiter-dashboard') {
         navigate('/recruiter-dashboard');
-      }
-      if (onTabChange) {
-        onTabChange(item.id);
+        // Set a timeout to ensure navigation completes before setting tab
+        setTimeout(() => {
+          if (onTabChange) {
+            onTabChange(item.id);
+          }
+        }, 100);
+      } else {
+        if (onTabChange) {
+          onTabChange(item.id);
+        }
       }
     }
     // For non-dashboard tabs, Link component will handle navigation
