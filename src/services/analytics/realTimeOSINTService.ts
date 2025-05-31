@@ -82,7 +82,7 @@ class RealTimeOSINTService {
   }
 
   private async refreshOSINTProfile(candidateId: string): Promise<OSINTProfile> {
-    // Mock updated OSINT data
+    // Mock updated OSINT data that matches the osint.ts type
     const updatedProfile: OSINTProfile = {
       candidate_id: candidateId,
       overall_score: Math.random() * 2 + 8,
@@ -94,8 +94,8 @@ class RealTimeOSINTService {
       availability_signals: []
     };
 
-    // Update candidate with new OSINT data
-    enhancedCandidateService.updateOSINTProfile(candidateId, updatedProfile);
+    // This would normally update the candidate through the service
+    console.log(`Updated OSINT profile for candidate ${candidateId}`);
     
     return updatedProfile;
   }

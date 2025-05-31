@@ -178,7 +178,7 @@ Looking forward to seeing your approach to these challenges!
     const osint = candidate.osint_profile;
     
     return {
-      candidate_name: candidate.first_name || candidate.name?.split(' ')[0] || 'there',
+      candidate_name: candidate.name?.split(' ')[0] || 'there',
       specific_skill: candidate.skills[0] || 'technical expertise',
       achievement_highlight: this.extractAchievement(candidate),
       technical_highlight: this.extractTechnicalHighlight(candidate),
@@ -206,25 +206,25 @@ Looking forward to seeing your approach to these challenges!
   }
 
   private extractAchievement(candidate: EnhancedCandidate): string {
-    if (candidate.osint_profile?.github?.public_repos > 20) {
-      return `${candidate.osint_profile.github.public_repos}+ open source projects`;
+    if (candidate.osint_profile?.github_profile?.public_repos > 20) {
+      return `${candidate.osint_profile.github_profile.public_repos}+ open source projects`;
     }
-    if (candidate.technical_depth_score > 8) {
+    if (candidate.technical_depth_score && candidate.technical_depth_score > 8) {
       return 'exceptional technical depth';
     }
     return 'strong technical background';
   }
 
   private extractTechnicalHighlight(candidate: EnhancedCandidate): string {
-    const github = candidate.osint_profile?.github;
-    if (github?.contribution_streak > 100) {
-      return `${github.contribution_streak}-day contribution streak on GitHub`;
+    const github = candidate.osint_profile?.github_profile;
+    if (github?.contribution_activity > 100) {
+      return `Active contributor with ${github.contribution_activity} contributions`;
     }
     return `Expertise in ${candidate.skills.slice(0, 2).join(' and ')}`;
   }
 
   private extractCommunityInvolvement(candidate: EnhancedCandidate): string {
-    if (candidate.community_influence_score > 7) {
+    if (candidate.community_influence_score && candidate.community_influence_score > 7) {
       return 'Active community leadership and mentoring';
     }
     return 'Engaged in developer communities';

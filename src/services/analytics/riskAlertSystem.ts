@@ -69,18 +69,18 @@ class RiskAlertSystem {
       ));
     }
 
-    // Availability concerns
+    // Availability concerns - using availability_signals instead of availability_status
     const recentAvailabilitySignals = candidate.availability_signals.filter(
       signal => new Date(signal.detected_date) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
     );
 
-    if (recentAvailabilitySignals.length === 0 && candidate.availability_status === 'passive') {
+    if (recentAvailabilitySignals.length === 0) {
       risks.push(this.createAlert(
         candidate.id,
         'availability',
         'low',
         'Unclear Availability Status',
-        'No recent availability signals detected for passive candidate',
+        'No recent availability signals detected for candidate',
         [
           'Probe availability status in next interaction',
           'Update OSINT monitoring frequency',
