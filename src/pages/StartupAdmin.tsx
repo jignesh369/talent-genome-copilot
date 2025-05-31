@@ -4,23 +4,24 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import OrganizationModal from '@/components/modals/OrganizationModal';
 import BillingManagement from '@/components/admin/BillingManagement';
 import AdvancedAnalytics from '@/components/admin/AdvancedAnalytics';
-import TeamAnalytics from '@/components/admin/TeamAnalytics';
 import SystemHealth from '@/components/admin/SystemHealth';
 import AIModelManagement from '@/components/admin/AIModelManagement';
 import FeatureReleaseControl from '@/components/admin/FeatureReleaseControl';
 import GlobalPerformanceMonitor from '@/components/admin/GlobalPerformanceMonitor';
-import AdvancedRevenueAnalytics from '@/components/admin/AdvancedRevenueAnalytics';
+import AuditLogs from '@/components/admin/AuditLogs';
 import StartupAdminHeader from '@/components/admin/StartupAdminHeader';
 import StartupAdminWelcome from '@/components/admin/StartupAdminWelcome';
 import StartupAdminSidebar from '@/components/admin/StartupAdminSidebar';
-import StartupAdminStats from '@/components/admin/StartupAdminStats';
 import StartupAdminOverview from '@/components/admin/StartupAdminOverview';
 import StartupAdminOrganizations from '@/components/admin/StartupAdminOrganizations';
 import { Organization } from '@/types/organization';
 import { 
   Building, 
   Users, 
-  DollarSign
+  DollarSign,
+  TrendingUp,
+  Shield,
+  Zap
 } from 'lucide-react';
 
 const StartupAdmin = () => {
@@ -30,7 +31,7 @@ const StartupAdmin = () => {
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create');
   const [dateRange, setDateRange] = useState('30d');
 
-  // Standardized organization data
+  // Enhanced organization data with more realistic metrics
   const [organizations, setOrganizations] = useState<Organization[]>([
     { 
       id: '1', 
@@ -91,18 +92,56 @@ const StartupAdmin = () => {
     }
   ]);
 
-  // Simplified stats for cleaner layout
+  // Enhanced platform stats with more impressive metrics
   const platformStats = [
-    { label: 'Organizations', value: organizations.length.toString(), icon: Building, color: 'text-blue-600' },
-    { label: 'Platform Users', value: '347', icon: Users, color: 'text-green-600' },
-    { label: 'Monthly Revenue', value: '$47.3k', icon: DollarSign, color: 'text-emerald-600' }
+    { 
+      label: 'Organizations', 
+      value: organizations.length.toString(), 
+      icon: Building, 
+      color: 'text-blue-600',
+      change: '+12% this month',
+      trend: 'up'
+    },
+    { 
+      label: 'Platform Users', 
+      value: '2,347', 
+      icon: Users, 
+      color: 'text-emerald-600',
+      change: '+18% this month',
+      trend: 'up'
+    },
+    { 
+      label: 'Monthly ARR', 
+      value: '$284k', 
+      icon: TrendingUp, 
+      color: 'text-purple-600',
+      change: '+24% this month',
+      trend: 'up'
+    },
+    {
+      label: 'System Health',
+      value: '99.9%',
+      icon: Shield,
+      color: 'text-green-600',
+      change: 'All systems operational',
+      trend: 'stable'
+    },
+    {
+      label: 'AI Accuracy',
+      value: '94.2%',
+      icon: Zap,
+      color: 'text-indigo-600',
+      change: '+2.1% this week',
+      trend: 'up'
+    }
   ];
 
   const recentActivities = [
-    { action: 'New organization registered', organization: 'TechCorp Inc.', time: '2 hours ago' },
-    { action: 'Subscription upgraded', organization: 'StartupXYZ', time: '4 hours ago' },
-    { action: 'New job posted', organization: 'DesignStudio', time: '6 hours ago' },
-    { action: 'User limit increased', organization: 'InnovateLab', time: '1 day ago' }
+    { action: 'Enterprise upgrade', organization: 'TechCorp Inc.', time: '15 mins ago', type: 'revenue' },
+    { action: 'New organization registered', organization: 'AI Innovations Ltd.', time: '1 hour ago', type: 'growth' },
+    { action: 'Feature flag enabled', organization: 'Global rollout', time: '2 hours ago', type: 'feature' },
+    { action: 'Security scan completed', organization: 'Platform-wide', time: '3 hours ago', type: 'security' },
+    { action: 'Performance optimization', organization: 'Infrastructure', time: '4 hours ago', type: 'performance' }
   ];
 
   const handleCreateOrganization = () => {
@@ -149,7 +188,7 @@ const StartupAdmin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
       <StartupAdminHeader onSignOut={signOut} />
 
       <div className="max-w-7xl mx-auto px-8 py-8">
@@ -157,18 +196,25 @@ const StartupAdmin = () => {
           <StartupAdminWelcome userName={user?.user_metadata?.first_name} />
         </div>
 
-        {/* Improved Stats Grid - 3 columns instead of 4 for better spacing */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+        {/* Enhanced Stats Grid - 5 columns for more comprehensive view */}
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-10">
           {platformStats.map((stat, index) => (
-            <div key={index} className="bg-white rounded-lg p-6 shadow-sm border">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">{stat.label}</p>
-                  <p className="text-2xl font-semibold text-gray-900 mt-1">{stat.value}</p>
-                </div>
+            <div key={index} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200">
+              <div className="flex items-center justify-between mb-3">
                 <div className={`p-3 rounded-lg bg-gray-50`}>
-                  <stat.icon className={`w-6 h-6 ${stat.color}`} />
+                  <stat.icon className={`w-5 h-5 ${stat.color}`} />
                 </div>
+                {stat.trend === 'up' && (
+                  <div className="flex items-center text-emerald-600 text-xs">
+                    <TrendingUp className="w-3 h-3 mr-1" />
+                    <span>Up</span>
+                  </div>
+                )}
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-1">{stat.label}</p>
+                <p className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</p>
+                <p className="text-xs text-emerald-600">{stat.change}</p>
               </div>
             </div>
           ))}
@@ -188,14 +234,6 @@ const StartupAdmin = () => {
                 />
               </TabsContent>
 
-              <TabsContent value="performance" className="mt-0">
-                <GlobalPerformanceMonitor />
-              </TabsContent>
-
-              <TabsContent value="revenue" className="mt-0">
-                <AdvancedRevenueAnalytics />
-              </TabsContent>
-
               <TabsContent value="analytics" className="mt-0">
                 <AdvancedAnalytics 
                   dateRange={dateRange}
@@ -203,8 +241,34 @@ const StartupAdmin = () => {
                 />
               </TabsContent>
 
-              <TabsContent value="team" className="mt-0">
-                <TeamAnalytics />
+              <TabsContent value="performance" className="mt-0">
+                <GlobalPerformanceMonitor />
+              </TabsContent>
+
+              <TabsContent value="predictive" className="mt-0">
+                <div className="space-y-6">
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-8 border">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">AI Predictions</h2>
+                    <p className="text-gray-600 mb-6">Advanced predictive analytics powered by machine learning</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="bg-white rounded-lg p-4 shadow-sm">
+                        <h3 className="font-semibold text-gray-900 mb-2">Revenue Forecast</h3>
+                        <p className="text-2xl font-bold text-emerald-600">$425k</p>
+                        <p className="text-sm text-gray-600">Predicted next month</p>
+                      </div>
+                      <div className="bg-white rounded-lg p-4 shadow-sm">
+                        <h3 className="font-semibold text-gray-900 mb-2">Churn Risk</h3>
+                        <p className="text-2xl font-bold text-orange-600">2.1%</p>
+                        <p className="text-sm text-gray-600">Organizations at risk</p>
+                      </div>
+                      <div className="bg-white rounded-lg p-4 shadow-sm">
+                        <h3 className="font-semibold text-gray-900 mb-2">Growth Rate</h3>
+                        <p className="text-2xl font-bold text-blue-600">+18%</p>
+                        <p className="text-sm text-gray-600">Projected monthly</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </TabsContent>
 
               <TabsContent value="health" className="mt-0">
@@ -220,6 +284,17 @@ const StartupAdmin = () => {
                 />
               </TabsContent>
 
+              <TabsContent value="billing" className="mt-0">
+                <BillingManagement 
+                  organizations={organizations}
+                  onUpdateBilling={handleUpdateBilling}
+                />
+              </TabsContent>
+
+              <TabsContent value="logs" className="mt-0">
+                <AuditLogs />
+              </TabsContent>
+
               <TabsContent value="ai-models" className="mt-0">
                 <AIModelManagement />
               </TabsContent>
@@ -228,11 +303,35 @@ const StartupAdmin = () => {
                 <FeatureReleaseControl />
               </TabsContent>
 
-              <TabsContent value="billing" className="mt-0">
-                <BillingManagement 
-                  organizations={organizations}
-                  onUpdateBilling={handleUpdateBilling}
-                />
+              <TabsContent value="security" className="mt-0">
+                <div className="space-y-6">
+                  <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-xl p-8 border">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Security Center</h2>
+                    <p className="text-gray-600 mb-6">Platform security monitoring and threat detection</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div className="bg-white rounded-lg p-4 shadow-sm">
+                        <h3 className="font-semibold text-gray-900 mb-2">Security Score</h3>
+                        <p className="text-2xl font-bold text-green-600">98/100</p>
+                        <p className="text-sm text-gray-600">Excellent security</p>
+                      </div>
+                      <div className="bg-white rounded-lg p-4 shadow-sm">
+                        <h3 className="font-semibold text-gray-900 mb-2">Threats Blocked</h3>
+                        <p className="text-2xl font-bold text-red-600">247</p>
+                        <p className="text-sm text-gray-600">Last 24 hours</p>
+                      </div>
+                      <div className="bg-white rounded-lg p-4 shadow-sm">
+                        <h3 className="font-semibold text-gray-900 mb-2">Compliance</h3>
+                        <p className="text-2xl font-bold text-blue-600">100%</p>
+                        <p className="text-sm text-gray-600">GDPR, SOC2 compliant</p>
+                      </div>
+                      <div className="bg-white rounded-lg p-4 shadow-sm">
+                        <h3 className="font-semibold text-gray-900 mb-2">Last Scan</h3>
+                        <p className="text-2xl font-bold text-gray-600">2m</p>
+                        <p className="text-sm text-gray-600">ago</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </TabsContent>
             </div>
           </div>
