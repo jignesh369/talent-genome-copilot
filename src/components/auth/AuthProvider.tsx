@@ -2,17 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-
-interface AuthContextType {
-  user: User | null;
-  session: Session | null;
-  userRole: string | null;
-  organizationId: string | null;
-  loading: boolean;
-  signOut: () => Promise<void>;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+import { AuthContext, AuthContextType } from '@/hooks/useAuthContext';
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -29,60 +19,94 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [organizationId, setOrganizationId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchUserOrganization = async (userId: string) => {
+    try {
+      console.log('AuthProvider: Fetching organization for user:', userId);
+      
+      // First try to get organization from organization_members table
+      const { data: memberData, error: memberError } = await supabase
+        .from('organization_members')
+        .select(`
+          organization_id,
+          role,
+          organizations (*)
+        `)
+        .eq('user_id', userId)
+        .single();
+
+      if (memberError) {
+        console.log('AuthProvider: No organization membership found, checking user_roles');
+        
+        // Fallback to user_roles table
+        const { data: roleData, error: roleError } = await supabase
+          .from('user_roles')
+          .select('role, organization_id')
+          .eq('user_id', userId)
+          .single();
+
+        if (roleError) {
+          console.log('AuthProvider: No user role found, using defaults');
+          setUserRole('candidate');
+          setOrganizationId(null);
+        } else {
+          console.log('AuthProvider: User role found:', roleData);
+          setUserRole(roleData.role);
+          setOrganizationId(roleData.organization_id);
+        }
+      } else {
+        console.log('AuthProvider: Organization membership found:', memberData);
+        setUserRole(memberData.role);
+        setOrganizationId(memberData.organization_id);
+      }
+    } catch (error) {
+      console.error('AuthProvider: Error fetching user organization:', error);
+      setUserRole('candidate');
+      setOrganizationId(null);
+    }
+  };
+
+  const refreshAuth = async () => {
+    if (user) {
+      await fetchUserOrganization(user.id);
+    }
+  };
+
   useEffect(() => {
+    console.log('AuthProvider: Setting up auth state listener');
+    
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
+        console.log('AuthProvider: Auth state changed:', event, !!session);
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // For now, set default role based on email or user metadata
-          // This will be replaced with database lookup once tables are created
-          setDefaultUserRole(session.user);
+          await fetchUserOrganization(session.user.id);
         } else {
           setUserRole(null);
           setOrganizationId(null);
-          setLoading(false);
         }
+        
+        setLoading(false);
       }
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log('AuthProvider: Initial session check:', !!session);
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        setDefaultUserRole(session.user);
-      } else {
-        setLoading(false);
+        await fetchUserOrganization(session.user.id);
       }
+      
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
-
-  const setDefaultUserRole = (user: User) => {
-    // Temporary role assignment logic until database is set up
-    // You can customize this based on email domains or user metadata
-    const email = user.email || '';
-    
-    if (email.includes('admin@') || user.user_metadata?.role === 'startup_admin') {
-      setUserRole('startup_admin');
-    } else if (email.includes('customer@') || user.user_metadata?.role === 'customer_admin') {
-      setUserRole('customer_admin');
-    } else if (email.includes('recruiter@') || user.user_metadata?.role === 'recruiter') {
-      setUserRole('recruiter');
-    } else if (email.includes('hiring@') || user.user_metadata?.role === 'hiring_manager') {
-      setUserRole('hiring_manager');
-    } else {
-      setUserRole('candidate'); // Default role
-    }
-    
-    setOrganizationId('default-org'); // Temporary organization ID
-    setLoading(false);
-  };
 
   const signOut = async () => {
     try {
@@ -96,17 +120,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const value: AuthContextType = {
+    user,
+    session,
+    userRole,
+    organizationId,
+    loading,
+    signOut,
+    refreshAuth,
+  };
+
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        session,
-        userRole,
-        organizationId,
-        loading,
-        signOut,
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,8 +1,8 @@
-
 import { useState, useCallback } from 'react';
 import { useBackendIntegration } from './useBackendIntegration';
 import { SearchResult } from '@/types/enhanced-candidate';
 import { useToast } from './use-toast';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 export const useSearch = () => {
   const [query, setQuery] = useState('');
@@ -11,15 +11,27 @@ export const useSearch = () => {
   const [isListening, setIsListening] = useState(false);
   const { toast } = useToast();
   const { searchCandidates, loading, error } = useBackendIntegration();
+  const { organizationId, user } = useAuth();
 
   const handleSearch = useCallback(async () => {
     console.log('useSearch: handleSearch called with query:', query);
+    console.log('useSearch: Current auth state:', { organizationId, userId: user?.id });
     
     if (!query.trim()) {
       console.log('useSearch: Empty query, showing toast');
       toast({
         title: "Search Query Required",
         description: "Please enter a search query to find candidates.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!organizationId) {
+      console.log('useSearch: No organization ID, showing toast');
+      toast({
+        title: "Authentication Required",
+        description: "Please ensure you're logged in and have an organization assigned.",
         variant: "destructive"
       });
       return;
@@ -37,7 +49,7 @@ export const useSearch = () => {
         location: extractLocationFromQuery(query),
         experience_range: extractExperienceFromQuery(query),
         job_requirements: [query],
-        organization_id: 'current-org' // This should come from user context
+        organization_id: organizationId // Use real organization ID
       };
 
       console.log('useSearch: Search params:', searchParams);
@@ -72,7 +84,7 @@ export const useSearch = () => {
       console.log('useSearch: Search process completed, setting isSearching to false');
       setIsSearching(false);
     }
-  }, [query, searchCandidates, toast]);
+  }, [query, searchCandidates, toast, organizationId, user]);
 
   const handleVoiceInput = useCallback(() => {
     console.log('useSearch: Voice input requested');
@@ -202,7 +214,9 @@ export const useSearch = () => {
     query,
     isSearching: isSearching || loading,
     hasSearchResult: !!searchResult,
-    error
+    error,
+    organizationId,
+    userId: user?.id
   });
 
   return {
