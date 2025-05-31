@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,7 +27,15 @@ import {
   Zap,
   Link,
   Brain,
-  Palette
+  Palette,
+  BarChart3,
+  MessageSquare,
+  Bell,
+  Settings,
+  CreditCard,
+  Shield,
+  Calendar,
+  Mail
 } from 'lucide-react';
 import TeamAnalytics from '@/components/admin/TeamAnalytics';
 import CandidatePipeline from '@/components/admin/CandidatePipeline';
@@ -39,6 +48,7 @@ import AdvancedAnalyticsDashboard from '@/components/admin/AdvancedAnalyticsDash
 import PerformanceOptimizationHub from '@/components/admin/PerformanceOptimizationHub';
 import AdvancedCommunicationCenter from '@/components/admin/AdvancedCommunicationCenter';
 import SmartNotificationsSystem from '@/components/admin/SmartNotificationsSystem';
+import EmailCalendarIntegration from '@/components/admin/EmailCalendarIntegration';
 
 const CustomerAdmin = () => {
   const { user } = useAuth();
@@ -157,7 +167,7 @@ const CustomerAdmin = () => {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Welcome Section */}
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
@@ -175,145 +185,227 @@ const CustomerAdmin = () => {
           ))}
         </div>
 
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-12">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="performance">Performance</TabsTrigger>
-            <TabsTrigger value="communication">Communication</TabsTrigger>
-            <TabsTrigger value="notifications">Notifications</TabsTrigger>
-            <TabsTrigger value="billing">Billing</TabsTrigger>
-            <TabsTrigger value="team">Team</TabsTrigger>
-            <TabsTrigger value="roles">Roles</TabsTrigger>
-            <TabsTrigger value="integrations" className="flex items-center space-x-1">
-              <Link className="w-3 h-3" />
-              <span>Integrations</span>
-            </TabsTrigger>
-            <TabsTrigger value="automation" className="flex items-center space-x-1">
-              <Zap className="w-3 h-3" />
-              <span>Automation</span>
-            </TabsTrigger>
-            <TabsTrigger value="ai-config" className="flex items-center space-x-1">
-              <Brain className="w-3 h-3" />
-              <span>AI Config</span>
-            </TabsTrigger>
-            <TabsTrigger value="themes" className="flex items-center space-x-1">
-              <Palette className="w-3 h-3" />
-              <span>Themes</span>
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="space-y-6">
-            <QuickActionsGrid />
-            <CandidatePipeline showCandidates={false} />
-          </TabsContent>
-
-          <TabsContent value="analytics">
-            <AdvancedAnalyticsDashboard />
-          </TabsContent>
-
-          <TabsContent value="performance">
-            <PerformanceOptimizationHub />
-          </TabsContent>
-
-          <TabsContent value="communication">
-            <AdvancedCommunicationCenter />
-          </TabsContent>
-
-          <TabsContent value="notifications">
-            <SmartNotificationsSystem />
-          </TabsContent>
-
-          <TabsContent value="billing">
-            <OrganizationBilling organization={currentOrganization} />
-          </TabsContent>
-
-          <TabsContent value="team">
-            {/* Team Members */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center">
-                    <Users className="w-5 h-5 mr-2" />
-                    Team Members ({filteredMembers.length})
-                  </CardTitle>
-                  <Button size="sm" onClick={() => setShowInviteModal(true)}>
-                    <UserPlus className="w-4 h-4 mr-2" />
-                    Invite
-                  </Button>
-                </div>
-                
-                {/* Filters and Search */}
-                <div className="flex items-center space-x-4 mt-4">
-                  <div className="flex-1">
-                    <Input
-                      placeholder="Search team members..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="max-w-sm"
-                    />
+        {/* Main Content with Sidebar Navigation */}
+        <div className="flex gap-6">
+          {/* Left Sidebar Navigation */}
+          <div className="w-64 flex-shrink-0">
+            <Tabs defaultValue="overview" orientation="vertical" className="w-full">
+              <TabsList className="flex flex-col h-auto w-full p-1 bg-white border shadow-sm">
+                {/* Overview Section */}
+                <div className="w-full mb-2">
+                  <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide px-3 py-2">
+                    Dashboard
                   </div>
-                  <Select value={filterRole} onValueChange={setFilterRole}>
-                    <SelectTrigger className="w-48">
-                      <Filter className="w-4 h-4 mr-2" />
-                      <SelectValue placeholder="Filter by role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Roles</SelectItem>
-                      <SelectItem value="recruiter">Recruiters</SelectItem>
-                      <SelectItem value="hiring">Hiring Managers</SelectItem>
-                      <SelectItem value="admin">Admins</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <TabsTrigger value="overview" className="w-full justify-start">
+                    <BarChart3 className="w-4 h-4 mr-3" />
+                    Overview
+                  </TabsTrigger>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {filteredMembers.map((member) => (
-                    <TeamMemberCard
-                      key={member.id}
-                      member={member}
-                      onEdit={handleEditMember}
-                      onRemove={handleRemoveMember}
-                    />
-                  ))}
+
+                {/* Analytics Section */}
+                <div className="w-full mb-2">
+                  <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide px-3 py-2">
+                    Analytics
+                  </div>
+                  <TabsTrigger value="analytics" className="w-full justify-start">
+                    <BarChart3 className="w-4 h-4 mr-3" />
+                    Advanced Analytics
+                  </TabsTrigger>
+                  <TabsTrigger value="performance" className="w-full justify-start">
+                    <Zap className="w-4 h-4 mr-3" />
+                    Performance
+                  </TabsTrigger>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
 
-          <TabsContent value="roles">
-            <UserRoleAssignment 
-              users={teamMembers}
-              onUpdateRole={handleUpdateRole}
-            />
-          </TabsContent>
+                {/* Team Management Section */}
+                <div className="w-full mb-2">
+                  <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide px-3 py-2">
+                    Team Management
+                  </div>
+                  <TabsTrigger value="team" className="w-full justify-start">
+                    <Users className="w-4 h-4 mr-3" />
+                    Team Members
+                  </TabsTrigger>
+                  <TabsTrigger value="roles" className="w-full justify-start">
+                    <Shield className="w-4 h-4 mr-3" />
+                    Roles & Permissions
+                  </TabsTrigger>
+                </div>
 
-          <TabsContent value="integrations">
-            <PlatformIntegrationHub />
-          </TabsContent>
+                {/* Communications Section */}
+                <div className="w-full mb-2">
+                  <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide px-3 py-2">
+                    Communications
+                  </div>
+                  <TabsTrigger value="communication" className="w-full justify-start">
+                    <MessageSquare className="w-4 h-4 mr-3" />
+                    Communication Hub
+                  </TabsTrigger>
+                  <TabsTrigger value="notifications" className="w-full justify-start">
+                    <Bell className="w-4 h-4 mr-3" />
+                    Smart Notifications
+                  </TabsTrigger>
+                </div>
 
-          <TabsContent value="automation">
-            <AutomationWorkflows />
-          </TabsContent>
+                {/* Integrations & Automation Section */}
+                <div className="w-full mb-2">
+                  <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide px-3 py-2">
+                    Integrations & Automation
+                  </div>
+                  <TabsTrigger value="email-calendar" className="w-full justify-start">
+                    <Mail className="w-4 h-4 mr-3" />
+                    Email & Calendar
+                  </TabsTrigger>
+                  <TabsTrigger value="integrations" className="w-full justify-start">
+                    <Link className="w-4 h-4 mr-3" />
+                    Platform Integrations
+                  </TabsTrigger>
+                  <TabsTrigger value="automation" className="w-full justify-start">
+                    <Zap className="w-4 h-4 mr-3" />
+                    Automation
+                  </TabsTrigger>
+                  <TabsTrigger value="ai-config" className="w-full justify-start">
+                    <Brain className="w-4 h-4 mr-3" />
+                    AI Configuration
+                  </TabsTrigger>
+                </div>
 
-          <TabsContent value="ai-config">
-            <AIConfiguration />
-          </TabsContent>
+                {/* System Settings Section */}
+                <div className="w-full">
+                  <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide px-3 py-2">
+                    System Settings
+                  </div>
+                  <TabsTrigger value="billing" className="w-full justify-start">
+                    <CreditCard className="w-4 h-4 mr-3" />
+                    Billing & Plans
+                  </TabsTrigger>
+                  <TabsTrigger value="themes" className="w-full justify-start">
+                    <Palette className="w-4 h-4 mr-3" />
+                    Themes & Branding
+                  </TabsTrigger>
+                  <TabsTrigger value="system" className="w-full justify-start">
+                    <Settings className="w-4 h-4 mr-3" />
+                    System Configuration
+                  </TabsTrigger>
+                </div>
+              </TabsList>
 
-          <TabsContent value="themes">
-            <CustomizationThemes />
-          </TabsContent>
+              {/* Main Content Area */}
+              <div className="flex-1 ml-6">
+                <TabsContent value="overview" className="mt-0">
+                  <div className="space-y-6">
+                    <QuickActionsGrid />
+                    <CandidatePipeline showCandidates={false} />
+                  </div>
+                </TabsContent>
 
-          <TabsContent value="system">
-            <SystemConfiguration />
-          </TabsContent>
+                <TabsContent value="analytics" className="mt-0">
+                  <AdvancedAnalyticsDashboard />
+                </TabsContent>
 
-          <TabsContent value="legacy">
-            <IntegrationSettings />
-          </TabsContent>
-        </Tabs>
-      </main>
+                <TabsContent value="performance" className="mt-0">
+                  <PerformanceOptimizationHub />
+                </TabsContent>
+
+                <TabsContent value="communication" className="mt-0">
+                  <AdvancedCommunicationCenter />
+                </TabsContent>
+
+                <TabsContent value="notifications" className="mt-0">
+                  <SmartNotificationsSystem />
+                </TabsContent>
+
+                <TabsContent value="email-calendar" className="mt-0">
+                  <EmailCalendarIntegration />
+                </TabsContent>
+
+                <TabsContent value="billing" className="mt-0">
+                  <OrganizationBilling organization={currentOrganization} />
+                </TabsContent>
+
+                <TabsContent value="team" className="mt-0">
+                  <Card>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="flex items-center">
+                          <Users className="w-5 h-5 mr-2" />
+                          Team Members ({filteredMembers.length})
+                        </CardTitle>
+                        <Button size="sm" onClick={() => setShowInviteModal(true)}>
+                          <UserPlus className="w-4 h-4 mr-2" />
+                          Invite
+                        </Button>
+                      </div>
+                      
+                      <div className="flex items-center space-x-4 mt-4">
+                        <div className="flex-1">
+                          <Input
+                            placeholder="Search team members..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="max-w-sm"
+                          />
+                        </div>
+                        <Select value={filterRole} onValueChange={setFilterRole}>
+                          <SelectTrigger className="w-48">
+                            <Filter className="w-4 h-4 mr-2" />
+                            <SelectValue placeholder="Filter by role" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Roles</SelectItem>
+                            <SelectItem value="recruiter">Recruiters</SelectItem>
+                            <SelectItem value="hiring">Hiring Managers</SelectItem>
+                            <SelectItem value="admin">Admins</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {filteredMembers.map((member) => (
+                          <TeamMemberCard
+                            key={member.id}
+                            member={member}
+                            onEdit={handleEditMember}
+                            onRemove={handleRemoveMember}
+                          />
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="roles" className="mt-0">
+                  <UserRoleAssignment 
+                    users={teamMembers}
+                    onUpdateRole={handleUpdateRole}
+                  />
+                </TabsContent>
+
+                <TabsContent value="integrations" className="mt-0">
+                  <PlatformIntegrationHub />
+                </TabsContent>
+
+                <TabsContent value="automation" className="mt-0">
+                  <AutomationWorkflows />
+                </TabsContent>
+
+                <TabsContent value="ai-config" className="mt-0">
+                  <AIConfiguration />
+                </TabsContent>
+
+                <TabsContent value="themes" className="mt-0">
+                  <CustomizationThemes />
+                </TabsContent>
+
+                <TabsContent value="system" className="mt-0">
+                  <SystemConfiguration />
+                </TabsContent>
+              </div>
+            </Tabs>
+          </div>
+        </div>
+      </div>
 
       {/* Modals */}
       <InviteMemberModal
