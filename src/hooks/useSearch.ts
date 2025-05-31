@@ -65,7 +65,11 @@ export const useSearch = () => {
         setSearchResult({
           candidates: result.candidates,
           search_quality_score: result.search_quality_score || 0.85,
-          search_metadata: result.search_metadata
+          search_metadata: result.search_metadata || {
+            total_found: result.candidates.length,
+            search_time_ms: 0,
+            sources_used: ['ai_search']
+          }
         });
         
         toast({
