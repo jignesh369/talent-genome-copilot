@@ -72,6 +72,19 @@ const AIConfiguration = () => {
     }));
   };
 
+  const handleWeightChange = (weightType: string, value: number[]) => {
+    setConfig(prev => ({
+      ...prev,
+      jobMatching: {
+        ...prev.jobMatching,
+        weights: {
+          ...prev.jobMatching.weights,
+          [weightType]: value
+        }
+      }
+    }));
+  };
+
   const handleSelectChange = (section: string, field: string, value: string) => {
     setConfig(prev => ({
       ...prev,
@@ -236,7 +249,7 @@ const AIConfiguration = () => {
               </label>
               <Slider
                 value={config.jobMatching.weights.skills}
-                onValueChange={(value) => handleSliderChange('jobMatching', 'weights', { ...config.jobMatching.weights, skills: value })}
+                onValueChange={(value) => handleWeightChange('skills', value)}
                 max={100}
                 min={0}
                 step={5}
@@ -250,7 +263,7 @@ const AIConfiguration = () => {
               </label>
               <Slider
                 value={config.jobMatching.weights.experience}
-                onValueChange={(value) => handleSliderChange('jobMatching', 'weights', { ...config.jobMatching.weights, experience: value })}
+                onValueChange={(value) => handleWeightChange('experience', value)}
                 max={100}
                 min={0}
                 step={5}
