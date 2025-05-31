@@ -13,9 +13,10 @@ import ConsistentStatsCard from '@/components/recruiter/ConsistentStatsCard';
 interface OverviewTabProps {
   userName?: string;
   onCreateJob: () => void;
+  onInviteMember: () => void;
 }
 
-const OverviewTab: React.FC<OverviewTabProps> = ({ userName, onCreateJob }) => {
+const OverviewTab: React.FC<OverviewTabProps> = ({ userName, onCreateJob, onInviteMember }) => {
   return (
     <div className="space-y-6">
       <EnhancedWelcomeSection 

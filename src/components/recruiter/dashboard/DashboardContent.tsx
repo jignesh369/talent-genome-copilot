@@ -43,7 +43,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
       </TabsContent>
 
       <TabsContent value="team">
-        <TeamManagement />
+        <TeamManagement onInviteMember={onInviteMember} />
       </TabsContent>
     </Tabs>
   );
