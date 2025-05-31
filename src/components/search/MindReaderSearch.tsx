@@ -7,10 +7,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Brain, Mic, ThumbsUp, ThumbsDown, ExternalLink, User, Lightbulb, Github, Star, GitFork, Calendar, Clock, Loader2, TrendingUp, Users, MessageSquare, Award, Zap, Target, Eye, Twitter, Linkedin } from "lucide-react";
+import { Search, Brain, Mic, ThumbsUp, ThumbsDown, ExternalLink, User, Lightbulb, Github, Star, GitFork, Calendar, Clock, Loader2, TrendingUp, Users, MessageSquare, Award, Zap, Target, Eye, Twitter, Linkedin, Radar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { aiSearchService } from "@/services/aiSearchService";
 import { EnhancedCandidate, SearchResult } from "@/types/enhanced-candidate";
+import DigitalFootprintModal from "./DigitalFootprintModal";
 
 const MindReaderSearch = () => {
   const [query, setQuery] = useState("");
@@ -18,6 +19,7 @@ const MindReaderSearch = () => {
   const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
   const [isListening, setIsListening] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState<EnhancedCandidate | null>(null);
+  const [footprintCandidate, setFootprintCandidate] = useState<EnhancedCandidate | null>(null);
   const { toast } = useToast();
 
   const handleSearch = async () => {
@@ -593,9 +595,28 @@ const MindReaderSearch = () => {
                       </div>
                       
                       <div className="flex flex-col space-y-2 ml-4">
-                        <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
+                        <Button 
+                          size="sm" 
+                          className="bg-purple-600 hover:bg-purple-700"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedCandidate(candidate);
+                          }}
+                        >
                           <User className="h-4 w-4 mr-1" />
                           View Details
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="bg-gradient-to-r from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100 border-blue-200"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setFootprintCandidate(candidate);
+                          }}
+                        >
+                          <Radar className="h-4 w-4 mr-1" />
+                          View Snapshot
                         </Button>
                         <div className="flex space-x-1">
                           <Button 
@@ -733,6 +754,13 @@ const MindReaderSearch = () => {
           </div>
         </div>
       )}
+
+      {/* Digital Footprint Modal */}
+      <DigitalFootprintModal
+        candidate={footprintCandidate}
+        isOpen={!!footprintCandidate}
+        onClose={() => setFootprintCandidate(null)}
+      />
 
       {/* Empty State */}
       {!searchResult && !isSearching && (
