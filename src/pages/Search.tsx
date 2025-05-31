@@ -82,12 +82,6 @@ const Search = () => {
     }
   };
 
-  // Adapter function to convert boolean feedback to string format for modals
-  const handleModalFeedback = (candidateId: string, isPositive: boolean) => {
-    const feedback = isPositive ? 'positive' : 'negative';
-    handleFeedback(candidateId, feedback);
-  };
-
   return (
     <RecruiterLayout 
       title="AI-Powered Talent Discovery" 
@@ -120,7 +114,7 @@ const Search = () => {
           onCloseFootprint={() => setFootprintCandidate(null)}
           onCloseOutreach={() => setOutreachCandidate(null)}
           onContactCandidate={handleContactCandidate}
-          onFeedback={handleModalFeedback}
+          onFeedback={handleFeedback}
           onSequenceStart={handleSequenceStart}
         />
       </div>
