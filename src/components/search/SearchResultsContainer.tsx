@@ -80,7 +80,7 @@ const SearchResultsContainer: React.FC = () => {
               onViewProfile={() => handleCandidateClick(candidate)}
               onViewSnapshot={() => handleViewDigitalFootprint(candidate)}
               onContactCandidate={() => handleCandidateClick(candidate)}
-              onFeedback={(feedback, reason) => handleFeedback(candidate.id, feedback, reason)}
+              onFeedback={(candidateId, feedback, reason) => handleFeedback(candidateId, feedback, reason)}
             />
           ))}
         </div>
