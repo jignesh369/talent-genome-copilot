@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { Star, X, User, ExternalLink, Target, Zap, ThumbsUp, ThumbsDown, Brain } from "lucide-react";
+import { Star, X, User, ExternalLink, Target, Zap, ThumbsUp, ThumbsDown, Brain, Contact } from "lucide-react";
 import { EnhancedCandidate } from "@/types/enhanced-candidate";
 import OSINTMetrics from "./OSINTMetrics";
 import SourceBadge from "./SourceBadge";
@@ -17,12 +17,16 @@ interface CandidateDetailsModalProps {
   candidate: EnhancedCandidate;
   onClose: () => void;
   onFeedback: (candidateId: string, isPositive: boolean) => void;
+  onViewProfile?: (candidate: EnhancedCandidate) => void;
+  onContactCandidate?: (candidate: EnhancedCandidate) => void;
 }
 
 const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({ 
   candidate, 
   onClose, 
-  onFeedback 
+  onFeedback,
+  onViewProfile,
+  onContactCandidate
 }) => {
   const getAISources = () => [
     { platform: 'ai_analysis', confidence: 0.95, lastUpdated: new Date().toISOString(), verified: true }
@@ -48,6 +52,23 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
       });
     }
     return sources;
+  };
+
+  const handleViewProfile = () => {
+    if (onViewProfile) {
+      onViewProfile(candidate);
+    } else {
+      // Default behavior - open LinkedIn profile if available
+      if (candidate.osint_profile.linkedin?.profile_url) {
+        window.open(candidate.osint_profile.linkedin.profile_url, '_blank');
+      }
+    }
+  };
+
+  const handleContactCandidate = () => {
+    if (onContactCandidate) {
+      onContactCandidate(candidate);
+    }
   };
 
   return (
@@ -299,12 +320,21 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
               </div>
               
               <div className="flex space-x-3">
-                <Button variant="outline" size="sm" className="hover:bg-blue-50 hover:border-blue-200 transition-colors">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="hover:bg-blue-50 hover:border-blue-200 transition-colors"
+                  onClick={handleViewProfile}
+                >
                   <ExternalLink className="h-4 w-4 mr-2" />
                   View Full Profile
                 </Button>
-                <Button className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all" size="sm">
-                  <User className="h-4 w-4 mr-2" />
+                <Button 
+                  className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all" 
+                  size="sm"
+                  onClick={handleContactCandidate}
+                >
+                  <Contact className="h-4 w-4 mr-2" />
                   Contact Candidate
                 </Button>
               </div>
