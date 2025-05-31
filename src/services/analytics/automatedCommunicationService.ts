@@ -1,5 +1,6 @@
 
-import { EnhancedCandidate } from '@/types/enhanced-recruiting';
+import { EnhancedCandidate } from '@/types/enhanced-candidate';
+import { OSINTProfile } from '@/types/osint';
 
 interface CommunicationTemplate {
   id: string;
@@ -159,7 +160,7 @@ Looking forward to seeing your approach to these challenges!
       id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       candidate_id: candidate.id,
       template_id: template.id,
-      platform: candidate.preferred_contact_method || template.platform,
+      platform: candidate.best_contact_method?.platform || template.platform,
       subject: personalizedSubject,
       content: personalizedContent,
       personalized_content: personalizationData,
@@ -178,7 +179,7 @@ Looking forward to seeing your approach to these challenges!
     const osint = candidate.osint_profile;
     
     return {
-      candidate_name: candidate.name?.split(' ')[0] || 'there',
+      candidate_name: candidate.handle?.split(' ')[0] || candidate.handle || 'there',
       specific_skill: candidate.skills[0] || 'technical expertise',
       achievement_highlight: this.extractAchievement(candidate),
       technical_highlight: this.extractTechnicalHighlight(candidate),
