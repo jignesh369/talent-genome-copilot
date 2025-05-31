@@ -15,6 +15,8 @@ import EmptyState from "./EmptyState";
 import { useSearch } from "@/hooks/useSearch";
 
 const MindReaderSearch = () => {
+  console.log('MindReaderSearch: Component rendering');
+  
   const [selectedCandidate, setSelectedCandidate] = useState<EnhancedCandidate | null>(null);
   const [footprintCandidate, setFootprintCandidate] = useState<EnhancedCandidate | null>(null);
   
@@ -30,9 +32,22 @@ const MindReaderSearch = () => {
     error
   } = useSearch();
 
+  console.log('MindReaderSearch: Current state', {
+    query,
+    isSearching,
+    hasSearchResult: !!searchResult,
+    error,
+    candidatesCount: searchResult?.candidates?.length || 0
+  });
+
   const handleContactCandidate = (candidate: EnhancedCandidate) => {
     console.log('Contact candidate:', candidate.name);
     // This will be handled by the parent component
+  };
+
+  const handleSearchWrapper = () => {
+    console.log('MindReaderSearch: Search button clicked with query:', query);
+    handleSearch();
   };
 
   return (
@@ -44,7 +59,7 @@ const MindReaderSearch = () => {
         setQuery={setQuery}
         isSearching={isSearching}
         isListening={isListening}
-        onSearch={handleSearch}
+        onSearch={handleSearchWrapper}
         onVoiceInput={handleVoiceInput}
       />
 
@@ -52,6 +67,15 @@ const MindReaderSearch = () => {
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-600">Search Error: {error}</p>
           <p className="text-sm text-red-500 mt-1">Please check your API configuration and try again.</p>
+        </div>
+      )}
+
+      {isSearching && (
+        <div className="text-center py-8">
+          <div className="inline-flex items-center gap-2">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
+            <span className="text-gray-600">Analyzing candidates...</span>
+          </div>
         </div>
       )}
 

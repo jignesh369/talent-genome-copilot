@@ -13,7 +13,10 @@ export const useSearch = () => {
   const { searchCandidates, loading, error } = useBackendIntegration();
 
   const handleSearch = useCallback(async () => {
+    console.log('useSearch: handleSearch called with query:', query);
+    
     if (!query.trim()) {
+      console.log('useSearch: Empty query, showing toast');
       toast({
         title: "Search Query Required",
         description: "Please enter a search query to find candidates.",
@@ -22,10 +25,11 @@ export const useSearch = () => {
       return;
     }
 
+    console.log('useSearch: Starting search process');
     setIsSearching(true);
     
     try {
-      console.log('Starting AI candidate search for query:', query);
+      console.log('useSearch: Starting AI candidate search for query:', query);
       
       const searchParams = {
         query: query.trim(),
@@ -36,16 +40,20 @@ export const useSearch = () => {
         organization_id: 'current-org' // This should come from user context
       };
 
+      console.log('useSearch: Search params:', searchParams);
+
       const result = await searchCandidates(searchParams);
-      console.log('Search result received:', result);
+      console.log('useSearch: Search result received:', result);
       
       if (result && result.candidates) {
+        console.log('useSearch: Setting search result with', result.candidates.length, 'candidates');
         setSearchResult(result);
         toast({
           title: "Search Complete",
           description: `Found ${result.candidates.length} candidates matching your criteria.`,
         });
       } else {
+        console.log('useSearch: No candidates found in result');
         toast({
           title: "No Results",
           description: "No candidates found matching your search criteria.",
@@ -53,7 +61,7 @@ export const useSearch = () => {
         setSearchResult(null);
       }
     } catch (error) {
-      console.error('Search error:', error);
+      console.error('useSearch: Search error:', error);
       toast({
         title: "Search Failed",
         description: "There was an error performing the search. Please try again.",
@@ -61,12 +69,16 @@ export const useSearch = () => {
       });
       setSearchResult(null);
     } finally {
+      console.log('useSearch: Search process completed, setting isSearching to false');
       setIsSearching(false);
     }
   }, [query, searchCandidates, toast]);
 
   const handleVoiceInput = useCallback(() => {
+    console.log('useSearch: Voice input requested');
+    
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      console.log('useSearch: Speech recognition not supported');
       toast({
         title: "Voice Input Not Supported",
         description: "Your browser doesn't support voice input.",
@@ -83,9 +95,11 @@ export const useSearch = () => {
     recognition.lang = 'en-US';
 
     setIsListening(true);
+    console.log('useSearch: Started listening for voice input');
 
     recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript;
+      console.log('useSearch: Voice input captured:', transcript);
       setQuery(transcript);
       setIsListening(false);
       
@@ -96,7 +110,7 @@ export const useSearch = () => {
     };
 
     recognition.onerror = (event: any) => {
-      console.error('Speech recognition error:', event.error);
+      console.error('useSearch: Speech recognition error:', event.error);
       setIsListening(false);
       toast({
         title: "Voice Input Error",
@@ -106,6 +120,7 @@ export const useSearch = () => {
     };
 
     recognition.onend = () => {
+      console.log('useSearch: Voice input ended');
       setIsListening(false);
     };
 
@@ -113,7 +128,7 @@ export const useSearch = () => {
   }, [toast]);
 
   const handleFeedback = useCallback((candidateId: string, feedback: 'positive' | 'negative', reason?: string) => {
-    console.log('Feedback received:', { candidateId, feedback, reason });
+    console.log('useSearch: Feedback received:', { candidateId, feedback, reason });
     
     toast({
       title: "Feedback Recorded",
@@ -182,6 +197,13 @@ export const useSearch = () => {
     
     return undefined;
   };
+
+  console.log('useSearch: Hook state:', {
+    query,
+    isSearching: isSearching || loading,
+    hasSearchResult: !!searchResult,
+    error
+  });
 
   return {
     query,

@@ -7,6 +7,7 @@ export const useBackendIntegration = () => {
   const [error, setError] = useState<string | null>(null);
 
   const invokeFunction = async (functionName: string, payload: any) => {
+    console.log(`useBackendIntegration: Invoking function ${functionName} with payload:`, payload);
     setLoading(true);
     setError(null);
     
@@ -15,10 +16,17 @@ export const useBackendIntegration = () => {
         body: payload
       });
       
-      if (error) throw error;
+      console.log(`useBackendIntegration: Function ${functionName} response:`, { data, error });
+      
+      if (error) {
+        console.error(`useBackendIntegration: Function ${functionName} error:`, error);
+        throw error;
+      }
+      
       return data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      console.error(`useBackendIntegration: Error in ${functionName}:`, err);
       setError(errorMessage);
       throw err;
     } finally {
@@ -35,6 +43,7 @@ export const useBackendIntegration = () => {
     job_requirements?: string[];
     organization_id: string;
   }) => {
+    console.log('useBackendIntegration: searchCandidates called with params:', searchParams);
     return invokeFunction('ai-candidate-search', searchParams);
   };
 
@@ -121,12 +130,12 @@ export const useBackendIntegration = () => {
     loading,
     error,
     searchCandidates,
-    collectOSINTData,
-    generateAssessment,
-    generatePersonalizedOutreach,
-    getPredictiveAnalytics,
-    sendEmail,
-    processDocument,
-    generateAnalyticsReport
+    collectOSINTData: async (params: any) => invokeFunction('osint-data-collector', params),
+    generateAssessment: async (params: any) => invokeFunction('assessment-generator', params),
+    generatePersonalizedOutreach: async (params: any) => invokeFunction('outreach-personalization', params),
+    getPredictiveAnalytics: async (params: any) => invokeFunction('predictive-analytics', params),
+    sendEmail: async (params: any) => invokeFunction('email-service', params),
+    processDocument: async (params: any) => invokeFunction('document-processor', params),
+    generateAnalyticsReport: async (params: any) => invokeFunction('analytics-processor', params)
   };
 };
