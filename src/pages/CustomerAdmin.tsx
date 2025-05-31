@@ -50,20 +50,20 @@ const CustomerAdmin = () => {
     updated_at: new Date().toISOString()
   };
 
-  const [teamMembers, setTeamMembers] = useState([
-    { id: '1', name: 'Sarah Johnson', email: 'sarah@company.com', role: 'recruiter' as const, status: 'active' as const, jobs: 3, department: 'HR', lastActive: '2 hours ago' },
-    { id: '2', name: 'Mike Chen', email: 'mike@company.com', role: 'hiring_manager' as const, status: 'active' as const, jobs: 2, department: 'Engineering', lastActive: '1 day ago' },
-    { id: '3', name: 'Emily Davis', email: 'emily@company.com', role: 'recruiter' as const, status: 'active' as const, jobs: 3, department: 'HR', lastActive: '30 mins ago' },
-    { id: '4', name: 'Alex Wilson', email: 'alex@company.com', role: 'interviewer' as const, status: 'inactive' as const, jobs: 0, department: 'Product', lastActive: '1 week ago' }
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([
+    { id: '1', name: 'Sarah Johnson', email: 'sarah@company.com', role: 'recruiter', status: 'active', jobs: 3, department: 'HR', lastActive: '2 hours ago' },
+    { id: '2', name: 'Mike Chen', email: 'mike@company.com', role: 'hiring_manager', status: 'active', jobs: 2, department: 'Engineering', lastActive: '1 day ago' },
+    { id: '3', name: 'Emily Davis', email: 'emily@company.com', role: 'recruiter', status: 'active', jobs: 3, department: 'HR', lastActive: '30 mins ago' },
+    { id: '4', name: 'Alex Wilson', email: 'alex@company.com', role: 'hiring_manager', status: 'inactive', jobs: 0, department: 'Product', lastActive: '1 week ago' }
   ]);
 
   const handleInviteMember = (memberData: any) => {
-    const newMember = {
+    const newMember: TeamMember = {
       id: Date.now().toString(),
       name: `${memberData.firstName} ${memberData.lastName}`,
       email: memberData.email,
-      role: memberData.role,
-      status: 'pending' as const,
+      role: memberData.role as UserRole,
+      status: 'pending',
       jobs: 0,
       department: memberData.department || 'Unassigned',
       lastActive: 'Never'
@@ -74,7 +74,7 @@ const CustomerAdmin = () => {
   const handleUpdateRole = (userId: string, newRole: string) => {
     setTeamMembers(prev =>
       prev.map(member => 
-        member.id === userId ? { ...member, role: newRole as any } : member
+        member.id === userId ? { ...member, role: newRole as UserRole } : member
       )
     );
   };
@@ -165,6 +165,30 @@ const CustomerAdmin = () => {
       </Dialog>
     </div>
   );
+
+  function handleCreateJob(jobData: any) {
+    toast({
+      title: "Job Created",
+      description: `${jobData.title} has been posted successfully.`,
+    });
+    console.log('Creating job:', jobData);
+    setShowCreateJobModal(false);
+  }
+
+  function handleEditMember(memberId: string) {
+    toast({
+      title: "Edit Member",
+      description: "Member editing functionality will be implemented.",
+    });
+  }
+
+  function handleRemoveMember(memberId: string) {
+    setTeamMembers(prev => prev.filter(member => member.id !== memberId));
+    toast({
+      title: "Member Removed",
+      description: "Team member has been removed successfully.",
+    });
+  }
 };
 
 export default CustomerAdmin;

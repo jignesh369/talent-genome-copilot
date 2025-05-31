@@ -15,6 +15,8 @@ export interface Organization {
   jobLimit: number;
   currentUsers: number;
   currentJobs: number;
+  monthlyAmount: number;
+  nextBilling: string;
   website?: string;
   description?: string;
   created_at: string;
