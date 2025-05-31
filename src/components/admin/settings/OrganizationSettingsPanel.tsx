@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,7 +14,8 @@ import {
   Globe,
   Save,
   Upload,
-  Settings
+  Settings,
+  Download
 } from 'lucide-react';
 import { Organization } from '@/types/organization';
 
