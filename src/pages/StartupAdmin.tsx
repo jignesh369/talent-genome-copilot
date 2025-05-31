@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -224,283 +223,285 @@ const StartupAdmin = () => {
           ))}
         </div>
 
-        {/* Main Content with Sidebar Navigation */}
-        <div className="flex gap-6">
+        {/* Main Content Layout */}
+        <div className="grid grid-cols-12 gap-6">
           {/* Left Sidebar Navigation */}
-          <div className="w-64 flex-shrink-0">
+          <div className="col-span-3">
             <Tabs defaultValue="overview" orientation="vertical" className="w-full">
-              <TabsList className="flex flex-col h-auto w-full p-1 bg-white border shadow-sm">
+              <TabsList className="flex flex-col h-auto w-full p-1 bg-white border shadow-sm space-y-1">
                 {/* Dashboard Section */}
-                <div className="w-full mb-2">
+                <div className="w-full">
                   <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide px-3 py-2">
                     Dashboard
                   </div>
-                  <TabsTrigger value="overview" className="w-full justify-start">
+                  <TabsTrigger value="overview" className="w-full justify-start data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900">
                     <BarChart3 className="w-4 h-4 mr-3" />
                     Overview
                   </TabsTrigger>
                 </div>
 
                 {/* Performance & Analytics Section */}
-                <div className="w-full mb-2">
+                <div className="w-full">
                   <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide px-3 py-2">
                     Performance & Analytics
                   </div>
-                  <TabsTrigger value="performance" className="w-full justify-start">
+                  <TabsTrigger value="performance" className="w-full justify-start data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900">
                     <Globe className="w-4 h-4 mr-3" />
                     Global Performance
                   </TabsTrigger>
-                  <TabsTrigger value="revenue" className="w-full justify-start">
+                  <TabsTrigger value="revenue" className="w-full justify-start data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900">
                     <DollarSign className="w-4 h-4 mr-3" />
                     Revenue Analytics
                   </TabsTrigger>
-                  <TabsTrigger value="analytics" className="w-full justify-start">
+                  <TabsTrigger value="analytics" className="w-full justify-start data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900">
                     <BarChart3 className="w-4 h-4 mr-3" />
                     Advanced Analytics
                   </TabsTrigger>
-                  <TabsTrigger value="team" className="w-full justify-start">
+                  <TabsTrigger value="team" className="w-full justify-start data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900">
                     <Users className="w-4 h-4 mr-3" />
                     Team Analytics
                   </TabsTrigger>
                 </div>
 
                 {/* System Management Section */}
-                <div className="w-full mb-2">
+                <div className="w-full">
                   <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide px-3 py-2">
                     System Management
                   </div>
-                  <TabsTrigger value="health" className="w-full justify-start">
+                  <TabsTrigger value="health" className="w-full justify-start data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900">
                     <Activity className="w-4 h-4 mr-3" />
                     System Health
                   </TabsTrigger>
-                  <TabsTrigger value="ai-models" className="w-full justify-start">
+                  <TabsTrigger value="ai-models" className="w-full justify-start data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900">
                     <Brain className="w-4 h-4 mr-3" />
                     AI Models
                   </TabsTrigger>
-                  <TabsTrigger value="features" className="w-full justify-start">
+                  <TabsTrigger value="features" className="w-full justify-start data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900">
                     <Flag className="w-4 h-4 mr-3" />
                     Feature Control
                   </TabsTrigger>
                 </div>
 
                 {/* Customer Management Section */}
-                <div className="w-full mb-2">
+                <div className="w-full">
                   <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide px-3 py-2">
                     Customer Management
                   </div>
-                  <TabsTrigger value="organizations" className="w-full justify-start">
+                  <TabsTrigger value="organizations" className="w-full justify-start data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900">
                     <Building className="w-4 h-4 mr-3" />
                     Organizations
                   </TabsTrigger>
-                  <TabsTrigger value="billing" className="w-full justify-start">
+                  <TabsTrigger value="billing" className="w-full justify-start data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900">
                     <CreditCard className="w-4 h-4 mr-3" />
                     Billing Management
                   </TabsTrigger>
                 </div>
               </TabsList>
+            </Tabs>
+          </div>
 
-              {/* Main Content Area */}
-              <div className="flex-1 ml-6">
-                <TabsContent value="overview" className="mt-0">
-                  <div className="space-y-6">
-                    {/* Action Cards */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                      <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={handleCreateOrganization}>
-                        <CardHeader>
-                          <CardTitle className="flex items-center">
-                            <Building className="w-5 h-5 mr-2 text-blue-600" />
-                            Manage Organizations
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-gray-600 mb-4">
-                            View, create, and manage customer organizations on the platform.
-                          </p>
-                          <Button className="w-full">
-                            <Plus className="w-4 h-4 mr-2" />
-                            Add Organization
-                          </Button>
-                        </CardContent>
-                      </Card>
-
-                      <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                        <CardHeader>
-                          <CardTitle className="flex items-center">
-                            <BarChart3 className="w-5 h-5 mr-2 text-green-600" />
-                            Platform Analytics
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-gray-600 mb-4">
-                            Monitor usage, performance, and revenue across all customers.
-                          </p>
-                          <Button variant="outline" className="w-full">
-                            View Reports
-                          </Button>
-                        </CardContent>
-                      </Card>
-
-                      <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                        <CardHeader>
-                          <CardTitle className="flex items-center">
-                            <Settings className="w-5 h-5 mr-2 text-purple-600" />
-                            System Settings
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-gray-600 mb-4">
-                            Configure platform settings, pricing, and feature flags.
-                          </p>
-                          <Button variant="outline" className="w-full">
-                            Configure
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    </div>
-
-                    {/* Recent Activity */}
-                    <Card>
+          {/* Main Content Area */}
+          <div className="col-span-9">
+            <Tabs defaultValue="overview" orientation="vertical" className="w-full">
+              <TabsContent value="overview" className="mt-0">
+                <div className="space-y-6">
+                  {/* Action Cards */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={handleCreateOrganization}>
                       <CardHeader>
                         <CardTitle className="flex items-center">
-                          <FileText className="w-5 h-5 mr-2" />
-                          Recent Platform Activity
+                          <Building className="w-5 h-5 mr-2 text-blue-600" />
+                          Manage Organizations
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="space-y-4">
-                          {recentActivities.map((activity, index) => (
-                            <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                              <div className="flex items-center space-x-3">
-                                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                  <UserCheck className="w-4 h-4 text-blue-600" />
-                                </div>
-                                <div>
-                                  <p className="font-medium text-gray-900">{activity.action}</p>
-                                  <p className="text-sm text-gray-600">{activity.organization}</p>
-                                </div>
-                              </div>
-                              <span className="text-sm text-gray-500">{activity.time}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="performance" className="mt-0">
-                  <GlobalPerformanceMonitor />
-                </TabsContent>
-
-                <TabsContent value="revenue" className="mt-0">
-                  <AdvancedRevenueAnalytics />
-                </TabsContent>
-
-                <TabsContent value="analytics" className="mt-0">
-                  <AdvancedAnalytics 
-                    dateRange={dateRange}
-                    onDateRangeChange={setDateRange}
-                  />
-                </TabsContent>
-
-                <TabsContent value="team" className="mt-0">
-                  <TeamAnalytics />
-                </TabsContent>
-
-                <TabsContent value="health" className="mt-0">
-                  <SystemHealth />
-                </TabsContent>
-
-                <TabsContent value="organizations" className="mt-0">
-                  <Card>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center">
-                          <Building className="w-5 h-5 mr-2" />
-                          Customer Organizations ({organizations.length})
-                        </CardTitle>
-                        <Button size="sm" onClick={handleCreateOrganization}>
+                        <p className="text-gray-600 mb-4">
+                          View, create, and manage customer organizations on the platform.
+                        </p>
+                        <Button className="w-full">
                           <Plus className="w-4 h-4 mr-2" />
                           Add Organization
                         </Button>
-                      </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                      <CardHeader>
+                        <CardTitle className="flex items-center">
+                          <BarChart3 className="w-5 h-5 mr-2 text-green-600" />
+                          Platform Analytics
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-gray-600 mb-4">
+                          Monitor usage, performance, and revenue across all customers.
+                        </p>
+                        <Button variant="outline" className="w-full">
+                          View Reports
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                      <CardHeader>
+                        <CardTitle className="flex items-center">
+                          <Settings className="w-5 h-5 mr-2 text-purple-600" />
+                          System Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-gray-600 mb-4">
+                          Configure platform settings, pricing, and feature flags.
+                        </p>
+                        <Button variant="outline" className="w-full">
+                          Configure
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Recent Activity */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center">
+                        <FileText className="w-5 h-5 mr-2" />
+                        Recent Platform Activity
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
-                        {organizations.map((org) => (
-                          <div key={org.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                            <div className="flex items-center space-x-4">
-                              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
-                                {org.name.split(' ').map(n => n[0]).join('')}
+                        {recentActivities.map((activity, index) => (
+                          <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                <UserCheck className="w-4 h-4 text-blue-600" />
                               </div>
                               <div>
-                                <h4 className="font-medium text-gray-900">{org.name}</h4>
-                                <p className="text-sm text-gray-600">{org.contactEmail}</p>
-                                <p className="text-xs text-gray-500">{org.domain}</p>
+                                <p className="font-medium text-gray-900">{activity.action}</p>
+                                <p className="text-sm text-gray-600">{activity.organization}</p>
                               </div>
                             </div>
-                            
-                            <div className="flex items-center space-x-4">
-                              <div className="text-center">
-                                <Badge className={
-                                  org.plan === 'enterprise' ? 'bg-purple-100 text-purple-800' :
-                                  org.plan === 'professional' ? 'bg-blue-100 text-blue-800' :
-                                  'bg-green-100 text-green-800'
-                                }>
-                                  {org.plan}
-                                </Badge>
-                                <p className="text-xs text-gray-600 mt-1">{org.userLimit} users</p>
-                              </div>
-                              
-                              <Badge 
-                                variant={org.status === 'active' ? 'default' : org.status === 'trial' ? 'secondary' : 'outline'}
-                                className={
-                                  org.status === 'active' ? 'bg-green-100 text-green-800' : 
-                                  org.status === 'trial' ? 'bg-blue-100 text-blue-800' : ''
-                                }
-                              >
-                                {org.status}
-                              </Badge>
-                              
-                              <div className="flex items-center space-x-2">
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm"
-                                  onClick={() => handleViewOrganization(org)}
-                                >
-                                  <Search className="h-4 w-4" />
-                                </Button>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm"
-                                  onClick={() => handleEditOrganization(org)}
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </div>
+                            <span className="text-sm text-gray-500">{activity.time}</span>
                           </div>
                         ))}
                       </div>
                     </CardContent>
                   </Card>
-                </TabsContent>
+                </div>
+              </TabsContent>
 
-                <TabsContent value="ai-models" className="mt-0">
-                  <AIModelManagement />
-                </TabsContent>
+              <TabsContent value="performance" className="mt-0">
+                <GlobalPerformanceMonitor />
+              </TabsContent>
 
-                <TabsContent value="features" className="mt-0">
-                  <FeatureReleaseControl />
-                </TabsContent>
+              <TabsContent value="revenue" className="mt-0">
+                <AdvancedRevenueAnalytics />
+              </TabsContent>
 
-                <TabsContent value="billing" className="mt-0">
-                  <BillingManagement 
-                    organizations={organizations}
-                    onUpdateBilling={handleUpdateBilling}
-                  />
-                </TabsContent>
-              </div>
+              <TabsContent value="analytics" className="mt-0">
+                <AdvancedAnalytics 
+                  dateRange={dateRange}
+                  onDateRangeChange={setDateRange}
+                />
+              </TabsContent>
+
+              <TabsContent value="team" className="mt-0">
+                <TeamAnalytics />
+              </TabsContent>
+
+              <TabsContent value="health" className="mt-0">
+                <SystemHealth />
+              </TabsContent>
+
+              <TabsContent value="organizations" className="mt-0">
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="flex items-center">
+                        <Building className="w-5 h-5 mr-2" />
+                        Customer Organizations ({organizations.length})
+                      </CardTitle>
+                      <Button size="sm" onClick={handleCreateOrganization}>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Organization
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {organizations.map((org) => (
+                        <div key={org.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                          <div className="flex items-center space-x-4">
+                            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                              {org.name.split(' ').map(n => n[0]).join('')}
+                            </div>
+                            <div>
+                              <h4 className="font-medium text-gray-900">{org.name}</h4>
+                              <p className="text-sm text-gray-600">{org.contactEmail}</p>
+                              <p className="text-xs text-gray-500">{org.domain}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center space-x-4">
+                            <div className="text-center">
+                              <Badge className={
+                                org.plan === 'enterprise' ? 'bg-purple-100 text-purple-800' :
+                                org.plan === 'professional' ? 'bg-blue-100 text-blue-800' :
+                                'bg-green-100 text-green-800'
+                              }>
+                                {org.plan}
+                              </Badge>
+                              <p className="text-xs text-gray-600 mt-1">{org.userLimit} users</p>
+                            </div>
+                            
+                            <Badge 
+                              variant={org.status === 'active' ? 'default' : org.status === 'trial' ? 'secondary' : 'outline'}
+                              className={
+                                org.status === 'active' ? 'bg-green-100 text-green-800' : 
+                                org.status === 'trial' ? 'bg-blue-100 text-blue-800' : ''
+                              }
+                            >
+                              {org.status}
+                            </Badge>
+                            
+                            <div className="flex items-center space-x-2">
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => handleViewOrganization(org)}
+                              >
+                                <Search className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => handleEditOrganization(org)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="ai-models" className="mt-0">
+                <AIModelManagement />
+              </TabsContent>
+
+              <TabsContent value="features" className="mt-0">
+                <FeatureReleaseControl />
+              </TabsContent>
+
+              <TabsContent value="billing" className="mt-0">
+                <BillingManagement 
+                  organizations={organizations}
+                  onUpdateBilling={handleUpdateBilling}
+                />
+              </TabsContent>
             </Tabs>
           </div>
         </div>
