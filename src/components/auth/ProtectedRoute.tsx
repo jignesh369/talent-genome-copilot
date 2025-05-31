@@ -14,14 +14,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   allowedRoles,
   fallback 
 }) => {
-  // TEMPORARY: Bypass authentication for development
-  // TODO: Re-enable authentication when ready for production
-  const BYPASS_AUTH = true;
-  
-  if (BYPASS_AUTH) {
-    return <>{children}</>;
-  }
-
   const { user, userRole, loading } = useAuth();
 
   if (loading) {
@@ -43,6 +35,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h1>
           <p className="text-gray-600">You don't have permission to access this page.</p>
+          <p className="text-sm text-gray-500 mt-2">Current role: {userRole}</p>
+          <p className="text-sm text-gray-500">Required roles: {allowedRoles.join(', ')}</p>
         </div>
       </div>
     );

@@ -1,19 +1,46 @@
 
 import { UserRole } from '@/types/auth';
+import { supabase } from '@/integrations/supabase/client';
 
 export class AuthService {
-  static determineUserRole(user: any): UserRole {
-    // This would typically come from user metadata or database
-    if (user?.user_metadata?.role) {
-      return user.user_metadata.role as UserRole;
+  static async getUserRole(userId: string): Promise<UserRole | null> {
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching user role:', error);
+        return null;
+      }
+
+      return data.role as UserRole;
+    } catch (error) {
+      console.error('Error in getUserRole:', error);
+      return null;
     }
-    
-    // Default role determination logic
-    if (user?.email?.includes('admin@')) {
-      return 'startup_admin';
+  }
+
+  static async getUserOrganization(userId: string): Promise<string | null> {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching user organization:', error);
+        return null;
+      }
+
+      return data.organization_id;
+    } catch (error) {
+      console.error('Error in getUserOrganization:', error);
+      return null;
     }
-    
-    return 'candidate';
   }
 
   static canAccessAdminFeatures(role: UserRole): boolean {
@@ -36,5 +63,21 @@ export class AuthService {
     }
     
     return baseTabs;
+  }
+
+  static getDefaultRedirect(role: UserRole): string {
+    switch (role) {
+      case 'startup_admin':
+        return '/startup-admin';
+      case 'customer_admin':
+        return '/customer-admin';
+      case 'recruiter':
+      case 'hiring_manager':
+        return '/recruiter-dashboard';
+      case 'candidate':
+        return '/candidate-dashboard';
+      default:
+        return '/';
+    }
   }
 }
