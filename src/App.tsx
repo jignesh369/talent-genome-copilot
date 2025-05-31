@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -102,24 +101,21 @@ const App = () => (
               </ProtectedRoute>
             } />
             
-            {/* Recruiter Dashboard Route */}
+            {/* Unified Recruiter Dashboard Route */}
             <Route path="/recruiter-dashboard" element={
               <ProtectedRoute allowedRoles={['recruiter', 'hiring_manager']}>
                 <RecruiterDashboard />
               </ProtectedRoute>
             } />
             
-            {/* Recruiter/Main App Routes */}
+            {/* Main Dashboard - Now redirects to RecruiterDashboard for recruiters/hiring managers */}
             <Route path="/dashboard" element={
               <ProtectedRoute allowedRoles={['recruiter', 'hiring_manager']}>
-                <div className="min-h-screen bg-gray-50">
-                  <Navigation />
-                  <main className="max-w-7xl mx-auto px-6 py-8">
-                    <Dashboard />
-                  </main>
-                </div>
+                <RecruiterDashboard />
               </ProtectedRoute>
             } />
+            
+            {/* Individual Pages with Navigation (for legacy routes) */}
             <Route path="/candidates" element={
               <ProtectedRoute allowedRoles={['recruiter', 'hiring_manager']}>
                 <div className="min-h-screen bg-gray-50">
