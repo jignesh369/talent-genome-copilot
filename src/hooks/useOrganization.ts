@@ -32,6 +32,8 @@ export const useOrganization = (organizationId?: string) => {
           jobLimit: 15,
           currentUsers: 12,
           currentJobs: 8,
+          monthlyAmount: 299,
+          nextBilling: 'Jan 15, 2024',
           website: 'https://techcorp.com',
           description: 'Leading technology company focused on innovation.',
           created_at: new Date().toISOString(),

@@ -11,6 +11,8 @@ import CustomerAdminHeader from '@/components/admin/CustomerAdminHeader';
 import CustomerAdminWelcome from '@/components/admin/CustomerAdminWelcome';
 import CustomerAdminSidebar from '@/components/admin/CustomerAdminSidebar';
 import CustomerAdminContent from '@/components/admin/CustomerAdminContent';
+import { TeamMember, Organization } from '@/types/organization';
+import { UserRole } from '@/types/auth';
 import { Users } from 'lucide-react';
 
 const CustomerAdmin = () => {
@@ -30,7 +32,7 @@ const CustomerAdmin = () => {
   ];
 
   // Current organization data
-  const currentOrganization = {
+  const currentOrganization: Organization = {
     id: '1',
     name: 'TechCorp Solutions',
     plan: 'professional' as const,
@@ -165,30 +167,6 @@ const CustomerAdmin = () => {
       </Dialog>
     </div>
   );
-
-  function handleCreateJob(jobData: any) {
-    toast({
-      title: "Job Created",
-      description: `${jobData.title} has been posted successfully.`,
-    });
-    console.log('Creating job:', jobData);
-    setShowCreateJobModal(false);
-  }
-
-  function handleEditMember(memberId: string) {
-    toast({
-      title: "Edit Member",
-      description: "Member editing functionality will be implemented.",
-    });
-  }
-
-  function handleRemoveMember(memberId: string) {
-    setTeamMembers(prev => prev.filter(member => member.id !== memberId));
-    toast({
-      title: "Member Removed",
-      description: "Team member has been removed successfully.",
-    });
-  }
 };
 
 export default CustomerAdmin;
