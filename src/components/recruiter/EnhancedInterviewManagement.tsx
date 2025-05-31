@@ -24,7 +24,8 @@ import {
   FileText,
   Star,
   TrendingUp,
-  BarChart3
+  BarChart3,
+  Eye
 } from 'lucide-react';
 
 interface InterviewPanel {
