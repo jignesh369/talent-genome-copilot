@@ -3,28 +3,22 @@ import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Separator } from '@/components/ui/separator';
-import { Save } from 'lucide-react';
+import { User } from 'lucide-react';
 import FormSection from '@/components/shared/FormSection';
 import AvatarUpload from '@/components/profile/AvatarUpload';
-import { useAuth } from '@/components/auth/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 
 const ProfileForm: React.FC = () => {
-  const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-
+  
   const [profile, setProfile] = useState({
-    firstName: '',
-    lastName: '',
-    email: user?.email || '',
-    phone: '',
-    title: '',
-    department: '',
-    bio: '',
-    location: '',
-    timezone: 'UTC-8'
+    firstName: 'John',
+    lastName: 'Doe',
+    email: 'john.doe@example.com',
+    phone: '+1 (555) 123-4567',
+    bio: 'Experienced recruiter with 5+ years in tech hiring.',
+    avatarUrl: ''
   });
 
   const handleSaveProfile = async () => {
@@ -39,20 +33,27 @@ const ProfileForm: React.FC = () => {
     }, 1000);
   };
 
+  const handleAvatarUpload = () => {
+    toast({
+      title: "Avatar Upload",
+      description: "Avatar upload functionality will be implemented.",
+    });
+  };
+
   return (
     <FormSection 
-      title="Profile Information" 
+      title="Personal Information" 
+      icon={User}
       onSave={handleSaveProfile}
       saveLabel="Save Profile"
       loading={loading}
     >
       <AvatarUpload
-        avatarUrl={user?.user_metadata?.avatar_url}
+        avatarUrl={profile.avatarUrl}
         firstName={profile.firstName}
         lastName={profile.lastName}
+        onUpload={handleAvatarUpload}
       />
-
-      <Separator />
 
       <div className="grid grid-cols-2 gap-4">
         <div>
@@ -83,23 +84,13 @@ const ProfileForm: React.FC = () => {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="phone">Phone</Label>
-          <Input
-            id="phone"
-            value={profile.phone}
-            onChange={(e) => setProfile({...profile, phone: e.target.value})}
-          />
-        </div>
-        <div>
-          <Label htmlFor="title">Job Title</Label>
-          <Input
-            id="title"
-            value={profile.title}
-            onChange={(e) => setProfile({...profile, title: e.target.value})}
-          />
-        </div>
+      <div>
+        <Label htmlFor="phone">Phone</Label>
+        <Input
+          id="phone"
+          value={profile.phone}
+          onChange={(e) => setProfile({...profile, phone: e.target.value})}
+        />
       </div>
 
       <div>
@@ -108,7 +99,6 @@ const ProfileForm: React.FC = () => {
           id="bio"
           value={profile.bio}
           onChange={(e) => setProfile({...profile, bio: e.target.value})}
-          placeholder="Tell us about yourself..."
           rows={3}
         />
       </div>
