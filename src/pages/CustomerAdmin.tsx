@@ -14,6 +14,7 @@ import CustomerAdminWelcome from '@/components/admin/CustomerAdminWelcome';
 import CustomerAdminSidebar from '@/components/admin/CustomerAdminSidebar';
 import CustomerAdminContent from '@/components/admin/CustomerAdminContent';
 import { Organization } from '@/types/organization';
+import { UserRole } from '@/types/auth';
 import { Users, Briefcase, CheckCircle } from 'lucide-react';
 
 const CustomerAdmin = () => {
@@ -81,7 +82,7 @@ const CustomerAdmin = () => {
     console.log('Inviting member:', memberData);
   };
 
-  const handleUpdateRole = async (userId: string, newRole: string) => {
+  const handleUpdateRole = async (userId: string, newRole: UserRole) => {
     await updateMemberRole(userId, newRole);
   };
 
