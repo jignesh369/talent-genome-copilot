@@ -58,9 +58,9 @@ export class OutreachPersonalizationService {
         insights.push({
           type: 'recent_activity',
           title: 'Recent Activity Signal',
-          content: `Recent activity detected on ${recentActivity.source || 'professional platform'}`,
+          content: `Recent activity detected on ${recentActivity.signal_type || 'professional platform'}`,
           confidence: recentActivity.confidence || 70,
-          source: recentActivity.source || 'OSINT Analysis',
+          source: recentActivity.signal_type || 'OSINT Analysis',
           suggested_usage: 'Reference their current activity and engagement in the field.'
         });
       }
