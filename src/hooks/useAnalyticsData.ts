@@ -9,7 +9,7 @@ export const useAnalyticsData = () => {
   
   const candidateIds = enhancedCandidates.map(c => c.id);
   const { osintMonitoring } = useOSINTMonitoring(candidateIds);
-  const { communicationMetrics } = useCommunicationMetrics();
+  const communicationMetrics = useCommunicationMetrics();
   const { alerts, resolveAlert, getAlertStats, getCandidateAlerts } = useRiskAlerts(enhancedCandidates);
 
   return {

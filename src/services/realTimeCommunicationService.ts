@@ -61,6 +61,14 @@ export interface TypingIndicator {
   timestamp: string;
 }
 
+export interface CommunicationMetrics {
+  total_sent: number;
+  response_rate: number;
+  platform_performance: Record<string, any>;
+  engagement_score?: number;
+  avg_response_time?: number;
+}
+
 class RealTimeCommunicationService {
   private messages: Map<string, Message[]> = new Map();
   private channels: Map<string, CommunicationChannel> = new Map();
@@ -228,6 +236,31 @@ class RealTimeCommunicationService {
     });
 
     return results.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  }
+
+  // Communication metrics
+  getCommunicationMetrics(): CommunicationMetrics {
+    let totalSent = 0;
+    let totalRead = 0;
+
+    this.messages.forEach(messages => {
+      totalSent += messages.length;
+      totalRead += messages.filter(m => m.read).length;
+    });
+
+    const responseRate = totalSent > 0 ? (totalRead / totalSent) * 100 : 0;
+
+    return {
+      total_sent: totalSent,
+      response_rate: responseRate,
+      platform_performance: {
+        channels: this.channels.size,
+        active_conversations: Array.from(this.channels.values()).filter(c => c.last_message).length,
+        avg_messages_per_channel: totalSent / Math.max(this.channels.size, 1)
+      },
+      engagement_score: Math.min(100, responseRate * 1.2),
+      avg_response_time: 2.5 // Mock average response time in hours
+    };
   }
 
   private initializeMockData(): void {

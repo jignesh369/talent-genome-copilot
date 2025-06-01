@@ -20,7 +20,7 @@ export const useCommunicationMetrics = () => {
   useEffect(() => {
     const loadMetrics = async () => {
       try {
-        const communicationMetrics = await realTimeCommunicationService.getCommunicationMetrics();
+        const communicationMetrics = realTimeCommunicationService.getCommunicationMetrics();
         setMetrics(communicationMetrics);
       } catch (error) {
         console.error('Failed to load communication metrics:', error);
