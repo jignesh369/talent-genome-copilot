@@ -1,4 +1,3 @@
-
 import { naturalLanguageQueryService, QueryInterpretation, PlatformSearchQuery } from '@/services/llm/naturalLanguageQueryService';
 import { candidateAnalysisService, CandidateSummary, JobMatchScore } from '@/services/llm/candidateAnalysisService';
 import { personalizedOutreachService, PersonalizedMessage } from '@/services/llm/personalizedOutreachService';
@@ -228,7 +227,7 @@ export class AITalentDiscoveryAPI {
         social_presence: {
           platforms: ['linkedin', 'github', 'twitter'],
           professional_consistency: 0.85,
-          communication_style: 'professional',
+          communication_style: 'casual',
           thought_leadership_score: 7.2
         },
         professional_reputation: {
@@ -269,7 +268,7 @@ export class AITalentDiscoveryAPI {
         platform: 'email',
         confidence: 0.9,
         best_time: '10:00 AM PST',
-        approach_style: 'professional'
+        approach_style: 'casual'
       },
       salary_expectation_range: {
         min: 120000,

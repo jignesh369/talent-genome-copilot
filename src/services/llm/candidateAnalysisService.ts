@@ -1,4 +1,3 @@
-
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
 
 export interface CandidateSummary {
@@ -111,7 +110,7 @@ export class CandidateAnalysisService {
     
     return {
       progression_type: 'ascending' as const,
-      growth_rate,
+      growth_rate: growthRate,
       next_likely_move: this.predictNextMove(candidate)
     };
   }
