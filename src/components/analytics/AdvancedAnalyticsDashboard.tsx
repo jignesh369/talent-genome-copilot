@@ -18,7 +18,31 @@ const AdvancedAnalyticsDashboard = () => {
 
   useEffect(() => {
     if (enhancedCandidates.length > 0) {
-      const generatedInsights = predictiveAnalyticsService.generatePredictiveInsights(enhancedCandidates);
+      // Convert to the format expected by predictiveAnalyticsService
+      const candidatesForAnalysis = enhancedCandidates.map(candidate => ({
+        ...candidate,
+        source_details: { platform: 'database', verified: true },
+        portal_activity_score: candidate.learning_velocity_score,
+        interaction_timeline: [],
+        engagement_score: candidate.community_influence_score,
+        last_contact_date: undefined,
+        response_rate: 0.8,
+        preferred_contact_method: candidate.best_contact_method.platform,
+        osint_last_updated: candidate.osint_last_fetched,
+        background_verification_status: 'verified' as const,
+        placement_probability_score: candidate.match_score,
+        cultural_fit_score: candidate.community_influence_score,
+        availability_signals: [],
+        portal_preferences: undefined,
+        job_interests: [],
+        career_aspirations: candidate.ai_summary,
+        pipeline_stage: 'sourced',
+        stage_history: [],
+        assigned_recruiter_id: undefined,
+        priority_level: 'medium' as const,
+      }));
+      
+      const generatedInsights = predictiveAnalyticsService.generatePredictiveInsights(candidatesForAnalysis);
       setInsights(generatedInsights);
     }
     setMarketData(predictiveAnalyticsService.getMarketIntelligence());

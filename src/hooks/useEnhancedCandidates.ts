@@ -1,50 +1,9 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { EnhancedCandidate } from '@/types/enhanced-candidate';
 
-export interface EnhancedCandidate {
-  id: string;
-  organization_id?: string;
-  name: string;
-  handle?: string;
-  email: string;
-  location?: string;
-  current_title?: string;
-  current_company?: string;
-  experience_years: number;
-  bio?: string;
-  avatar_url?: string;
-  skills: string[];
-  ai_summary?: string;
-  technical_depth_score: number;
-  community_influence_score: number;
-  learning_velocity_score: number;
-  availability_status: 'active' | 'passive' | 'unavailable';
-  salary_expectation_min?: number;
-  salary_expectation_max?: number;
-  salary_currency: string;
-  preferred_contact_method: 'email' | 'linkedin' | 'phone' | 'sms' | 'slack';
-  profile_last_updated: string;
-  osint_last_fetched: string;
-  created_at: string;
-  updated_at: string;
-  
-  // Related data from joins
-  osint_profiles?: any[];
-  career_trajectories?: any[];
-  cultural_fit_indicators?: any[];
-  
-  // Frontend-specific properties for compatibility
-  career_trajectory_analysis?: any;
-  osint_profile?: any;
-  match_score?: number;
-  relevance_factors?: any[];
-  best_contact_method?: any;
-  source_details?: any;
-  portal_activity_score?: number;
-  interaction_timeline?: any[];
-  engagement_score?: number;
-}
+export { type EnhancedCandidate } from '@/types/enhanced-candidate';
 
 export const useEnhancedCandidates = () => {
   return useQuery({
@@ -69,10 +28,20 @@ export const useEnhancedCandidates = () => {
 
       console.log('Enhanced candidates fetched:', data);
       
-      // Transform the data to include frontend-compatible properties
+      // Transform the data to match the EnhancedCandidate interface
       const transformedData = (data || []).map(candidate => ({
-        ...candidate,
-        // Add missing frontend properties with defaults
+        id: candidate.id,
+        name: candidate.name,
+        handle: candidate.handle || candidate.email.split('@')[0],
+        email: candidate.email,
+        location: candidate.location || '',
+        current_title: candidate.current_title,
+        current_company: candidate.current_company,
+        experience_years: candidate.experience_years || 0,
+        skills: candidate.skills || [],
+        bio: candidate.bio,
+        avatar_url: candidate.avatar_url,
+        ai_summary: candidate.ai_summary || '',
         career_trajectory_analysis: candidate.career_trajectories?.[0] || {
           progression_type: 'ascending',
           growth_rate: 0,
@@ -80,32 +49,82 @@ export const useEnhancedCandidates = () => {
           next_likely_move: '',
           timeline_events: []
         },
-        osint_profile: candidate.osint_profiles?.[0] || {
-          overall_score: 0,
-          influence_score: 0,
-          technical_depth: 0,
-          community_engagement: 0,
-          github: {},
-          linkedin: {},
-          stackoverflow: {},
-          twitter: {},
-          availability_signals: []
+        technical_depth_score: candidate.technical_depth_score || 0,
+        community_influence_score: candidate.community_influence_score || 0,
+        cultural_fit_indicators: candidate.cultural_fit_indicators || [],
+        learning_velocity_score: candidate.learning_velocity_score || 0,
+        osint_profile: candidate.osint_profiles?.[0] ? {
+          github_profile: {
+            username: candidate.osint_profiles[0].github_username || '',
+            public_repos: candidate.osint_profiles[0].github_repos || 0,
+            followers: 0,
+            top_languages: [],
+            contribution_activity: candidate.osint_profiles[0].github_commits || 0,
+            notable_projects: [],
+            open_source_contributions: candidate.osint_profiles[0].github_stars || 0,
+          },
+          linkedin_insights: {
+            connection_count: candidate.osint_profiles[0].linkedin_connections || 0,
+            recent_activity_level: 'medium',
+            job_change_indicators: [],
+            skills_endorsements: {},
+            recommendation_count: 0,
+          },
+          social_presence: {
+            platforms: ['github', 'linkedin'],
+            professional_consistency: 0.8,
+            communication_style: 'professional',
+            thought_leadership_score: candidate.osint_profiles[0].influence_score || 0,
+          },
+          professional_reputation: {
+            industry_recognition: [],
+            conference_speaking: false,
+            published_content: 0,
+            community_involvement: [],
+            expertise_areas: [],
+          },
+          red_flags: [],
+          last_updated: candidate.osint_profiles[0].last_updated || new Date().toISOString(),
+        } : {
+          github_profile: undefined,
+          linkedin_insights: undefined,
+          social_presence: {
+            platforms: [],
+            professional_consistency: 0,
+            communication_style: 'mixed',
+            thought_leadership_score: 0,
+          },
+          professional_reputation: {
+            industry_recognition: [],
+            conference_speaking: false,
+            published_content: 0,
+            community_involvement: [],
+            expertise_areas: [],
+          },
+          red_flags: [],
+          last_updated: new Date().toISOString(),
         },
-        match_score: Math.round((candidate.technical_depth_score + candidate.community_influence_score) * 5),
+        match_score: Math.round((candidate.technical_depth_score + candidate.community_influence_score) * 5) || 75,
         relevance_factors: [],
+        availability_status: candidate.availability_status || 'passive',
         best_contact_method: {
           platform: candidate.preferred_contact_method || 'email',
           confidence: 0.8,
           best_time: '9-17',
-          approach_style: 'professional'
+          approach_style: 'direct',
         },
-        source_details: { platform: 'database', verified: true },
-        portal_activity_score: candidate.learning_velocity_score,
-        interaction_timeline: [],
-        engagement_score: candidate.community_influence_score
-      }));
+        salary_expectation_range: candidate.salary_expectation_min ? {
+          min: candidate.salary_expectation_min,
+          max: candidate.salary_expectation_max || candidate.salary_expectation_min + 20000,
+          currency: candidate.salary_currency || 'USD',
+          confidence: 0.7,
+          source: 'database'
+        } : undefined,
+        profile_last_updated: candidate.profile_last_updated || candidate.created_at || new Date().toISOString(),
+        osint_last_fetched: candidate.osint_last_fetched || candidate.created_at || new Date().toISOString(),
+      })) as EnhancedCandidate[];
 
-      return transformedData as EnhancedCandidate[];
+      return transformedData;
     },
   });
 };
@@ -115,22 +134,28 @@ export const useCreateEnhancedCandidate = () => {
 
   return useMutation({
     mutationFn: async (candidateData: Partial<EnhancedCandidate>) => {
-      // Filter out frontend-only properties before inserting
-      const {
-        career_trajectory_analysis,
-        osint_profile,
-        match_score,
-        relevance_factors,
-        best_contact_method,
-        source_details,
-        portal_activity_score,
-        interaction_timeline,
-        engagement_score,
-        osint_profiles,
-        career_trajectories,
-        cultural_fit_indicators,
-        ...dbData
-      } = candidateData;
+      // Transform to database format
+      const dbData = {
+        name: candidateData.name!,
+        email: candidateData.email!,
+        handle: candidateData.handle,
+        location: candidateData.location,
+        current_title: candidateData.current_title,
+        current_company: candidateData.current_company,
+        experience_years: candidateData.experience_years || 0,
+        bio: candidateData.bio,
+        avatar_url: candidateData.avatar_url,
+        skills: candidateData.skills || [],
+        ai_summary: candidateData.ai_summary,
+        technical_depth_score: candidateData.technical_depth_score || 0,
+        community_influence_score: candidateData.community_influence_score || 0,
+        learning_velocity_score: candidateData.learning_velocity_score || 0,
+        availability_status: candidateData.availability_status || 'passive',
+        salary_expectation_min: candidateData.salary_expectation_range?.min,
+        salary_expectation_max: candidateData.salary_expectation_range?.max,
+        salary_currency: candidateData.salary_expectation_range?.currency || 'USD',
+        preferred_contact_method: candidateData.best_contact_method?.platform || 'email',
+      };
 
       const { data, error } = await supabase
         .from('enhanced_candidates')
@@ -152,22 +177,32 @@ export const useUpdateEnhancedCandidate = () => {
 
   return useMutation({
     mutationFn: async ({ id, ...updates }: { id: string } & Partial<EnhancedCandidate>) => {
-      // Filter out frontend-only properties before updating
-      const {
-        career_trajectory_analysis,
-        osint_profile,
-        match_score,
-        relevance_factors,
-        best_contact_method,
-        source_details,
-        portal_activity_score,
-        interaction_timeline,
-        engagement_score,
-        osint_profiles,
-        career_trajectories,
-        cultural_fit_indicators,
-        ...dbUpdates
-      } = updates;
+      // Transform updates to database format
+      const dbUpdates: any = {};
+      
+      if (updates.name) dbUpdates.name = updates.name;
+      if (updates.email) dbUpdates.email = updates.email;
+      if (updates.handle) dbUpdates.handle = updates.handle;
+      if (updates.location) dbUpdates.location = updates.location;
+      if (updates.current_title) dbUpdates.current_title = updates.current_title;
+      if (updates.current_company) dbUpdates.current_company = updates.current_company;
+      if (updates.experience_years !== undefined) dbUpdates.experience_years = updates.experience_years;
+      if (updates.bio) dbUpdates.bio = updates.bio;
+      if (updates.avatar_url) dbUpdates.avatar_url = updates.avatar_url;
+      if (updates.skills) dbUpdates.skills = updates.skills;
+      if (updates.ai_summary) dbUpdates.ai_summary = updates.ai_summary;
+      if (updates.technical_depth_score !== undefined) dbUpdates.technical_depth_score = updates.technical_depth_score;
+      if (updates.community_influence_score !== undefined) dbUpdates.community_influence_score = updates.community_influence_score;
+      if (updates.learning_velocity_score !== undefined) dbUpdates.learning_velocity_score = updates.learning_velocity_score;
+      if (updates.availability_status) dbUpdates.availability_status = updates.availability_status;
+      if (updates.salary_expectation_range) {
+        dbUpdates.salary_expectation_min = updates.salary_expectation_range.min;
+        dbUpdates.salary_expectation_max = updates.salary_expectation_range.max;
+        dbUpdates.salary_currency = updates.salary_expectation_range.currency;
+      }
+      if (updates.best_contact_method) {
+        dbUpdates.preferred_contact_method = updates.best_contact_method.platform;
+      }
 
       const { data, error } = await supabase
         .from('enhanced_candidates')
