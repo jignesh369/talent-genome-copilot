@@ -634,6 +634,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_user_email: {
+        Args: { user_uuid: string }
+        Returns: string
+      }
       get_user_organization: {
         Args: Record<PropertyKey, never>
         Returns: string

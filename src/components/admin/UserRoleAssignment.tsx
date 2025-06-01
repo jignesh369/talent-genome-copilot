@@ -8,10 +8,22 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { Users, UserPlus, Shield, Search, Filter } from 'lucide-react';
+import { UserRole } from '@/types/auth';
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  status: string;
+  jobs: number;
+  department: string;
+  lastActive: string;
+}
 
 interface UserRoleAssignmentProps {
-  users: any[];
-  onUpdateRole: (userId: string, newRole: string) => void;
+  users: User[];
+  onUpdateRole: (userId: string, newRole: UserRole) => void;
 }
 
 const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({ users, onUpdateRole }) => {
@@ -21,11 +33,11 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({ users, onUpdate
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 
   const roleColors = {
-    admin: 'bg-red-100 text-red-800',
+    customer_admin: 'bg-red-100 text-red-800',
+    startup_admin: 'bg-red-100 text-red-800',
     recruiter: 'bg-blue-100 text-blue-800',
     hiring_manager: 'bg-green-100 text-green-800',
-    interviewer: 'bg-purple-100 text-purple-800',
-    viewer: 'bg-gray-100 text-gray-800'
+    candidate: 'bg-gray-100 text-gray-800'
   };
 
   const filteredUsers = users.filter(user => {
@@ -36,7 +48,7 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({ users, onUpdate
   });
 
   const handleRoleChange = (userId: string, newRole: string) => {
-    onUpdateRole(userId, newRole);
+    onUpdateRole(userId, newRole as UserRole);
     toast({
       title: "Role Updated",
       description: "User role has been updated successfully.",
@@ -45,7 +57,7 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({ users, onUpdate
 
   const handleBulkRoleUpdate = (newRole: string) => {
     selectedUsers.forEach(userId => {
-      onUpdateRole(userId, newRole);
+      onUpdateRole(userId, newRole as UserRole);
     });
     setSelectedUsers([]);
     toast({
@@ -62,13 +74,26 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({ users, onUpdate
     );
   };
 
+  const getRoleDisplayName = (role: UserRole) => {
+    switch (role) {
+      case 'customer_admin':
+        return 'Customer Admin';
+      case 'startup_admin':
+        return 'Startup Admin';
+      case 'hiring_manager':
+        return 'Hiring Manager';
+      default:
+        return role.charAt(0).toUpperCase() + role.slice(1);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center">
             <Shield className="w-5 h-5 mr-2" />
-            User Role Management
+            User Role Management ({filteredUsers.length})
           </div>
           {selectedUsers.length > 0 && (
             <div className="flex items-center space-x-2">
@@ -80,11 +105,10 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({ users, onUpdate
                   <SelectValue placeholder="Bulk assign role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="customer_admin">Customer Admin</SelectItem>
                   <SelectItem value="recruiter">Recruiter</SelectItem>
                   <SelectItem value="hiring_manager">Hiring Manager</SelectItem>
-                  <SelectItem value="interviewer">Interviewer</SelectItem>
-                  <SelectItem value="viewer">Viewer</SelectItem>
+                  <SelectItem value="candidate">Candidate</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -111,93 +135,97 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({ users, onUpdate
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Roles</SelectItem>
-              <SelectItem value="admin">Admin</SelectItem>
+              <SelectItem value="customer_admin">Customer Admin</SelectItem>
               <SelectItem value="recruiter">Recruiter</SelectItem>
               <SelectItem value="hiring_manager">Hiring Manager</SelectItem>
-              <SelectItem value="interviewer">Interviewer</SelectItem>
-              <SelectItem value="viewer">Viewer</SelectItem>
+              <SelectItem value="candidate">Candidate</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </CardHeader>
       
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-12">
-                <input
-                  type="checkbox"
-                  checked={selectedUsers.length === filteredUsers.length && filteredUsers.length > 0}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setSelectedUsers(filteredUsers.map(user => user.id));
-                    } else {
-                      setSelectedUsers([]);
-                    }
-                  }}
-                />
-              </TableHead>
-              <TableHead>User</TableHead>
-              <TableHead>Department</TableHead>
-              <TableHead>Current Role</TableHead>
-              <TableHead>Last Active</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredUsers.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell>
+        {filteredUsers.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-gray-500">No team members found</p>
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-12">
                   <input
                     type="checkbox"
-                    checked={selectedUsers.includes(user.id)}
-                    onChange={() => toggleUserSelection(user.id)}
+                    checked={selectedUsers.length === filteredUsers.length && filteredUsers.length > 0}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedUsers(filteredUsers.map(user => user.id));
+                      } else {
+                        setSelectedUsers([]);
+                      }
+                    }}
                   />
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                      {user.name.split(' ').map((n: string) => n[0]).join('')}
-                    </div>
-                    <div>
-                      <p className="font-medium">{user.name}</p>
-                      <p className="text-sm text-gray-600">{user.email}</p>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <span className="text-sm text-gray-600">{user.department}</span>
-                </TableCell>
-                <TableCell>
-                  <Badge className={roleColors[user.role as keyof typeof roleColors]}>
-                    {user.role.replace('_', ' ')}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <span className="text-sm text-gray-600">{user.lastActive}</span>
-                </TableCell>
-                <TableCell>
-                  <Select 
-                    value={user.role} 
-                    onValueChange={(newRole) => handleRoleChange(user.id, newRole)}
-                  >
-                    <SelectTrigger className="w-36">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="admin">Admin</SelectItem>
-                      <SelectItem value="recruiter">Recruiter</SelectItem>
-                      <SelectItem value="hiring_manager">Hiring Manager</SelectItem>
-                      <SelectItem value="interviewer">Interviewer</SelectItem>
-                      <SelectItem value="viewer">Viewer</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </TableCell>
+                </TableHead>
+                <TableHead>User</TableHead>
+                <TableHead>Department</TableHead>
+                <TableHead>Current Role</TableHead>
+                <TableHead>Last Active</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {filteredUsers.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell>
+                    <input
+                      type="checkbox"
+                      checked={selectedUsers.includes(user.id)}
+                      onChange={() => toggleUserSelection(user.id)}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                        {user.name.split(' ').map((n: string) => n[0]).join('')}
+                      </div>
+                      <div>
+                        <p className="font-medium">{user.name}</p>
+                        <p className="text-sm text-gray-600">{user.email}</p>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-sm text-gray-600">{user.department}</span>
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={roleColors[user.role]}>
+                      {getRoleDisplayName(user.role)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-sm text-gray-600">{user.lastActive}</span>
+                  </TableCell>
+                  <TableCell>
+                    <Select 
+                      value={user.role} 
+                      onValueChange={(newRole) => handleRoleChange(user.id, newRole)}
+                    >
+                      <SelectTrigger className="w-36">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="customer_admin">Customer Admin</SelectItem>
+                        <SelectItem value="recruiter">Recruiter</SelectItem>
+                        <SelectItem value="hiring_manager">Hiring Manager</SelectItem>
+                        <SelectItem value="candidate">Candidate</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </CardContent>
     </Card>
   );
