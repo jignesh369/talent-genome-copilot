@@ -3,6 +3,8 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import SearchInterface from './SearchInterface';
 import SearchHistory from './SearchHistory';
 import EmptyState from './EmptyState';
@@ -25,6 +27,8 @@ interface SearchTabsContainerProps {
   onViewProfile: (candidate: EnhancedCandidate) => void;
   onViewSnapshot: (candidate: EnhancedCandidate) => void;
   onContactCandidate: (candidate: EnhancedCandidate) => void;
+  useEnhancedMode: boolean;
+  setUseEnhancedMode: (enabled: boolean) => void;
 }
 
 const SearchTabsContainer: React.FC<SearchTabsContainerProps> = ({
@@ -41,7 +45,9 @@ const SearchTabsContainer: React.FC<SearchTabsContainerProps> = ({
   handleAutomaticOutreach,
   onViewProfile,
   onViewSnapshot,
-  onContactCandidate
+  onContactCandidate,
+  useEnhancedMode,
+  setUseEnhancedMode
 }) => {
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -61,15 +67,28 @@ const SearchTabsContainer: React.FC<SearchTabsContainerProps> = ({
           </TabsTrigger>
         </TabsList>
         
-        {searchResult && (
-          <Button 
-            onClick={handleAutomaticOutreach}
-            className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-          >
-            <Sparkles className="h-4 w-4 mr-2" />
-            Process Auto Outreach
-          </Button>
-        )}
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="enhanced-mode"
+              checked={useEnhancedMode}
+              onCheckedChange={setUseEnhancedMode}
+            />
+            <Label htmlFor="enhanced-mode" className="text-sm font-medium">
+              Enhanced OSINT Mode
+            </Label>
+          </div>
+          
+          {searchResult && (
+            <Button 
+              onClick={handleAutomaticOutreach}
+              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+            >
+              <Sparkles className="h-4 w-4 mr-2" />
+              Process Auto Outreach
+            </Button>
+          )}
+        </div>
       </div>
 
       <TabsContent value="search" className="space-y-6">
