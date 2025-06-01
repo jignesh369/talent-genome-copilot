@@ -57,7 +57,13 @@ export const useEnhancedCandidates = () => {
         },
         technical_depth_score: candidate.technical_depth_score || 0,
         community_influence_score: candidate.community_influence_score || 0,
-        cultural_fit_indicators: candidate.cultural_fit_indicators || [],
+        cultural_fit_indicators: (candidate.cultural_fit_indicators || []).map((indicator: any) => ({
+          aspect: indicator.aspect,
+          score: indicator.score || 0,
+          evidence: Array.isArray(indicator.evidence) ? indicator.evidence : 
+                   typeof indicator.evidence === 'string' ? [indicator.evidence] : [],
+          confidence: indicator.confidence || 0
+        })),
         learning_velocity_score: candidate.learning_velocity_score || 0,
         osint_profile: candidate.osint_profiles?.[0] ? {
           id: candidate.osint_profiles[0].id,
@@ -144,6 +150,42 @@ export const useEnhancedCandidates = () => {
         } : undefined,
         profile_last_updated: candidate.profile_last_updated || candidate.created_at || new Date().toISOString(),
         osint_last_fetched: candidate.osint_last_fetched || candidate.created_at || new Date().toISOString(),
+        // Additional fields for compatibility
+        source_details: {
+          type: 'database',
+          platform: 'enhanced_candidates',
+          verified: true,
+          imported_date: candidate.created_at || new Date().toISOString(),
+          confidence_score: 0.9
+        },
+        first_name: candidate.name.split(' ')[0],
+        last_name: candidate.name.split(' ').slice(1).join(' '),
+        score: Math.round((candidate.technical_depth_score + candidate.community_influence_score) * 5) || 75,
+        education: [],
+        applications: [],
+        interviews: [],
+        notes: [],
+        tags: [],
+        organization_id: candidate.organization_id || '',
+        created_at: candidate.created_at || new Date().toISOString(),
+        updated_at: candidate.updated_at || new Date().toISOString(),
+        portal_activity_score: candidate.learning_velocity_score,
+        interaction_timeline: [],
+        engagement_score: candidate.community_influence_score,
+        response_rate: 0.8,
+        preferred_contact_method: candidate.preferred_contact_method,
+        osint_last_updated: candidate.osint_last_fetched,
+        background_verification_status: 'verified' as const,
+        placement_probability_score: Math.round((candidate.technical_depth_score + candidate.community_influence_score) * 5) || 75,
+        cultural_fit_score: candidate.community_influence_score,
+        availability_signals: [],
+        job_interests: [],
+        career_aspirations: candidate.ai_summary,
+        pipeline_stage: 'sourced',
+        stage_history: [],
+        priority_level: 'medium' as const,
+        status: 'new' as const,
+        source: 'direct' as const,
       }));
 
       return transformedData;
@@ -181,7 +223,7 @@ export const useCreateEnhancedCandidate = () => {
 
       const { data, error } = await supabase
         .from('enhanced_candidates')
-        .insert([dbData])
+        .insert(dbData)
         .select()
         .single();
 

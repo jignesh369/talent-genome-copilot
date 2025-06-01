@@ -109,18 +109,24 @@ export const enhancedCandidateService = {
     ];
 
     try {
-      const { data, error } = await supabase
-        .from('enhanced_candidates')
-        .insert(dummyCandidates)
-        .select();
+      // Insert candidates one by one
+      const insertedCandidates = [];
+      for (const candidate of dummyCandidates) {
+        const { data, error } = await supabase
+          .from('enhanced_candidates')
+          .insert(candidate)
+          .select()
+          .single();
 
-      if (error) throw error;
+        if (error) throw error;
+        insertedCandidates.push(data);
+      }
 
-      console.log('Dummy candidates created:', data);
+      console.log('Dummy candidates created:', insertedCandidates);
 
       // Add OSINT data for each candidate
-      if (data) {
-        const osintData = data.map(candidate => ({
+      if (insertedCandidates.length > 0) {
+        const osintData = insertedCandidates.map(candidate => ({
           candidate_id: candidate.id,
           overall_score: Math.random() * 3 + 7, // 7-10 range
           influence_score: Math.random() * 3 + 6, // 6-9 range
@@ -142,7 +148,7 @@ export const enhancedCandidateService = {
         await supabase.from('osint_profiles').insert(osintData);
 
         // Add career trajectories
-        const careerData = data.map(candidate => ({
+        const careerData = insertedCandidates.map(candidate => ({
           candidate_id: candidate.id,
           progression_type: 'ascending',
           growth_rate: Math.random() * 3 + 2, // 2-5 range
@@ -159,7 +165,7 @@ export const enhancedCandidateService = {
         console.log('OSINT and career data added successfully');
       }
 
-      return data;
+      return insertedCandidates;
     } catch (error) {
       console.error('Error creating dummy candidates:', error);
       throw error;

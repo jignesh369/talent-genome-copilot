@@ -39,6 +39,40 @@ export interface EnhancedCandidate {
   // Timestamps
   profile_last_updated: string;
   osint_last_fetched: string;
+
+  // Additional fields for analytics compatibility
+  source_details?: CandidateSource;
+  portal_activity_score?: number;
+  interaction_timeline?: any[];
+  engagement_score?: number;
+  last_contact_date?: string;
+  response_rate?: number;
+  preferred_contact_method?: string;
+  osint_last_updated?: string;
+  background_verification_status?: 'verified' | 'pending' | 'failed';
+  placement_probability_score?: number;
+  cultural_fit_score?: number;
+  availability_signals?: any[];
+  portal_preferences?: any;
+  job_interests?: string[];
+  career_aspirations?: string;
+  pipeline_stage?: string;
+  stage_history?: any[];
+  assigned_recruiter_id?: string;
+  priority_level?: 'low' | 'medium' | 'high';
+  status?: 'new' | 'contacted' | 'interviewed' | 'offered' | 'hired' | 'rejected';
+  source?: 'direct' | 'referral' | 'job_board' | 'social_media' | 'other';
+  first_name?: string;
+  last_name?: string;
+  score?: number;
+  education?: any[];
+  applications?: any[];
+  interviews?: any[];
+  notes?: any[];
+  tags?: string[];
+  organization_id?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface CareerTrajectory {
@@ -64,7 +98,7 @@ export interface RelevanceFactor {
 }
 
 export interface ContactMethod {
-  platform: 'email' | 'linkedin' | 'twitter' | 'github';
+  platform: 'email' | 'linkedin' | 'phone' | 'github';
   confidence: number;
   best_time: string;
   approach_style: 'direct' | 'casual' | 'technical' | 'project-based';
@@ -84,6 +118,14 @@ export interface TimelineEvent {
   title: string;
   description: string;
   impact_score: number;
+}
+
+export interface CandidateSource {
+  type: string;
+  platform?: string;
+  verified?: boolean;
+  imported_date?: string;
+  confidence_score?: number;
 }
 
 export interface SearchResult {

@@ -184,7 +184,13 @@ export const useAISearch = () => {
         },
         technical_depth_score: candidate.technical_depth_score || 0,
         community_influence_score: candidate.community_influence_score || 0,
-        cultural_fit_indicators: candidate.cultural_fit_indicators || [],
+        cultural_fit_indicators: (candidate.cultural_fit_indicators || []).map((indicator: any) => ({
+          aspect: indicator.aspect,
+          score: indicator.score || 0,
+          evidence: Array.isArray(indicator.evidence) ? indicator.evidence : 
+                   typeof indicator.evidence === 'string' ? [indicator.evidence] : [],
+          confidence: indicator.confidence || 0
+        })),
         learning_velocity_score: candidate.learning_velocity_score || 0,
         osint_profile: candidate.osint_profiles?.[0] ? {
           id: candidate.osint_profiles[0].id,
