@@ -77,7 +77,37 @@ export const useOffers = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setOffers(data || []);
+      
+      // Transform the data to match our interface
+      const transformedOffers: Offer[] = (data || []).map(offer => ({
+        id: offer.id,
+        application_id: offer.application_id,
+        title: offer.title,
+        salary_amount: offer.salary_amount,
+        salary_currency: offer.salary_currency,
+        benefits: offer.benefits,
+        start_date: offer.start_date,
+        expiry_date: offer.expiry_date,
+        status: offer.status as 'pending' | 'accepted' | 'rejected' | 'withdrawn' | 'expired',
+        offer_letter_url: offer.offer_letter_url,
+        notes: offer.notes,
+        created_by: offer.created_by,
+        created_at: offer.created_at,
+        updated_at: offer.updated_at,
+        application: offer.applications ? {
+          id: offer.applications.id,
+          job: offer.applications.jobs ? {
+            id: offer.applications.jobs.id,
+            title: offer.applications.jobs.title,
+            department: offer.applications.jobs.department,
+            organization: offer.applications.jobs.organizations ? {
+              name: offer.applications.jobs.organizations.name
+            } : undefined
+          } : undefined
+        } : undefined
+      }));
+      
+      setOffers(transformedOffers);
     } catch (error: any) {
       console.error('Error fetching offers:', error);
       toast({

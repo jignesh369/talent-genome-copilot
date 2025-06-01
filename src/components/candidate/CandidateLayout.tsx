@@ -1,13 +1,17 @@
 
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { UserProfileDropdown } from '@/components/navigation/UserProfileDropdown';
-import { NotificationDropdown } from '@/components/navigation/NotificationDropdown';
+import UserProfileDropdown from '@/components/navigation/UserProfileDropdown';
+import NotificationDropdown from '@/components/navigation/NotificationDropdown';
 import { Bell, Briefcase, User, MessageCircle, FileText, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-const CandidateLayout = () => {
+interface CandidateLayoutProps {
+  children?: React.ReactNode;
+}
+
+const CandidateLayout: React.FC<CandidateLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -65,7 +69,7 @@ const CandidateLayout = () => {
 
         {/* Main Content */}
         <main className="flex-1 p-6">
-          <Outlet />
+          {children || <Outlet />}
         </main>
       </div>
     </div>
