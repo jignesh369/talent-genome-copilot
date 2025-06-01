@@ -40,7 +40,15 @@ export const useEnhancedCandidates = () => {
         bio: candidate.bio,
         avatar_url: candidate.avatar_url,
         ai_summary: candidate.ai_summary || '',
-        career_trajectory_analysis: candidate.career_trajectories?.[0] || {
+        career_trajectory_analysis: candidate.career_trajectories?.[0] ? {
+          progression_type: candidate.career_trajectories[0].progression_type as 'ascending' | 'lateral' | 'transitioning' | 'consulting',
+          growth_rate: candidate.career_trajectories[0].growth_rate || 0,
+          stability_score: candidate.career_trajectories[0].stability_score || 0,
+          next_likely_move: candidate.career_trajectories[0].next_likely_move || '',
+          timeline_events: Array.isArray(candidate.career_trajectories[0].timeline_events) 
+            ? candidate.career_trajectories[0].timeline_events as any[]
+            : []
+        } : {
           progression_type: 'ascending' as const,
           growth_rate: 0,
           stability_score: 0,
@@ -116,9 +124,13 @@ export const useEnhancedCandidates = () => {
         },
         match_score: Math.round((candidate.technical_depth_score + candidate.community_influence_score) * 5) || 75,
         relevance_factors: [],
-        availability_status: candidate.availability_status || 'passive',
+        availability_status: (candidate.availability_status as 'active' | 'passive' | 'unavailable') || 'passive',
         best_contact_method: {
-          platform: candidate.preferred_contact_method === 'twitter' ? 'email' : (candidate.preferred_contact_method as 'email' | 'linkedin' | 'github') || 'email',
+          platform: (candidate.preferred_contact_method === 'email' || 
+                    candidate.preferred_contact_method === 'linkedin' || 
+                    candidate.preferred_contact_method === 'phone') 
+                    ? candidate.preferred_contact_method 
+                    : 'email',
           confidence: 0.8,
           best_time: '9-17',
           approach_style: 'direct' as const,
@@ -164,7 +176,7 @@ export const useCreateEnhancedCandidate = () => {
         salary_expectation_min: candidateData.salary_expectation_range?.min,
         salary_expectation_max: candidateData.salary_expectation_range?.max,
         salary_currency: candidateData.salary_expectation_range?.currency || 'USD',
-        preferred_contact_method: candidateData.best_contact_method?.platform === 'twitter' ? 'email' : candidateData.best_contact_method?.platform || 'email',
+        preferred_contact_method: candidateData.best_contact_method?.platform === 'github' ? 'email' : candidateData.best_contact_method?.platform || 'email',
       };
 
       const { data, error } = await supabase
@@ -211,7 +223,7 @@ export const useUpdateEnhancedCandidate = () => {
         dbUpdates.salary_currency = updates.salary_expectation_range.currency;
       }
       if (updates.best_contact_method) {
-        dbUpdates.preferred_contact_method = updates.best_contact_method.platform === 'twitter' ? 'email' : updates.best_contact_method.platform;
+        dbUpdates.preferred_contact_method = updates.best_contact_method.platform === 'github' ? 'email' : updates.best_contact_method.platform;
       }
 
       const { data, error } = await supabase

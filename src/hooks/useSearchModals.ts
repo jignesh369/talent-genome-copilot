@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { EnhancedCandidate } from './useEnhancedCandidates';
+import { EnhancedCandidate } from '@/types/enhanced-candidate';
 
 export const useSearchModals = () => {
   const [selectedCandidate, setSelectedCandidate] = useState<EnhancedCandidate | null>(null);
