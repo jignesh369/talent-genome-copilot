@@ -4,6 +4,8 @@ import { Tabs } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
+import { useOrganizationStats } from '@/hooks/useOrganizationStats';
+import { useTeamMembers } from '@/hooks/useTeamMembers';
 import InviteMemberModal from '@/components/modals/InviteMemberModal';
 import CreateJobForm from '@/components/forms/CreateJobForm';
 import StatCard from '@/components/shared/StatCard';
@@ -11,26 +13,46 @@ import CustomerAdminHeader from '@/components/admin/CustomerAdminHeader';
 import CustomerAdminWelcome from '@/components/admin/CustomerAdminWelcome';
 import CustomerAdminSidebar from '@/components/admin/CustomerAdminSidebar';
 import CustomerAdminContent from '@/components/admin/CustomerAdminContent';
-import { TeamMember, Organization } from '@/types/organization';
+import { Organization } from '@/types/organization';
 import { UserRole } from '@/types/auth';
-import { Users, Briefcase, TrendingUp, CheckCircle } from 'lucide-react';
+import { Users, Briefcase, CheckCircle } from 'lucide-react';
 
 const CustomerAdmin = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { stats, loading: statsLoading } = useOrganizationStats();
+  const { teamMembers, loading: membersLoading, updateMemberRole, removeMember } = useTeamMembers();
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showCreateJobModal, setShowCreateJobModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('all');
 
-  // Simplified stats for cleaner layout
+  // Organization stats for display
   const organizationStats = [
-    { label: 'Team Members', value: '12', icon: Users, color: 'text-blue-600', change: '+2 this month' },
-    { label: 'Active Jobs', value: '8', icon: Briefcase, color: 'text-green-600', change: '+3 this week' },
-    { label: 'Account Health', value: '98%', icon: CheckCircle, color: 'text-emerald-600', change: 'Excellent' }
+    { 
+      label: 'Team Members', 
+      value: stats.totalMembers.toString(), 
+      icon: Users, 
+      color: 'text-blue-600', 
+      change: stats.memberGrowth 
+    },
+    { 
+      label: 'Active Jobs', 
+      value: stats.activeJobs.toString(), 
+      icon: Briefcase, 
+      color: 'text-green-600', 
+      change: stats.jobGrowth 
+    },
+    { 
+      label: 'Account Health', 
+      value: `${stats.accountHealth}%`, 
+      icon: CheckCircle, 
+      color: 'text-emerald-600', 
+      change: 'Excellent' 
+    }
   ];
 
-  // Current organization data
+  // Current organization data (this could also come from a hook)
   const currentOrganization: Organization = {
     id: '1',
     name: 'TechCorp Solutions',
@@ -40,8 +62,8 @@ const CustomerAdmin = () => {
     nextBilling: 'Jan 15, 2024',
     userLimit: 25,
     jobLimit: 15,
-    currentUsers: 12,
-    currentJobs: 8,
+    currentUsers: stats.totalMembers,
+    currentJobs: stats.activeJobs,
     domain: 'techcorp.com',
     industry: 'technology',
     size: '51-200',
@@ -51,33 +73,17 @@ const CustomerAdmin = () => {
     updated_at: new Date().toISOString()
   };
 
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([
-    { id: '1', name: 'Sarah Johnson', email: 'sarah@company.com', role: 'recruiter', status: 'active', jobs: 3, department: 'HR', lastActive: '2 hours ago' },
-    { id: '2', name: 'Mike Chen', email: 'mike@company.com', role: 'hiring_manager', status: 'active', jobs: 2, department: 'Engineering', lastActive: '1 day ago' },
-    { id: '3', name: 'Emily Davis', email: 'emily@company.com', role: 'recruiter', status: 'active', jobs: 3, department: 'HR', lastActive: '30 mins ago' },
-    { id: '4', name: 'Alex Wilson', email: 'alex@company.com', role: 'hiring_manager', status: 'inactive', jobs: 0, department: 'Product', lastActive: '1 week ago' }
-  ]);
-
   const handleInviteMember = (memberData: any) => {
-    const newMember: TeamMember = {
-      id: Date.now().toString(),
-      name: `${memberData.firstName} ${memberData.lastName}`,
-      email: memberData.email,
-      role: memberData.role as UserRole,
-      status: 'pending',
-      jobs: 0,
-      department: memberData.department || 'Unassigned',
-      lastActive: 'Never'
-    };
-    setTeamMembers(prev => [...prev, newMember]);
+    // This would typically create a new user invitation
+    toast({
+      title: "Invitation Sent",
+      description: `Invitation sent to ${memberData.email}`,
+    });
+    console.log('Inviting member:', memberData);
   };
 
-  const handleUpdateRole = (userId: string, newRole: string) => {
-    setTeamMembers(prev =>
-      prev.map(member => 
-        member.id === userId ? { ...member, role: newRole as UserRole } : member
-      )
-    );
+  const handleUpdateRole = async (userId: string, newRole: string) => {
+    await updateMemberRole(userId, newRole);
   };
 
   const handleCreateJob = (jobData: any) => {
@@ -96,12 +102,8 @@ const CustomerAdmin = () => {
     });
   };
 
-  const handleRemoveMember = (memberId: string) => {
-    setTeamMembers(prev => prev.filter(member => member.id !== memberId));
-    toast({
-      title: "Member Removed",
-      description: "Team member has been removed successfully.",
-    });
+  const handleRemoveMember = async (memberId: string) => {
+    await removeMember(memberId);
   };
 
   const filteredMembers = teamMembers.filter(member => {
@@ -110,6 +112,12 @@ const CustomerAdmin = () => {
     const matchesRole = filterRole === 'all' || member.role.toLowerCase().includes(filterRole.toLowerCase());
     return matchesSearch && matchesRole;
   });
+
+  const isLoading = statsLoading || membersLoading;
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-64">Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
@@ -120,14 +128,14 @@ const CustomerAdmin = () => {
           <CustomerAdminWelcome userName={user?.user_metadata?.first_name} />
         </div>
 
-        {/* Improved Stats Grid - 3 columns with better responsive design */}
+        {/* Stats Grid with real data */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-8 mb-6 lg:mb-10">
           {organizationStats.map((stat, index) => (
             <StatCard key={index} {...stat} />
           ))}
         </div>
 
-        {/* Main Content with improved spacing and overflow handling */}
+        {/* Main Content */}
         <Tabs defaultValue="overview" className="w-full">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-8">
             <div className="lg:col-span-3">

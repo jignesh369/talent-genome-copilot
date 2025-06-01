@@ -3,32 +3,11 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
+import { useOrganizationAnalytics } from '@/hooks/useOrganizationAnalytics';
 import { TrendingUp, Users, Brain } from 'lucide-react';
 
 const AnalyticsCharts: React.FC = () => {
-  const hiringData = [
-    { month: 'Jan', applications: 120, interviews: 45, offers: 12, hires: 8 },
-    { month: 'Feb', applications: 150, interviews: 52, offers: 15, hires: 11 },
-    { month: 'Mar', applications: 180, interviews: 68, offers: 18, hires: 14 },
-    { month: 'Apr', applications: 165, interviews: 61, offers: 16, hires: 12 },
-    { month: 'May', applications: 200, interviews: 75, offers: 22, hires: 18 },
-    { month: 'Jun', applications: 190, interviews: 72, offers: 20, hires: 16 }
-  ];
-
-  const departmentData = [
-    { name: 'Engineering', value: 45, color: '#3B82F6' },
-    { name: 'Sales', value: 25, color: '#10B981' },
-    { name: 'Marketing', value: 15, color: '#8B5CF6' },
-    { name: 'Design', value: 10, color: '#F59E0B' },
-    { name: 'Other', value: 5, color: '#6B7280' }
-  ];
-
-  const performanceData = [
-    { week: 'W1', efficiency: 78, quality: 85 },
-    { week: 'W2', efficiency: 82, quality: 88 },
-    { week: 'W3', efficiency: 85, quality: 92 },
-    { week: 'W4', efficiency: 88, quality: 94 }
-  ];
+  const { analytics, loading } = useOrganizationAnalytics();
 
   const chartConfig = {
     applications: { label: "Applications", color: "#3B82F6" },
@@ -36,6 +15,25 @@ const AnalyticsCharts: React.FC = () => {
     offers: { label: "Offers", color: "#8B5CF6" },
     hires: { label: "Hires", color: "#F59E0B" },
   };
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full overflow-hidden">
+        {[...Array(3)].map((_, i) => (
+          <Card key={i} className="min-w-0">
+            <CardHeader>
+              <div className="animate-pulse">
+                <div className="h-6 bg-gray-200 rounded w-48"></div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-3 lg:p-6">
+              <div className="w-full h-[250px] lg:h-[300px] bg-gray-100 rounded animate-pulse"></div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full overflow-hidden">
@@ -51,7 +49,7 @@ const AnalyticsCharts: React.FC = () => {
           <div className="w-full h-[250px] lg:h-[300px]">
             <ChartContainer config={chartConfig} className="w-full h-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={hiringData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                <BarChart data={analytics.hiringFunnel} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis 
                     dataKey="month" 
@@ -88,7 +86,7 @@ const AnalyticsCharts: React.FC = () => {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={departmentData}
+                  data={analytics.departmentBreakdown}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
@@ -98,7 +96,7 @@ const AnalyticsCharts: React.FC = () => {
                   dataKey="value"
                   fontSize={10}
                 >
-                  {departmentData.map((entry, index) => (
+                  {analytics.departmentBreakdown.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
@@ -121,7 +119,7 @@ const AnalyticsCharts: React.FC = () => {
           <div className="w-full h-[250px]">
             <ChartContainer config={chartConfig} className="w-full h-full">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={performanceData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                <AreaChart data={analytics.performanceMetrics} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis 
                     dataKey="week" 
