@@ -6,7 +6,7 @@ import SearchModalsContainer from '@/components/search/SearchModalsContainer';
 import { useAISearch } from '@/hooks/useSearch';
 import { useSearchModals } from '@/hooks/useSearchModals';
 import { useRecruitingIntelligence } from '@/hooks/useRecruitingIntelligence';
-import { EnhancedCandidate } from '@/hooks/useEnhancedCandidates';
+import { EnhancedCandidate } from '@/types/enhanced-candidate';
 import { PersonalizedSequence } from '@/types/outreach-sequence';
 import { useToast } from '@/hooks/use-toast';
 

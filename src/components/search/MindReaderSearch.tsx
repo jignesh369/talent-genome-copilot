@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Filter, SortDesc } from "lucide-react";
-import { EnhancedCandidate } from "@/hooks/useEnhancedCandidates";
+import { EnhancedCandidate } from "@/types/enhanced-candidate";
 import DigitalFootprintModal from "./DigitalFootprintModal";
 import CandidateCard from "./CandidateCard";
 import SearchSidebar from "./SearchSidebar";

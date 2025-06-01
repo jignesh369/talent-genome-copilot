@@ -18,9 +18,20 @@ const AdvancedAnalyticsDashboard = () => {
 
   useEffect(() => {
     if (enhancedCandidates.length > 0) {
-      // Convert to the format expected by predictiveAnalyticsService
+      // Convert enhanced candidates to the format expected by predictiveAnalyticsService
       const candidatesForAnalysis = enhancedCandidates.map(candidate => ({
         ...candidate,
+        first_name: candidate.name.split(' ')[0],
+        last_name: candidate.name.split(' ').slice(1).join(' '),
+        score: candidate.match_score,
+        education: [],
+        applications: [],
+        interviews: [],
+        notes: [],
+        tags: [],
+        organization_id: '',
+        created_at: candidate.profile_last_updated,
+        updated_at: candidate.profile_last_updated,
         source_details: { platform: 'database', verified: true },
         portal_activity_score: candidate.learning_velocity_score,
         interaction_timeline: [],
