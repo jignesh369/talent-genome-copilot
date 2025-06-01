@@ -18,7 +18,9 @@ const UserProfileDropdown = () => {
 
   const handleProfileClick = () => {
     // Redirect based on user role
-    if (userRole === 'customer_admin') {
+    if (userRole === 'candidate') {
+      window.location.href = '/candidate-profile';
+    } else if (userRole === 'customer_admin') {
       window.location.href = '/customer-admin';
     } else {
       window.location.href = '/settings';
@@ -83,14 +85,26 @@ const UserProfileDropdown = () => {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleProfileClick} className="cursor-pointer">
-          <User className="mr-2 h-4 w-4" />
-          {userRole === 'customer_admin' ? 'Admin Dashboard' : 'Profile & Settings'}
-        </DropdownMenuItem>
-        <DropdownMenuItem className="cursor-pointer">
-          <Building className="mr-2 h-4 w-4" />
-          Organization
-        </DropdownMenuItem>
+        
+        {/* Show different menu items based on user role */}
+        {userRole === 'candidate' ? (
+          <DropdownMenuItem onClick={handleProfileClick} className="cursor-pointer">
+            <User className="mr-2 h-4 w-4" />
+            Profile
+          </DropdownMenuItem>
+        ) : (
+          <>
+            <DropdownMenuItem onClick={handleProfileClick} className="cursor-pointer">
+              <User className="mr-2 h-4 w-4" />
+              {userRole === 'customer_admin' ? 'Admin Dashboard' : 'Profile & Settings'}
+            </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer">
+              <Building className="mr-2 h-4 w-4" />
+              Organization
+            </DropdownMenuItem>
+          </>
+        )}
+        
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-600">
           <LogOut className="mr-2 h-4 w-4" />

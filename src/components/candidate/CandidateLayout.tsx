@@ -12,7 +12,7 @@ interface CandidateLayoutProps {
 }
 
 const CandidateLayout: React.FC<CandidateLayoutProps> = ({ children }) => {
-  const navigate = useNavigate();
+  const navigate = useLocation();
   const location = useLocation();
 
   const navigationItems = [
@@ -24,10 +24,13 @@ const CandidateLayout: React.FC<CandidateLayoutProps> = ({ children }) => {
     { path: '/candidate-offers', label: 'Offers', icon: FileText },
     { path: '/candidate-messages', label: 'Messages', icon: MessageCircle },
     { path: '/candidate-profile', label: 'Profile', icon: User },
-    { path: '/settings', label: 'Settings', icon: Settings },
   ];
 
   const isActivePath = (path: string) => location.pathname === path;
+
+  const handleNavigation = (path: string) => {
+    window.location.href = path;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -49,18 +52,19 @@ const CandidateLayout: React.FC<CandidateLayoutProps> = ({ children }) => {
       <div className="flex">
         {/* Sidebar */}
         <aside className="w-64 bg-white border-r border-gray-200 min-h-[calc(100vh-73px)]">
-          <nav className="p-4 space-y-2">
+          <nav className="p-4 space-y-1">
             {navigationItems.map((item) => {
               const Icon = item.icon;
+              const isActive = isActivePath(item.path);
               return (
                 <Button
                   key={item.path}
-                  variant={isActivePath(item.path) ? "default" : "ghost"}
-                  className="w-full justify-start"
-                  onClick={() => navigate(item.path)}
+                  variant={isActive ? "default" : "ghost"}
+                  className="w-full justify-start h-10 px-3"
+                  onClick={() => handleNavigation(item.path)}
                 >
-                  <Icon className="w-4 h-4 mr-3" />
-                  {item.label}
+                  <Icon className="w-4 h-4 mr-3 flex-shrink-0" />
+                  <span className="text-sm">{item.label}</span>
                 </Button>
               );
             })}
