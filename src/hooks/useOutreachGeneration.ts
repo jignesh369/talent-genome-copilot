@@ -3,13 +3,13 @@ import { useToast } from '@/hooks/use-toast';
 import { enhancedAutomatedCommunication } from '@/services/analytics/enhancedAutomatedCommunication';
 import { smartOutreachTriggers } from '@/services/analytics/smartOutreachTriggers';
 import { automatedCommunicationService } from '@/services/analytics/automatedCommunicationService';
-import { EnhancedCandidate as SearchCandidate } from '@/types/enhanced-candidate';
+import { EnhancedCandidate } from '@/types/enhanced-candidate';
 
 export const useOutreachGeneration = () => {
   const { toast } = useToast();
 
   const generatePersonalizedOutreach = async (
-    candidate: SearchCandidate,
+    candidate: EnhancedCandidate,
     messageType: 'initial_outreach' | 'follow_up' | 'assessment_request',
     customData: Record<string, string> = {}
   ) => {
@@ -32,7 +32,7 @@ export const useOutreachGeneration = () => {
     return result.body;
   };
 
-  const processAutomaticOutreach = async (candidates: SearchCandidate[]) => {
+  const processAutomaticOutreach = async (candidates: EnhancedCandidate[]) => {
     console.log('Processing automatic outreach for all candidates...');
     
     const result = await enhancedAutomatedCommunication.processTriggerBasedOutreach(candidates);

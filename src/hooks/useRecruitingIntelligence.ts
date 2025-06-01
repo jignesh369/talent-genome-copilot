@@ -3,6 +3,7 @@ import { useOutreachGeneration } from './useOutreachGeneration';
 import { usePredictiveAnalytics } from './usePredictiveAnalytics';
 import { useCandidateConversion } from './useCandidateConversion';
 import { useAnalyticsData } from './useAnalyticsData';
+import { EnhancedCandidate } from '@/types/enhanced-candidate';
 
 export const useRecruitingIntelligence = () => {
   const { enhancedCandidates, osintMonitoring, communicationMetrics, alerts, resolveAlert, getAlertStats, getCandidateAlerts } = useAnalyticsData();
@@ -26,13 +27,12 @@ export const useRecruitingIntelligence = () => {
     const candidate = enhancedCandidates.find(c => c.id === candidateId);
     if (!candidate) return null;
     
-    const searchCandidate = convertToSearchCandidate(candidate);
-    return await generatePersonalizedOutreach(searchCandidate, messageType, customData);
+    return await generatePersonalizedOutreach(candidate, messageType, customData);
   };
 
   const processAutomaticOutreachForAll = async () => {
-    const searchCandidates = enhancedCandidates.map(convertToSearchCandidate);
-    return await processAutomaticOutreach(searchCandidates);
+    console.log('Processing automatic outreach for all candidates...');
+    return await processAutomaticOutreach(enhancedCandidates);
   };
 
   return {
