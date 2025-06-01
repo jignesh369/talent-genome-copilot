@@ -20,10 +20,11 @@ export const enhancedCandidateService = {
         technical_depth_score: 8.5,
         community_influence_score: 7.2,
         learning_velocity_score: 9.1,
-        availability_status: "passive",
+        availability_status: "passive" as const,
         salary_expectation_min: 120000,
         salary_expectation_max: 150000,
-        preferred_contact_method: "email"
+        salary_currency: "USD",
+        preferred_contact_method: "email" as const
       },
       {
         name: "Marcus Johnson",
@@ -39,10 +40,11 @@ export const enhancedCandidateService = {
         technical_depth_score: 9.2,
         community_influence_score: 8.7,
         learning_velocity_score: 8.9,
-        availability_status: "active",
+        availability_status: "active" as const,
         salary_expectation_min: 140000,
         salary_expectation_max: 180000,
-        preferred_contact_method: "linkedin"
+        salary_currency: "USD",
+        preferred_contact_method: "linkedin" as const
       },
       {
         name: "Emily Rodriguez",
@@ -58,10 +60,11 @@ export const enhancedCandidateService = {
         technical_depth_score: 7.8,
         community_influence_score: 6.9,
         learning_velocity_score: 8.5,
-        availability_status: "passive",
+        availability_status: "passive" as const,
         salary_expectation_min: 110000,
         salary_expectation_max: 140000,
-        preferred_contact_method: "email"
+        salary_currency: "USD",
+        preferred_contact_method: "email" as const
       },
       {
         name: "David Kim",
@@ -77,10 +80,11 @@ export const enhancedCandidateService = {
         technical_depth_score: 9.0,
         community_influence_score: 8.1,
         learning_velocity_score: 7.8,
-        availability_status: "passive",
+        availability_status: "passive" as const,
         salary_expectation_min: 150000,
         salary_expectation_max: 190000,
-        preferred_contact_method: "linkedin"
+        salary_currency: "USD",
+        preferred_contact_method: "linkedin" as const
       },
       {
         name: "Lisa Wang",
@@ -96,10 +100,11 @@ export const enhancedCandidateService = {
         technical_depth_score: 8.7,
         community_influence_score: 7.5,
         learning_velocity_score: 8.3,
-        availability_status: "active",
+        availability_status: "active" as const,
         salary_expectation_min: 125000,
         salary_expectation_max: 160000,
-        preferred_contact_method: "email"
+        salary_currency: "USD",
+        preferred_contact_method: "email" as const
       }
     ];
 

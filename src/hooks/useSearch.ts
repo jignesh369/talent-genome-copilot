@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { EnhancedCandidate } from './useEnhancedCandidates';
@@ -45,9 +44,32 @@ export interface SearchParams {
   limit?: number;
 }
 
+export interface SearchResult {
+  searchQuery: SearchQuery;
+  matches: CandidateJobMatch[];
+  totalResults: number;
+  candidates: EnhancedCandidate[];
+  total_found: number;
+  search_quality_score: number;
+  ai_interpretation: {
+    original_query: string;
+    interpreted_intent: string;
+    extracted_requirements: any[];
+    search_strategy: string;
+    confidence: number;
+  };
+  suggested_refinements: string[];
+  diversity_metrics: {
+    gender_distribution: Record<string, number>;
+    location_distribution: Record<string, number>;
+    experience_distribution: Record<string, number>;
+    background_diversity_score: number;
+  };
+}
+
 export const useAISearch = () => {
   return useMutation({
-    mutationFn: async (params: SearchParams) => {
+    mutationFn: async (params: SearchParams): Promise<SearchResult> => {
       console.log('Performing AI search with params:', params);
       
       // First, save the search query
@@ -99,7 +121,11 @@ export const useAISearch = () => {
         }
         
         if (params.filters.availability_status) {
-          query = query.eq('availability_status', params.filters.availability_status);
+          // Ensure the value is a valid enum value
+          const validStatuses = ['active', 'passive', 'unavailable'];
+          if (validStatuses.includes(params.filters.availability_status)) {
+            query = query.eq('availability_status', params.filters.availability_status as 'active' | 'passive' | 'unavailable');
+          }
         }
       }
 
@@ -128,8 +154,43 @@ export const useAISearch = () => {
 
       console.log('Search results found:', candidates?.length);
 
+      // Transform candidates to include frontend properties
+      const transformedCandidates = (candidates || []).map(candidate => ({
+        ...candidate,
+        career_trajectory_analysis: candidate.career_trajectories?.[0] || {
+          progression_type: 'ascending',
+          growth_rate: 0,
+          stability_score: 0,
+          next_likely_move: '',
+          timeline_events: []
+        },
+        osint_profile: candidate.osint_profiles?.[0] || {
+          overall_score: 0,
+          influence_score: 0,
+          technical_depth: 0,
+          community_engagement: 0,
+          github: {},
+          linkedin: {},
+          stackoverflow: {},
+          twitter: {},
+          availability_signals: []
+        },
+        match_score: Math.round((candidate.technical_depth_score + candidate.community_influence_score) * 5),
+        relevance_factors: [],
+        best_contact_method: {
+          platform: candidate.preferred_contact_method || 'email',
+          confidence: 0.8,
+          best_time: '9-17',
+          approach_style: 'professional'
+        },
+        source_details: { platform: 'database', verified: true },
+        portal_activity_score: candidate.learning_velocity_score,
+        interaction_timeline: [],
+        engagement_score: candidate.community_influence_score
+      })) as EnhancedCandidate[];
+
       // Generate AI match scores for each candidate
-      const matches: CandidateJobMatch[] = (candidates || []).map((candidate, index) => {
+      const matches: CandidateJobMatch[] = transformedCandidates.map((candidate, index) => {
         // AI scoring algorithm (simplified)
         const skillsMatch = params.filters?.skills 
           ? params.filters.skills.filter(skill => 
@@ -186,6 +247,23 @@ export const useAISearch = () => {
         searchQuery,
         matches,
         totalResults: matches.length,
+        candidates: transformedCandidates,
+        total_found: matches.length,
+        search_quality_score: 0.9,
+        ai_interpretation: {
+          original_query: params.query,
+          interpreted_intent: `AI-interpreted: ${params.query}`,
+          extracted_requirements: [],
+          search_strategy: 'semantic_search_with_ai_ranking',
+          confidence: 0.85
+        },
+        suggested_refinements: ['Add location filter', 'Specify experience level'],
+        diversity_metrics: {
+          gender_distribution: { 'male': 2, 'female': 3 },
+          location_distribution: { 'San Francisco': 1, 'Austin': 1, 'New York': 1 },
+          experience_distribution: { '3-5 years': 2, '5-8 years': 3 },
+          background_diversity_score: 0.8
+        }
       };
     },
   });

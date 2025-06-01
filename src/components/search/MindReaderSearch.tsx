@@ -35,6 +35,14 @@ const MindReaderSearch = () => {
     console.log('Feedback for candidate:', candidateId, isPositive);
   };
 
+  const handleViewProfile = (candidate: EnhancedCandidate) => {
+    setSelectedCandidate(candidate);
+  };
+
+  const handleViewSnapshot = (candidate: EnhancedCandidate) => {
+    setFootprintCandidate(candidate);
+  };
+
   const searchResult = searchMutation.data;
 
   return (
@@ -82,12 +90,12 @@ const MindReaderSearch = () => {
             </div>
 
             <div className="space-y-6 sm:space-y-8">
-              {searchResult.matches.map((match) => (
+              {searchResult.candidates.map((candidate) => (
                 <CandidateCard 
-                  key={match.id} 
-                  candidate={match.enhanced_candidates!}
-                  onViewProfile={setSelectedCandidate}
-                  onViewSnapshot={setFootprintCandidate}
+                  key={candidate.id} 
+                  candidate={candidate}
+                  onViewProfile={handleViewProfile}
+                  onViewSnapshot={handleViewSnapshot}
                   onFeedback={handleFeedback}
                 />
               ))}
@@ -97,23 +105,12 @@ const MindReaderSearch = () => {
           <div className="lg:col-span-1">
             <SearchSidebar 
               searchResult={{
-                candidates: searchResult.matches.map(m => m.enhanced_candidates!),
+                candidates: searchResult.candidates,
                 total_found: searchResult.totalResults,
-                search_quality_score: 0.9,
-                ai_interpretation: {
-                  original_query: query,
-                  interpreted_intent: `AI-interpreted: ${query}`,
-                  extracted_requirements: [],
-                  search_strategy: 'semantic_search_with_ai_ranking',
-                  confidence: 0.85
-                },
-                suggested_refinements: ['Add location filter', 'Specify experience level'],
-                diversity_metrics: {
-                  gender_distribution: { 'male': 2, 'female': 3 },
-                  location_distribution: { 'San Francisco': 1, 'Austin': 1, 'New York': 1 },
-                  experience_distribution: { '3-5 years': 2, '5-8 years': 3 },
-                  background_diversity_score: 0.8
-                }
+                search_quality_score: searchResult.search_quality_score,
+                ai_interpretation: searchResult.ai_interpretation,
+                suggested_refinements: searchResult.suggested_refinements,
+                diversity_metrics: searchResult.diversity_metrics
               }} 
               onRefinementClick={setQuery}
             />
