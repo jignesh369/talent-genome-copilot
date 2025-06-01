@@ -15,6 +15,37 @@ export interface OSINTProfile {
   social_presence: SocialPresence;
   professional_reputation: ProfessionalReputation;
   
+  // Legacy platform fields for backward compatibility
+  github?: {
+    username: string;
+    stars: number;
+    repos: number;
+    commits: number;
+  };
+  linkedin?: {
+    connections: number;
+    url: string;
+  };
+  stackoverflow?: {
+    reputation: number;
+  };
+  twitter?: {
+    followers: number;
+    username: string;
+  };
+  reddit?: {
+    username: string;
+  };
+  devto?: {
+    username: string;
+  };
+  kaggle?: {
+    username: string;
+  };
+  medium?: {
+    username: string;
+  };
+  
   // Risk assessment
   red_flags: RedFlag[];
   

@@ -124,7 +124,7 @@ export interface CandidateSource {
   type: 'referral' | 'linkedin' | 'github' | 'osint' | 'portal' | 'ats' | 'manual_upload';
   platform?: string;
   verified?: boolean;
-  imported_date?: string;
+  imported_date: string; // Make this required for compatibility
   confidence_score?: number;
 }
 

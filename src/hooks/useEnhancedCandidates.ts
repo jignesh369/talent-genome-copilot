@@ -2,6 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
+import { AvailabilitySignal } from '@/types/osint';
 
 export const useEnhancedCandidates = () => {
   return useQuery({
@@ -72,8 +73,10 @@ export const useEnhancedCandidates = () => {
           influence_score: candidate.osint_profiles[0].influence_score || 0,
           technical_depth: candidate.osint_profiles[0].technical_depth || 0,
           community_engagement: candidate.osint_profiles[0].community_engagement || 0,
-          learning_velocity: candidate.osint_profiles[0].influence_score || 0, // Use influence_score as fallback
-          availability_signals: candidate.osint_profiles[0].availability_signals || [],
+          learning_velocity: candidate.osint_profiles[0].influence_score || 0,
+          availability_signals: Array.isArray(candidate.osint_profiles[0].availability_signals) 
+            ? candidate.osint_profiles[0].availability_signals as AvailabilitySignal[]
+            : [],
           github_profile: {
             username: candidate.osint_profiles[0].github_username || '',
             public_repos: candidate.osint_profiles[0].github_repos || 0,
@@ -103,6 +106,36 @@ export const useEnhancedCandidates = () => {
             community_involvement: [],
             expertise_areas: [],
           },
+          // Legacy platform fields for backward compatibility
+          github: {
+            username: candidate.osint_profiles[0].github_username || '',
+            stars: candidate.osint_profiles[0].github_stars || 0,
+            repos: candidate.osint_profiles[0].github_repos || 0,
+            commits: candidate.osint_profiles[0].github_commits || 0,
+          },
+          linkedin: {
+            connections: candidate.osint_profiles[0].linkedin_connections || 0,
+            url: candidate.osint_profiles[0].linkedin_url || '',
+          },
+          stackoverflow: {
+            reputation: candidate.osint_profiles[0].stackoverflow_reputation || 0,
+          },
+          twitter: {
+            followers: candidate.osint_profiles[0].twitter_followers || 0,
+            username: candidate.osint_profiles[0].twitter_username || '',
+          },
+          reddit: {
+            username: candidate.osint_profiles[0].reddit_username || '',
+          },
+          devto: {
+            username: '',
+          },
+          kaggle: {
+            username: '',
+          },
+          medium: {
+            username: '',
+          },
           red_flags: [],
           last_updated: candidate.osint_profiles[0].last_updated || new Date().toISOString(),
         } : {
@@ -128,6 +161,35 @@ export const useEnhancedCandidates = () => {
             published_content: 0,
             community_involvement: [],
             expertise_areas: [],
+          },
+          github: {
+            username: '',
+            stars: 0,
+            repos: 0,
+            commits: 0,
+          },
+          linkedin: {
+            connections: 0,
+            url: '',
+          },
+          stackoverflow: {
+            reputation: 0,
+          },
+          twitter: {
+            followers: 0,
+            username: '',
+          },
+          reddit: {
+            username: '',
+          },
+          devto: {
+            username: '',
+          },
+          kaggle: {
+            username: '',
+          },
+          medium: {
+            username: '',
           },
           red_flags: [],
           last_updated: new Date().toISOString(),

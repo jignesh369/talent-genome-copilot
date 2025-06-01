@@ -1,5 +1,5 @@
-
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
+import { OSINTProfile } from '@/types/osint';
 
 export interface CandidateSearchRequest {
   candidateName: string;
@@ -133,3 +133,60 @@ export class CandidateProfileService {
     return `${name} is a skilled professional with expertise in software development and technology. Based on available information, they demonstrate strong technical capabilities and professional experience in their field.`;
   }
 }
+
+const createBasicOSINTProfile = (candidateId: string): OSINTProfile => {
+  return {
+    id: `osint-${candidateId}`,
+    candidate_id: candidateId,
+    overall_score: Math.random() * 3 + 7,
+    influence_score: Math.random() * 3 + 6,
+    technical_depth: Math.random() * 3 + 7,
+    community_engagement: Math.random() * 3 + 6,
+    learning_velocity: Math.random() * 3 + 8,
+    last_updated: new Date().toISOString(),
+    availability_signals: [],
+    social_presence: {
+      platforms: ['github', 'linkedin'],
+      professional_consistency: 0.8,
+      communication_style: 'professional' as const,
+      thought_leadership_score: Math.random() * 3 + 6,
+    },
+    professional_reputation: {
+      industry_recognition: [],
+      conference_speaking: false,
+      published_content: 0,
+      community_involvement: [],
+      expertise_areas: [],
+    },
+    red_flags: [],
+    github: {
+      username: '',
+      stars: 0,
+      repos: 0,
+      commits: 0,
+    },
+    linkedin: {
+      connections: 0,
+      url: '',
+    },
+    stackoverflow: {
+      reputation: 0,
+    },
+    twitter: {
+      followers: 0,
+      username: '',
+    },
+    reddit: {
+      username: '',
+    },
+    devto: {
+      username: '',
+    },
+    kaggle: {
+      username: '',
+    },
+    medium: {
+      username: '',
+    },
+  };
+};
