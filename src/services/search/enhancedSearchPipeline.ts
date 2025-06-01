@@ -1,3 +1,4 @@
+
 import { naturalLanguageQueryService, QueryInterpretation } from '@/services/llm/naturalLanguageQueryService';
 import { platformQueryGenerator, OSINTSearchPlan } from '@/services/osint/platformQueryGenerator';
 import { candidateAnalysisService, CandidateAnalysisResult } from '@/services/osint/candidateAnalysisService';
@@ -109,9 +110,9 @@ export class EnhancedSearchPipeline {
         ...fallbackResults,
         osintSearchPlan: {
           queries: [],
-          expectedResults: 3,
+          totalExpectedResults: 3,
           searchStrategy: 'fallback',
-          createdAt: new Date().toISOString()
+          confidenceScore: 0.5
         },
         candidateAnalyses: [],
         searchProgress: this.searchProgress
