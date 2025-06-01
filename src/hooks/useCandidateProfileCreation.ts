@@ -10,7 +10,7 @@ export const useCandidateProfileCreation = (onProfileCreated?: (profile: Enhance
   const [candidateName, setCandidateName] = useState('');
   const [perplexityApiKey, setPerplexityApiKey] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<string>('');
   const [generatedProfile, setGeneratedProfile] = useState<EnhancedCandidate | null>(null);
 
   const createCandidateProfile = async (profileData: Partial<EnhancedCandidate>) => {
@@ -49,16 +49,17 @@ export const useCandidateProfileCreation = (onProfileCreated?: (profile: Enhance
 
     setIsSearching(true);
     try {
-      // Simulate search results
-      const mockResults = [
-        {
-          name: candidateName,
-          title: "Software Engineer",
-          company: "Tech Corp",
-          location: "San Francisco, CA"
-        }
-      ];
-      setSearchResults(mockResults);
+      // Simulate search results as a string
+      const mockResultsText = `Found information for ${candidateName}:
+      
+• Software Engineer at Tech Corp
+• Located in San Francisco, CA
+• 5+ years of experience
+• Skills: JavaScript, React, Node.js
+• Active on LinkedIn with professional presence
+• Strong technical background in web development`;
+      
+      setSearchResults(mockResultsText);
 
       // Generate a mock profile
       const mockProfile: EnhancedCandidate = {
@@ -117,7 +118,7 @@ export const useCandidateProfileCreation = (onProfileCreated?: (profile: Enhance
     await createCandidateProfile(generatedProfile);
     setGeneratedProfile(null);
     setCandidateName('');
-    setSearchResults([]);
+    setSearchResults('');
   };
 
   return {
