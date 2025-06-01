@@ -1,63 +1,61 @@
 
-import { EnhancedCandidate as SearchCandidate } from '@/types/enhanced-candidate';
+import { EnhancedCandidate } from '@/types/enhanced-candidate';
+
+interface SearchCandidate {
+  id: string;
+  name: string;
+  email: string;
+  location: string;
+  current_title?: string;
+  current_company?: string;
+  experience_years: number;
+  skills: string[];
+  technical_depth_score: number;
+  community_influence_score: number;
+  learning_velocity_score: number;
+  availability_status: 'active' | 'passive' | 'unavailable';
+  match_score?: number;
+}
 
 export const useCandidateConversion = () => {
-  // Convert enhanced recruiting candidate to search candidate format
-  const convertToSearchCandidate = (candidate: any): SearchCandidate => {
+  const convertToSearchCandidate = (candidate: EnhancedCandidate): SearchCandidate => {
     return {
       id: candidate.id,
-      name: candidate.first_name + ' ' + candidate.last_name,
-      handle: candidate.email.split('@')[0],
+      name: candidate.name,
       email: candidate.email,
-      location: candidate.location || 'Unknown',
+      location: candidate.location || '',
       current_title: candidate.current_title,
       current_company: candidate.current_company,
-      experience_years: candidate.experience_years || 0,
+      experience_years: candidate.experience_years,
       skills: candidate.skills || [],
-      bio: candidate.ai_summary,
-      avatar_url: candidate.avatar_url,
-      ai_summary: candidate.ai_summary || '',
-      career_trajectory_analysis: {
-        progression_type: 'ascending',
-        growth_rate: 0.8,
-        stability_score: 0.7,
-        next_likely_move: 'Senior role',
-        timeline_events: []
-      },
-      technical_depth_score: 8.5,
-      community_influence_score: 7.0,
-      cultural_fit_indicators: [],
-      learning_velocity_score: 8.0,
-      osint_profile: candidate.osint_profile || {
-        github_profile: undefined,
-        linkedin_insights: undefined,
-        social_presence: { platforms: [], professional_consistency: 0, communication_style: 'mixed', thought_leadership_score: 0 },
-        professional_reputation: { industry_recognition: [], conference_speaking: false, published_content: 0, community_involvement: [], expertise_areas: [] },
-        red_flags: [],
-        last_updated: new Date().toISOString()
-      },
-      match_score: candidate.placement_probability_score || 85,
-      relevance_factors: [],
-      availability_status: candidate.availability_signals?.some((s: any) => s.signal_type === 'active_job_search') ? 'active' : 'passive',
-      best_contact_method: {
-        platform: candidate.preferred_contact_method || 'email',
-        confidence: 0.8,
-        best_time: '10:00 AM',
-        approach_style: 'direct'
-      },
-      salary_expectation_range: candidate.portal_preferences?.salary_expectations ? {
-        min: candidate.portal_preferences.salary_expectations.min,
-        max: candidate.portal_preferences.salary_expectations.max,
-        currency: candidate.portal_preferences.salary_expectations.currency,
-        confidence: 0.7,
-        source: 'portal_preferences'
-      } : undefined,
-      profile_last_updated: new Date().toISOString(),
-      osint_last_fetched: new Date().toISOString()
+      technical_depth_score: candidate.technical_depth_score,
+      community_influence_score: candidate.community_influence_score,
+      learning_velocity_score: candidate.learning_velocity_score,
+      availability_status: candidate.availability_status,
+      match_score: candidate.match_score
+    };
+  };
+
+  const convertToEnhancedCandidate = (searchCandidate: SearchCandidate): Partial<EnhancedCandidate> => {
+    return {
+      id: searchCandidate.id,
+      name: searchCandidate.name,
+      email: searchCandidate.email,
+      location: searchCandidate.location,
+      current_title: searchCandidate.current_title,
+      current_company: searchCandidate.current_company,
+      experience_years: searchCandidate.experience_years,
+      skills: searchCandidate.skills,
+      technical_depth_score: searchCandidate.technical_depth_score,
+      community_influence_score: searchCandidate.community_influence_score,
+      learning_velocity_score: searchCandidate.learning_velocity_score,
+      availability_status: searchCandidate.availability_status,
+      match_score: searchCandidate.match_score || 0
     };
   };
 
   return {
-    convertToSearchCandidate
+    convertToSearchCandidate,
+    convertToEnhancedCandidate
   };
 };

@@ -1,145 +1,146 @@
 
+import { RiskAlert } from '@/hooks/useRiskAlerts';
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
 
-export interface RiskAlert {
-  id: string;
-  candidate_id: string;
-  alert_type: 'high_competition' | 'likely_to_decline' | 'compensation_mismatch' | 'cultural_misfit';
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  message: string;
-  recommendation: string;
-  confidence_score: number;
-  created_at: string;
-  is_resolved: boolean;
-  metadata?: Record<string, any>;
-}
-
-interface RiskMetrics {
-  total_alerts: number;
-  critical_alerts: number;
-  resolution_rate: number;
-  average_response_time: number;
-  risk_categories: Record<string, number>;
-}
-
 class RiskAlertSystem {
-  private static instance: RiskAlertSystem;
   private alerts: RiskAlert[] = [];
-  private alertHandlers: ((alert: RiskAlert) => void)[] = [];
 
-  static getInstance(): RiskAlertSystem {
-    if (!RiskAlertSystem.instance) {
-      RiskAlertSystem.instance = new RiskAlertSystem();
-    }
-    return RiskAlertSystem.instance;
-  }
-
-  async generateRiskAlerts(candidate: EnhancedCandidate): Promise<RiskAlert[]> {
-    const alerts: RiskAlert[] = [];
+  async getAllAlerts(): Promise<RiskAlert[]> {
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 500));
     
-    const competitionAlert = this.checkCompetitionRisk(candidate);
-    if (competitionAlert) alerts.push(competitionAlert);
+    // Generate mock alerts if none exist
+    if (this.alerts.length === 0) {
+      this.generateMockAlerts();
+    }
     
-    const declineAlert = this.checkDeclineRisk(candidate);
-    if (declineAlert) alerts.push(declineAlert);
+    return this.alerts;
+  }
+
+  async generateAlertForCandidate(candidate: EnhancedCandidate): Promise<RiskAlert[]> {
+    const candidateAlerts: RiskAlert[] = [];
     
-    const compensationAlert = this.checkCompensationRisk(candidate);
-    if (compensationAlert) alerts.push(compensationAlert);
+    // Check for employment gaps
+    if (candidate.experience_years < 3) {
+      candidateAlerts.push(this.createAlert(
+        candidate.id,
+        'employment_gap',
+        'medium',
+        'Limited Experience Detected',
+        `${candidate.name} has only ${candidate.experience_years} years of experience, which may indicate potential gaps in employment history.`,
+        ['Verify employment history during interview', 'Request detailed work timeline', 'Focus on skill assessment rather than years of experience'],
+        ['linkedin_profile', 'resume_analysis']
+      ));
+    }
+
+    // Check for skill mismatches
+    if (candidate.technical_depth_score < 5) {
+      candidateAlerts.push(this.createAlert(
+        candidate.id,
+        'skill_mismatch',
+        'high',
+        'Low Technical Depth Score',
+        `Technical assessment shows score of ${candidate.technical_depth_score}/10, indicating potential skill gaps.`,
+        ['Conduct detailed technical interview', 'Provide skill development plan', 'Consider alternative role placement'],
+        ['github_analysis', 'stackoverflow_activity']
+      ));
+    }
+
+    // Check for availability changes
+    if (candidate.availability_status === 'unavailable') {
+      candidateAlerts.push(this.createAlert(
+        candidate.id,
+        'availability_change',
+        'high',
+        'Candidate Unavailable',
+        `${candidate.name} has marked themselves as unavailable, indicating they may no longer be interested in opportunities.`,
+        ['Reach out to confirm availability', 'Update candidate status', 'Move to passive pipeline'],
+        ['profile_update', 'last_activity']
+      ));
+    }
+
+    this.alerts.push(...candidateAlerts);
+    return candidateAlerts;
+  }
+
+  async resolveAlert(alertId: string): Promise<void> {
+    await new Promise(resolve => setTimeout(resolve, 200));
     
-    return alerts;
-  }
-
-  checkCompetitionRisk(candidate: EnhancedCandidate): RiskAlert | null {
-    if (candidate.community_influence_score > 8 && candidate.technical_depth_score > 8) {
-      return {
-        id: `risk_${Date.now()}_competition`,
-        candidate_id: candidate.id,
-        alert_type: 'high_competition',
-        severity: 'high',
-        message: 'High-profile candidate likely receiving multiple offers',
-        recommendation: 'Move quickly with competitive offer and clear value proposition',
-        confidence_score: 0.85,
-        created_at: new Date().toISOString(),
-        is_resolved: false
-      };
-    }
-    return null;
-  }
-
-  checkDeclineRisk(candidate: EnhancedCandidate): RiskAlert | null {
-    if (candidate.availability_status === 'passive' && candidate.experience_years > 10) {
-      return {
-        id: `risk_${Date.now()}_decline`,
-        candidate_id: candidate.id,
-        alert_type: 'likely_to_decline',
-        severity: 'medium',
-        message: 'Senior passive candidate may require strong motivation to consider change',
-        recommendation: 'Focus on growth opportunities and unique challenges in initial outreach',
-        confidence_score: 0.7,
-        created_at: new Date().toISOString(),
-        is_resolved: false
-      };
-    }
-    return null;
-  }
-
-  checkCompensationRisk(candidate: EnhancedCandidate): RiskAlert | null {
-    if (candidate.current_company && ['Google', 'Apple', 'Microsoft', 'Amazon', 'Meta'].includes(candidate.current_company)) {
-      return {
-        id: `risk_${Date.now()}_compensation`,
-        candidate_id: candidate.id,
-        alert_type: 'compensation_mismatch',
-        severity: 'high',
-        message: 'Candidate from high-paying tech company may have elevated compensation expectations',
-        recommendation: 'Prepare competitive compensation package and emphasize non-monetary benefits',
-        confidence_score: 0.8,
-        created_at: new Date().toISOString(),
-        is_resolved: false
-      };
-    }
-    return null;
-  }
-
-  onAlert(handler: (alert: RiskAlert) => void): void {
-    this.alertHandlers.push(handler);
-  }
-
-  async analyzeCandidate(candidate: EnhancedCandidate): Promise<RiskAlert[]> {
-    const alerts = await this.generateRiskAlerts(candidate);
-    alerts.forEach(alert => {
-      this.alerts.push(alert);
-      this.alertHandlers.forEach(handler => handler(alert));
-    });
-    return alerts;
-  }
-
-  resolveAlert(alertId: string, resolvedBy: string): void {
-    const alert = this.alerts.find(a => a.id === alertId);
-    if (alert) {
-      alert.is_resolved = true;
-      alert.metadata = { ...alert.metadata, resolved_by: resolvedBy };
+    const alertIndex = this.alerts.findIndex(alert => alert.id === alertId);
+    if (alertIndex !== -1) {
+      this.alerts[alertIndex].resolved = true;
     }
   }
 
-  getAlertStats(): RiskMetrics {
+  private createAlert(
+    candidateId: string,
+    alertType: RiskAlert['alert_type'],
+    severity: RiskAlert['severity'],
+    title: string,
+    description: string,
+    recommendedActions: string[],
+    evidence: string[]
+  ): RiskAlert {
     return {
-      total_alerts: this.alerts.length,
-      critical_alerts: this.alerts.filter(a => a.severity === 'critical').length,
-      resolution_rate: this.alerts.length > 0 ? this.alerts.filter(a => a.is_resolved).length / this.alerts.length : 0,
-      average_response_time: 4.5,
-      risk_categories: {
-        'high_competition': this.alerts.filter(a => a.alert_type === 'high_competition').length,
-        'likely_to_decline': this.alerts.filter(a => a.alert_type === 'likely_to_decline').length,
-        'compensation_mismatch': this.alerts.filter(a => a.alert_type === 'compensation_mismatch').length,
-        'cultural_misfit': this.alerts.filter(a => a.alert_type === 'cultural_misfit').length
-      }
+      id: `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      candidate_id: candidateId,
+      alert_type: alertType,
+      severity,
+      title,
+      description,
+      detected_at: new Date().toISOString(),
+      resolved: false,
+      confidence_score: Math.random() * 0.3 + 0.7, // 0.7 - 1.0
+      evidence,
+      recommended_actions: recommendedActions
     };
   }
 
-  async getRiskMetrics(): Promise<RiskMetrics> {
-    return this.getAlertStats();
+  private generateMockAlerts(): void {
+    const mockAlerts: RiskAlert[] = [
+      {
+        id: 'alert_001',
+        candidate_id: 'candidate_001',
+        alert_type: 'profile_inconsistency',
+        severity: 'medium',
+        title: 'Profile Inconsistency Detected',
+        description: 'Discrepancy found between LinkedIn profile and GitHub activity dates.',
+        detected_at: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+        resolved: false,
+        confidence_score: 0.75,
+        evidence: ['linkedin_profile', 'github_commits'],
+        recommended_actions: ['Verify employment timeline', 'Request clarification during screening']
+      },
+      {
+        id: 'alert_002',
+        candidate_id: 'candidate_002',
+        alert_type: 'employment_gap',
+        severity: 'high',
+        title: 'Employment Gap Identified',
+        description: '8-month gap between previous positions requires investigation.',
+        detected_at: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+        resolved: false,
+        confidence_score: 0.90,
+        evidence: ['resume_analysis', 'linkedin_timeline'],
+        recommended_actions: ['Ask about gap during phone screening', 'Verify with references']
+      },
+      {
+        id: 'alert_003',
+        candidate_id: 'candidate_003',
+        alert_type: 'reputation_risk',
+        severity: 'critical',
+        title: 'Negative Online Presence',
+        description: 'Controversial social media posts found that may impact company reputation.',
+        detected_at: new Date(Date.now() - 259200000).toISOString(), // 3 days ago
+        resolved: true,
+        confidence_score: 0.85,
+        evidence: ['twitter_posts', 'reddit_comments'],
+        recommended_actions: ['Review social media policy', 'Discuss professional conduct expectations']
+      }
+    ];
+
+    this.alerts = mockAlerts;
   }
 }
 
-export const riskAlertSystem = RiskAlertSystem.getInstance();
-export type { RiskMetrics };
+export const riskAlertSystem = new RiskAlertSystem();

@@ -1,45 +1,84 @@
 
 import { useState, useEffect } from 'react';
-import { riskAlertSystem, RiskAlert } from '@/services/analytics/riskAlertSystem';
+import { riskAlertSystem } from '@/services/analytics/riskAlertSystem';
+import { EnhancedCandidate } from '@/types/enhanced-candidate';
+
+export interface RiskAlert {
+  id: string;
+  candidate_id: string;
+  alert_type: 'profile_inconsistency' | 'employment_gap' | 'skill_mismatch' | 'availability_change' | 'reputation_risk';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  title: string;
+  description: string;
+  detected_at: string;
+  resolved: boolean;
+  confidence_score: number;
+  evidence: string[];
+  recommended_actions: string[];
+}
+
+export interface AlertStats {
+  total: number;
+  unresolved: number;
+  critical: number;
+  high: number;
+  medium: number;
+  low: number;
+}
 
 export const useRiskAlerts = () => {
   const [alerts, setAlerts] = useState<RiskAlert[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const handleNewAlert = (alert: RiskAlert) => {
-      setAlerts(prev => [...prev, alert]);
-    };
-
-    riskAlertSystem.onAlert(handleNewAlert);
+    loadAlerts();
   }, []);
 
-  const resolveAlert = (alertId: string) => {
-    riskAlertSystem.resolveAlert(alertId, 'user');
-    setAlerts(prev => prev.map(alert => 
-      alert.id === alertId 
-        ? { ...alert, is_resolved: true }
-        : alert
-    ));
+  const loadAlerts = async () => {
+    try {
+      setLoading(true);
+      const alertsData = await riskAlertSystem.getAllAlerts();
+      setAlerts(alertsData);
+    } catch (error) {
+      console.error('Failed to load risk alerts:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const getAlertStats = () => {
-    return riskAlertSystem.getAlertStats();
+  const resolveAlert = async (alertId: string) => {
+    try {
+      await riskAlertSystem.resolveAlert(alertId);
+      setAlerts(prev => prev.map(alert => 
+        alert.id === alertId ? { ...alert, resolved: true } : alert
+      ));
+    } catch (error) {
+      console.error('Failed to resolve alert:', error);
+    }
   };
 
-  const getCandidateAlerts = (candidateId: string) => {
+  const getAlertStats = (): AlertStats => {
+    const unresolved = alerts.filter(alert => !alert.resolved);
+    return {
+      total: alerts.length,
+      unresolved: unresolved.length,
+      critical: unresolved.filter(alert => alert.severity === 'critical').length,
+      high: unresolved.filter(alert => alert.severity === 'high').length,
+      medium: unresolved.filter(alert => alert.severity === 'medium').length,
+      low: unresolved.filter(alert => alert.severity === 'low').length
+    };
+  };
+
+  const getCandidateAlerts = (candidateId: string): RiskAlert[] => {
     return alerts.filter(alert => alert.candidate_id === candidateId);
   };
 
-  // Transform alerts to include title from message for backwards compatibility
-  const alertsWithTitle = alerts.map(alert => ({
-    ...alert,
-    title: alert.message.split('.')[0] || alert.message.substring(0, 50)
-  }));
-
   return {
-    alerts: alertsWithTitle,
+    alerts,
+    loading,
     resolveAlert,
     getAlertStats,
-    getCandidateAlerts
+    getCandidateAlerts,
+    refreshAlerts: loadAlerts
   };
 };

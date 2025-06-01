@@ -1,233 +1,273 @@
-import { EnhancedCandidate } from '@/types/enhanced-candidate';
-import { OSINTProfile } from '@/types/osint';
-import { PredictiveInsight } from '@/types/predictive-analytics';
 
 interface JobSuccessPrediction {
-  candidate_id: string;
+  overall_score: number;
+  technical_fit: number;
+  cultural_fit: number;
+  experience_alignment: number;
   success_probability: number;
-  risk_factors: RiskFactor[];
-  success_indicators: SuccessIndicator[];
-  recommended_actions: string[];
-  confidence_level: number;
+  risk_factors: string[];
+  strengths: string[];
+  recommendations: string[];
 }
 
-interface RiskFactor {
-  factor: string;
-  severity: 'low' | 'medium' | 'high';
-  impact_score: number;
-  mitigation_strategy: string;
+interface AssessmentGeneration {
+  questions: AssessmentQuestion[];
+  estimated_duration: number;
+  difficulty_level: 'junior' | 'mid' | 'senior' | 'lead';
+  focus_areas: string[];
 }
 
-interface SuccessIndicator {
-  indicator: string;
-  strength: number;
-  evidence: string[];
+interface AssessmentQuestion {
+  id: string;
+  question: string;
+  type: 'multiple_choice' | 'coding' | 'scenario' | 'technical_explanation';
+  options?: string[];
+  expected_answer?: string;
+  skill_area: string;
+  difficulty: number;
+}
+
+interface MarketTrends {
+  demand_score: number;
+  salary_trends: {
+    median: number;
+    trend: 'increasing' | 'stable' | 'decreasing';
+    percentage_change: number;
+  };
+  competition_level: 'low' | 'medium' | 'high';
+  growth_projection: number;
+  top_companies_hiring: string[];
+  emerging_skills: string[];
 }
 
 class PredictiveAnalyticsEngine {
-  async predictJobSuccess(candidate: EnhancedCandidate, jobRequirements: string[]): Promise<JobSuccessPrediction> {
-    console.log('Predicting job success for candidate:', candidate.id);
-    
-    const skillMatchScore = this.calculateSkillMatch(candidate, jobRequirements);
-    const culturalFitScore = candidate.cultural_fit_indicators?.reduce((acc, indicator) => acc + indicator.score, 0) / candidate.cultural_fit_indicators?.length || 75;
-    const engagementScore = 70; // Default engagement score since it's not in the type
-    const osintScore = candidate.osint_profile?.overall_score || 8;
-    
-    const successProbability = this.calculateSuccessProbability(
-      skillMatchScore,
-      culturalFitScore,
-      engagementScore,
-      osintScore
-    );
+  async predictJobSuccess(candidate: any, jobRequirements: string[]): Promise<JobSuccessPrediction> {
+    // Simulate AI processing delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
-    const riskFactors = this.identifyRiskFactors(candidate);
-    const successIndicators = this.identifySuccessIndicators(candidate);
-    const recommendedActions = this.generateRecommendations(candidate, riskFactors);
+    const technical_fit = this.calculateTechnicalFit(candidate, jobRequirements);
+    const cultural_fit = this.calculateCulturalFit(candidate);
+    const experience_alignment = this.calculateExperienceAlignment(candidate, jobRequirements);
+    
+    const overall_score = (technical_fit + cultural_fit + experience_alignment) / 3;
+    const success_probability = Math.min(overall_score * 1.2, 10) / 10; // Cap at 100%
 
     return {
-      candidate_id: candidate.id,
-      success_probability: successProbability,
-      risk_factors: riskFactors,
-      success_indicators: successIndicators,
-      recommended_actions: recommendedActions,
-      confidence_level: 0.85
+      overall_score,
+      technical_fit,
+      cultural_fit,
+      experience_alignment,
+      success_probability,
+      risk_factors: this.identifyRiskFactors(candidate),
+      strengths: this.identifyStrengths(candidate),
+      recommendations: this.generateRecommendations(candidate, overall_score)
     };
   }
 
-  private calculateSkillMatch(candidate: EnhancedCandidate, requirements: string[]): number {
-    const candidateSkills = candidate.skills.map(s => s.toLowerCase());
-    const matchedSkills = requirements.filter(req => 
+  async generateAssessment(role: string, seniority: string, skills: string[]): Promise<AssessmentGeneration> {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    const difficulty_level = this.mapSeniorityToDifficulty(seniority);
+    const questions = this.generateQuestions(role, difficulty_level, skills);
+    
+    return {
+      questions,
+      estimated_duration: questions.length * 5, // 5 minutes per question
+      difficulty_level,
+      focus_areas: skills.slice(0, 3) // Top 3 skills
+    };
+  }
+
+  async analyzeMarketTrends(skills: string[], location: string): Promise<MarketTrends> {
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    const demandScore = this.calculateDemandScore(skills);
+    
+    return {
+      demand_score: demandScore,
+      salary_trends: {
+        median: this.calculateMedianSalary(skills, location),
+        trend: demandScore > 7 ? 'increasing' : demandScore > 4 ? 'stable' : 'decreasing',
+        percentage_change: (demandScore - 5) * 2 // Mock percentage
+      },
+      competition_level: demandScore > 8 ? 'high' : demandScore > 5 ? 'medium' : 'low',
+      growth_projection: demandScore * 1.2,
+      top_companies_hiring: this.getTopCompaniesForSkills(skills),
+      emerging_skills: this.getEmergingSkills(skills)
+    };
+  }
+
+  private calculateTechnicalFit(candidate: any, jobRequirements: string[]): number {
+    if (!candidate.skills || !Array.isArray(candidate.skills)) return 5;
+    
+    const candidateSkills = candidate.skills.map((skill: string) => skill.toLowerCase());
+    const matchingSkills = jobRequirements.filter(req => 
       candidateSkills.some(skill => skill.includes(req.toLowerCase()))
     );
     
-    return (matchedSkills.length / requirements.length) * 100;
+    const baseScore = (matchingSkills.length / Math.max(jobRequirements.length, 1)) * 10;
+    const experienceBonus = Math.min(candidate.experience_years * 0.2, 2);
+    const technicalDepthBonus = (candidate.technical_depth_score || 5) * 0.1;
+    
+    return Math.min(baseScore + experienceBonus + technicalDepthBonus, 10);
   }
 
-  private calculateSuccessProbability(
-    skillMatch: number,
-    culturalFit: number,
-    engagement: number,
-    osintScore: number
-  ): number {
-    const weights = {
-      skills: 0.4,
-      culture: 0.25,
-      engagement: 0.2,
-      osint: 0.15
-    };
-
-    const weightedScore = 
-      (skillMatch * weights.skills) +
-      (culturalFit * weights.culture) +
-      (engagement * weights.engagement) +
-      (osintScore * 10 * weights.osint);
-
-    return Math.min(Math.max(weightedScore, 0), 100);
+  private calculateCulturalFit(candidate: any): number {
+    const base = 6; // Default neutral score
+    const communityBonus = (candidate.community_influence_score || 5) * 0.1;
+    const learningBonus = (candidate.learning_velocity_score || 5) * 0.1;
+    
+    return Math.min(base + communityBonus + learningBonus, 10);
   }
 
-  private identifyRiskFactors(candidate: EnhancedCandidate): RiskFactor[] {
-    const risks: RiskFactor[] = [];
+  private calculateExperienceAlignment(candidate: any, jobRequirements: string[]): number {
+    const years = candidate.experience_years || 0;
+    const baseScore = Math.min(years * 1.5, 8); // Cap at 8 for experience alone
+    const roleAlignment = this.assessRoleAlignment(candidate, jobRequirements);
+    
+    return Math.min(baseScore + roleAlignment, 10);
+  }
 
-    // Job switching frequency
-    if (candidate.experience_years > 0) {
-      const avgJobDuration = candidate.experience_years / 3; // Assuming 3 jobs
-      if (avgJobDuration < 1.5) {
-        risks.push({
-          factor: 'Frequent job changes',
-          severity: 'medium',
-          impact_score: 6,
-          mitigation_strategy: 'Discuss career stability and long-term goals'
-        });
-      }
+  private assessRoleAlignment(candidate: any, jobRequirements: string[]): number {
+    if (!candidate.current_title) return 1;
+    
+    const title = candidate.current_title.toLowerCase();
+    const hasRelevantTitle = jobRequirements.some(req => 
+      title.includes(req.toLowerCase()) || req.toLowerCase().includes('engineer')
+    );
+    
+    return hasRelevantTitle ? 2 : 0.5;
+  }
+
+  private identifyRiskFactors(candidate: any): string[] {
+    const risks: string[] = [];
+    
+    if (candidate.experience_years < 2) {
+      risks.push('Limited professional experience');
     }
-
-    // Low engagement score (using a default since it's not in the type)
-    const engagementScore = 70; // Default value
-    if (engagementScore < 50) {
-      risks.push({
-        factor: 'Low engagement in recruitment process',
-        severity: 'medium',
-        impact_score: 7,
-        mitigation_strategy: 'Increase personalized communication and follow-up'
-      });
+    
+    if (candidate.technical_depth_score < 5) {
+      risks.push('Below-average technical assessment score');
     }
-
-    // OSINT red flags - using availability_signals as a proxy
-    if (candidate.osint_profile?.availability_signals && candidate.osint_profile.availability_signals.length > 0) {
-      const concerningSignals = candidate.osint_profile.availability_signals.filter(signal => 
-        signal.confidence < 0.5
-      );
-      if (concerningSignals.length > 0) {
-        risks.push({
-          factor: 'Background verification concerns',
-          severity: 'high',
-          impact_score: 8,
-          mitigation_strategy: 'Conduct thorough reference checks and background verification'
-        });
-      }
+    
+    if (candidate.availability_status === 'unavailable') {
+      risks.push('Currently unavailable for new opportunities');
     }
-
+    
+    if (!candidate.skills || candidate.skills.length < 3) {
+      risks.push('Limited skill diversity documented');
+    }
+    
     return risks;
   }
 
-  private identifySuccessIndicators(candidate: EnhancedCandidate): SuccessIndicator[] {
-    const indicators: SuccessIndicator[] = [];
-
-    // High technical depth
-    if (candidate.osint_profile?.technical_depth && candidate.osint_profile.technical_depth > 8) {
-      indicators.push({
-        indicator: 'Strong technical expertise',
-        strength: candidate.osint_profile.technical_depth,
-        evidence: ['High GitHub activity', 'Technical publications', 'Open source contributions']
-      });
+  private identifyStrengths(candidate: any): string[] {
+    const strengths: string[] = [];
+    
+    if (candidate.technical_depth_score >= 8) {
+      strengths.push('Exceptional technical depth');
     }
-
-    // Community involvement
-    if (candidate.osint_profile?.community_engagement && candidate.osint_profile.community_engagement > 7) {
-      indicators.push({
-        indicator: 'Active community participation',
-        strength: candidate.osint_profile.community_engagement,
-        evidence: ['Speaking engagements', 'Mentoring activities', 'Technical writing']
-      });
+    
+    if (candidate.community_influence_score >= 7) {
+      strengths.push('Strong community engagement');
     }
-
-    // Learning velocity
-    if (candidate.osint_profile?.learning_velocity && candidate.osint_profile.learning_velocity > 8) {
-      indicators.push({
-        indicator: 'Continuous learning mindset',
-        strength: candidate.osint_profile.learning_velocity,
-        evidence: ['Recent skill acquisitions', 'Course completions', 'Technology adoption']
-      });
+    
+    if (candidate.learning_velocity_score >= 8) {
+      strengths.push('High learning velocity');
     }
-
-    return indicators;
+    
+    if (candidate.experience_years >= 5) {
+      strengths.push('Substantial professional experience');
+    }
+    
+    if (candidate.skills && candidate.skills.length >= 8) {
+      strengths.push('Diverse technical skill set');
+    }
+    
+    return strengths;
   }
 
-  private generateRecommendations(candidate: EnhancedCandidate, risks: RiskFactor[]): string[] {
+  private generateRecommendations(candidate: any, overallScore: number): string[] {
     const recommendations: string[] = [];
-
-    if (risks.length === 0) {
-      recommendations.push('Fast-track for final interview');
-      recommendations.push('Consider for senior-level positions');
+    
+    if (overallScore >= 8) {
+      recommendations.push('Prioritize for immediate interview');
+      recommendations.push('Consider fast-track hiring process');
+    } else if (overallScore >= 6) {
+      recommendations.push('Schedule technical assessment');
+      recommendations.push('Conduct behavioral interview');
     } else {
-      recommendations.push('Schedule additional screening call');
-      recommendations.push('Prepare targeted interview questions');
-      
-      if (risks.some(r => r.severity === 'high')) {
-        recommendations.push('Conduct thorough reference checks');
-        recommendations.push('Consider probationary period');
-      }
+      recommendations.push('Additional skill validation required');
+      recommendations.push('Consider for junior or training roles');
     }
-
-    // Use a default engagement score since it's not available in the type
-    const defaultEngagementScore = 75;
-    if (defaultEngagementScore > 80) {
-      recommendations.push('High engagement - likely to accept offer');
-    } else {
-      recommendations.push('Increase personal touch in communications');
+    
+    if (candidate.availability_status === 'passive') {
+      recommendations.push('Craft personalized outreach strategy');
     }
-
+    
     return recommendations;
   }
 
-  async generateInsights(candidates: EnhancedCandidate[]): Promise<PredictiveInsight[]> {
-    const insights: PredictiveInsight[] = [];
+  private mapSeniorityToDifficulty(seniority: string): 'junior' | 'mid' | 'senior' | 'lead' {
+    const level = seniority.toLowerCase();
+    if (level.includes('senior') || level.includes('lead')) return 'senior';
+    if (level.includes('mid') || level.includes('intermediate')) return 'mid';
+    if (level.includes('lead') || level.includes('principal')) return 'lead';
+    return 'junior';
+  }
 
-    // Market trend insight
-    insights.push({
-      id: `insight_${Date.now()}_1`,
-      type: 'market_trend',
-      title: 'High Demand for AI/ML Skills',
-      description: 'Candidates with AI/ML experience are 40% more likely to receive multiple offers',
-      confidence: 0.89,
-      impact: 'high',
-      timeframe: 'Next 3 months',
-      actionable_recommendations: [
-        'Prioritize candidates with AI/ML background',
-        'Increase offer competitiveness for ML engineers',
-        'Consider remote work options to expand candidate pool'
-      ],
-      created_at: new Date().toISOString()
+  private generateQuestions(role: string, difficulty: string, skills: string[]): AssessmentQuestion[] {
+    const questions: AssessmentQuestion[] = [];
+    
+    // Generate technical questions based on skills
+    skills.slice(0, 3).forEach((skill, index) => {
+      questions.push({
+        id: `q_${index + 1}`,
+        question: `Explain a complex project where you used ${skill} and the challenges you faced.`,
+        type: 'technical_explanation',
+        skill_area: skill,
+        difficulty: difficulty === 'senior' ? 8 : difficulty === 'mid' ? 6 : 4
+      });
     });
-
-    // Pipeline bottleneck insight
-    insights.push({
-      id: `insight_${Date.now()}_2`,
-      type: 'pipeline_bottleneck',
-      title: 'Technical Assessment Delay',
-      description: 'Average time between initial screen and technical assessment is 8 days - causing 25% candidate drop-off',
-      confidence: 0.92,
-      impact: 'medium',
-      timeframe: 'Immediate action needed',
-      actionable_recommendations: [
-        'Implement automated technical screening',
-        'Reduce time between screening and assessment to 3 days',
-        'Provide clear timeline expectations to candidates'
-      ],
-      created_at: new Date().toISOString()
+    
+    // Add scenario-based questions
+    questions.push({
+      id: `q_scenario_1`,
+      question: `You're tasked with optimizing a slow-performing application. Walk me through your approach.`,
+      type: 'scenario',
+      skill_area: 'problem_solving',
+      difficulty: difficulty === 'senior' ? 9 : 7
     });
+    
+    return questions;
+  }
 
-    return insights;
+  private calculateDemandScore(skills: string[]): number {
+    const highDemandSkills = ['react', 'node.js', 'python', 'aws', 'kubernetes', 'typescript'];
+    const matches = skills.filter(skill => 
+      highDemandSkills.some(high => skill.toLowerCase().includes(high.toLowerCase()))
+    );
+    
+    return Math.min(5 + matches.length * 1.5, 10);
+  }
+
+  private calculateMedianSalary(skills: string[], location: string): number {
+    const baseSalary = location.toLowerCase().includes('san francisco') ? 120000 : 
+                     location.toLowerCase().includes('new york') ? 110000 : 
+                     location.toLowerCase().includes('seattle') ? 115000 : 95000;
+    
+    const skillMultiplier = skills.length * 0.02;
+    return Math.round(baseSalary * (1 + skillMultiplier));
+  }
+
+  private getTopCompaniesForSkills(skills: string[]): string[] {
+    const companies = ['Google', 'Microsoft', 'Amazon', 'Meta', 'Apple', 'Netflix', 'Uber', 'Airbnb'];
+    return companies.slice(0, 5);
+  }
+
+  private getEmergingSkills(skills: string[]): string[] {
+    const emerging = ['AI/ML', 'Web3', 'Edge Computing', 'Quantum Computing', 'AR/VR'];
+    return emerging.slice(0, 3);
   }
 }
 
