@@ -1,6 +1,14 @@
 
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
-import { PredictiveInsight, Prediction, MarketIntelligence } from '@/types/predictive-analytics';
+import { PredictiveInsight, MarketIntelligence } from '@/types/predictive-analytics';
+
+export interface Prediction {
+  type: string;
+  confidence: number;
+  timeframe: string;
+  factors: string[];
+  recommendation: string;
+}
 
 class PredictiveAnalyticsService {
   generatePredictions(candidate: EnhancedCandidate): Promise<Prediction[]> {
@@ -21,49 +29,120 @@ class PredictiveAnalyticsService {
       type: 'market_trend',
       title: `${candidate.skills[0] || 'Technical'} Skills in High Demand`,
       description: `Based on ${candidate.name}'s profile, ${candidate.skills[0] || 'technical'} skills are trending upward`,
-      confidence_score: 0.8 + (index * 0.05),
-      impact_level: 'high',
-      time_horizon: '3_months',
-      recommended_action: `Consider reaching out to candidates with ${candidate.skills[0] || 'similar'} skills`,
-      data_sources: ['market_analysis', 'candidate_activity'],
+      confidence: 0.8 + (index * 0.05),
+      impact: 'high',
+      timeframe: '3_months',
+      actionable_recommendations: [`Consider reaching out to candidates with ${candidate.skills[0] || 'similar'} skills`],
       created_at: new Date().toISOString()
     }));
   }
 
   getMarketIntelligence(): MarketIntelligence {
     return {
-      talent_availability: {
-        overall_market: 'competitive',
-        by_skill: {
-          'JavaScript': 'high_demand',
-          'React': 'competitive',
-          'Python': 'balanced'
+      skill_demand_trends: [
+        {
+          skill: 'JavaScript',
+          demand_change: 15,
+          popularity_score: 85,
+          projected_growth: 20,
+          market_saturation: 65
         },
-        trending_skills: ['TypeScript', 'AWS', 'Kubernetes'],
-        skill_gap_analysis: {
-          'AI/ML': 'critical_shortage',
-          'DevOps': 'moderate_shortage',
-          'Frontend': 'balanced'
-        }
-      },
-      salary_benchmarks: {
-        market_rates: {
-          'Senior Engineer': { min: 120000, max: 180000, currency: 'USD' },
-          'Lead Engineer': { min: 150000, max: 220000, currency: 'USD' }
+        {
+          skill: 'React',
+          demand_change: 25,
+          popularity_score: 90,
+          projected_growth: 30,
+          market_saturation: 70
         },
-        trend_direction: 'increasing',
-        regional_variations: {
-          'San Francisco': 1.4,
-          'New York': 1.2,
-          'Austin': 0.9
+        {
+          skill: 'Python',
+          demand_change: 20,
+          popularity_score: 88,
+          projected_growth: 25,
+          market_saturation: 60
         }
-      },
-      competition_analysis: {
-        active_companies: ['Google', 'Microsoft', 'Amazon'],
-        hiring_velocity: 'high',
-        common_benefits: ['remote_work', 'equity', 'learning_budget']
-      },
-      last_updated: new Date().toISOString()
+      ],
+      salary_benchmarks: [
+        {
+          role: 'Senior Engineer',
+          location: 'San Francisco, CA',
+          min_salary: 120000,
+          max_salary: 180000,
+          median_salary: 150000,
+          percentile_25: 135000,
+          percentile_75: 165000,
+          trend: 'increasing'
+        },
+        {
+          role: 'Lead Engineer',
+          location: 'New York, NY',
+          min_salary: 150000,
+          max_salary: 220000,
+          median_salary: 185000,
+          percentile_25: 170000,
+          percentile_75: 200000,
+          trend: 'increasing'
+        }
+      ],
+      competition_analysis: [
+        {
+          company: 'Google',
+          hiring_activity: 87,
+          talent_retention: 94,
+          market_share: 23,
+          competitive_strength: 96
+        },
+        {
+          company: 'Microsoft',
+          hiring_activity: 84,
+          talent_retention: 91,
+          market_share: 21,
+          competitive_strength: 93
+        },
+        {
+          company: 'Amazon',
+          hiring_activity: 92,
+          talent_retention: 82,
+          market_share: 26,
+          competitive_strength: 88
+        }
+      ],
+      talent_availability: [
+        {
+          skill_set: ['React', 'TypeScript', 'Node.js'],
+          available_candidates: 1247,
+          response_rate: 68,
+          avg_time_to_respond: 2.3,
+          quality_score: 82
+        },
+        {
+          skill_set: ['Python', 'Django', 'PostgreSQL'],
+          available_candidates: 956,
+          response_rate: 71,
+          avg_time_to_respond: 1.8,
+          quality_score: 87
+        }
+      ],
+      hiring_velocity_trends: [
+        {
+          stage: 'Initial Screening',
+          avg_duration_days: 3,
+          trend: 'improving',
+          bottleneck_probability: 15
+        },
+        {
+          stage: 'Technical Interview',
+          avg_duration_days: 7,
+          trend: 'stable',
+          bottleneck_probability: 23
+        },
+        {
+          stage: 'Final Interview',
+          avg_duration_days: 10,
+          trend: 'declining',
+          bottleneck_probability: 34
+        }
+      ]
     };
   }
 
