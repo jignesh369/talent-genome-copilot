@@ -1,112 +1,328 @@
 
-import { EnhancedCandidate } from '@/types/enhanced-recruiting';
-import { PredictiveInsight } from '@/types/predictive-analytics';
+import { supabase } from '@/integrations/supabase/client';
+import { EnhancedCandidate } from '@/types/enhanced-candidate';
 
-class InsightsGeneratorService {
-  generatePredictiveInsights(candidates: EnhancedCandidate[]): PredictiveInsight[] {
-    const insights: PredictiveInsight[] = [];
-
-    // Generate hiring forecast insight
-    const highEngagementCandidates = candidates.filter(c => c.engagement_score > 75);
-    if (highEngagementCandidates.length > 0) {
-      insights.push({
-        id: 'hiring-forecast-1',
-        type: 'hiring_forecast',
-        title: 'Strong Hiring Pipeline Detected',
-        description: `${highEngagementCandidates.length} candidates show high engagement scores (>75%). Expected to convert within 2-3 weeks.`,
-        confidence: 87,
-        impact: 'high',
-        timeframe: '2-3 weeks',
-        actionable_recommendations: [
-          'Prioritize outreach to high-engagement candidates',
-          'Schedule interviews within next 5 days',
-          'Prepare competitive offers for top performers'
-        ],
-        created_at: new Date().toISOString()
-      });
-    }
-
-    // Generate pipeline bottleneck insight
-    const stuckCandidates = candidates.filter(c => 
-      c.pipeline_stage === 'qualified' && 
-      new Date(c.updated_at) < new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-    );
-    
-    if (stuckCandidates.length > 5) {
-      insights.push({
-        id: 'bottleneck-1',
-        type: 'pipeline_bottleneck',
-        title: 'Qualification Stage Bottleneck',
-        description: `${stuckCandidates.length} candidates have been in qualification stage for over a week. This may indicate process inefficiencies.`,
-        confidence: 92,
-        impact: 'medium',
-        timeframe: 'immediate',
-        actionable_recommendations: [
-          'Review qualification criteria and process',
-          'Assign dedicated resources to move candidates forward',
-          'Implement automated follow-up sequences'
-        ],
-        created_at: new Date().toISOString()
-      });
-    }
-
-    // Generate candidate trajectory insight
-    const topCandidates = candidates
-      .filter(c => c.placement_probability_score > 80)
-      .sort((a, b) => b.placement_probability_score - a.placement_probability_score)
-      .slice(0, 3);
-
-    if (topCandidates.length > 0) {
-      insights.push({
-        id: 'trajectory-1',
-        type: 'candidate_trajectory',
-        title: 'Top Performers Identified',
-        description: `${topCandidates.length} candidates show exceptional placement probability scores. Fast-track recommended.`,
-        confidence: 94,
-        impact: 'high',
-        timeframe: '1-2 weeks',
-        actionable_recommendations: [
-          'Schedule executive interviews immediately',
-          'Prepare premium offer packages',
-          'Assign senior recruiters to these candidates'
-        ],
-        created_at: new Date().toISOString()
-      });
-    }
-
-    // Generate market trend insight
-    const techSkills = ['React', 'Node.js', 'Python', 'TypeScript', 'AWS'];
-    const skillCounts = techSkills.map(skill => ({
-      skill,
-      count: candidates.filter(c => 
-        c.skills.some(s => s.toLowerCase().includes(skill.toLowerCase()))
-      ).length
-    }));
-
-    const topSkill = skillCounts.reduce((max, current) => 
-      current.count > max.count ? current : max
-    );
-
-    if (topSkill.count > 10) {
-      insights.push({
-        id: 'market-trend-1',
-        type: 'market_trend',
-        title: `${topSkill.skill} Talent Pool Analysis`,
-        description: `Strong representation of ${topSkill.skill} skills in pipeline (${topSkill.count} candidates). Market timing favorable for placements.`,
-        confidence: 78,
-        impact: 'medium',
-        timeframe: '2-4 weeks',
-        actionable_recommendations: [
-          `Focus on ${topSkill.skill} job opportunities`,
-          'Leverage skill abundance for competitive positioning',
-          'Consider specialized recruitment campaigns'
-        ],
-        created_at: new Date().toISOString()
-      });
-    }
-
-    return insights;
-  }
+interface MarketInsight {
+  type: 'talent_scarcity' | 'salary_trends' | 'skill_demand' | 'location_trends' | 'hiring_velocity';
+  title: string;
+  description: string;
+  impact: 'high' | 'medium' | 'low';
+  actionable_recommendations: string[];
+  confidence: number;
+  data_points: any[];
 }
 
-export const insightsGeneratorService = new InsightsGeneratorService();
+interface TalentPoolAnalysis {
+  total_candidates: number;
+  active_candidates: number;
+  passive_candidates: number;
+  skill_distribution: Record<string, number>;
+  experience_distribution: Record<string, number>;
+  location_distribution: Record<string, number>;
+  availability_trends: Record<string, number>;
+  quality_metrics: {
+    avg_technical_score: number;
+    avg_influence_score: number;
+    avg_learning_velocity: number;
+  };
+}
+
+export const insightsGeneratorService = {
+  async generateMarketInsights(organizationId?: string): Promise<MarketInsight[]> {
+    console.log('Generating market insights...');
+    
+    const candidates = await this.fetchCandidateData(organizationId);
+    const insights: MarketInsight[] = [];
+    
+    // Generate different types of insights
+    insights.push(...await this.analyzeTalentScarcity(candidates));
+    insights.push(...await this.analyzeSalaryTrends(candidates));
+    insights.push(...await this.analyzeSkillDemand(candidates));
+    insights.push(...await this.analyzeLocationTrends(candidates));
+    insights.push(...await this.analyzeHiringVelocity(candidates));
+    
+    return insights.sort((a, b) => b.confidence - a.confidence);
+  },
+
+  async generateTalentPoolAnalysis(organizationId?: string): Promise<TalentPoolAnalysis> {
+    console.log('Analyzing talent pool...');
+    
+    const candidates = await this.fetchCandidateData(organizationId);
+    
+    return {
+      total_candidates: candidates.length,
+      active_candidates: candidates.filter(c => c.availability_status === 'active').length,
+      passive_candidates: candidates.filter(c => c.availability_status === 'passive').length,
+      skill_distribution: this.calculateSkillDistribution(candidates),
+      experience_distribution: this.calculateExperienceDistribution(candidates),
+      location_distribution: this.calculateLocationDistribution(candidates),
+      availability_trends: this.calculateAvailabilityTrends(candidates),
+      quality_metrics: this.calculateQualityMetrics(candidates)
+    };
+  },
+
+  async fetchCandidateData(organizationId?: string): Promise<EnhancedCandidate[]> {
+    let query = supabase
+      .from('enhanced_candidates')
+      .select(`
+        *,
+        osint_profiles(*),
+        career_trajectories(*),
+        cultural_fit_indicators(*)
+      `);
+    
+    if (organizationId) {
+      query = query.eq('organization_id', organizationId);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error('Error fetching candidate data:', error);
+      return [];
+    }
+    
+    return data || [];
+  },
+
+  async analyzeTalentScarcity(candidates: any[]): Promise<MarketInsight[]> {
+    const insights: MarketInsight[] = [];
+    
+    // Analyze skill scarcity
+    const skillCounts = this.calculateSkillDistribution(candidates);
+    const totalCandidates = candidates.length;
+    
+    Object.entries(skillCounts).forEach(([skill, count]) => {
+      const percentage = (count / totalCandidates) * 100;
+      
+      if (percentage < 10 && count > 0) { // Rare skills
+        insights.push({
+          type: 'talent_scarcity',
+          title: `${skill} Talent Scarcity`,
+          description: `Only ${percentage.toFixed(1)}% of candidates have ${skill} skills. This represents a potential talent bottleneck.`,
+          impact: percentage < 5 ? 'high' : 'medium',
+          actionable_recommendations: [
+            `Consider expanding search criteria for ${skill}`,
+            'Invest in upskilling existing team members',
+            'Consider remote candidates to expand talent pool',
+            'Partner with bootcamps or training programs'
+          ],
+          confidence: 0.8,
+          data_points: [{ skill, count, percentage }]
+        });
+      }
+    });
+    
+    return insights;
+  },
+
+  async analyzeSalaryTrends(candidates: any[]): Promise<MarketInsight[]> {
+    const insights: MarketInsight[] = [];
+    
+    const candidatesWithSalary = candidates.filter(c => c.salary_expectation_min);
+    
+    if (candidatesWithSalary.length > 10) {
+      const avgSalary = candidatesWithSalary.reduce((sum, c) => sum + c.salary_expectation_min, 0) / candidatesWithSalary.length;
+      const medianSalary = this.calculateMedian(candidatesWithSalary.map(c => c.salary_expectation_min));
+      
+      insights.push({
+        type: 'salary_trends',
+        title: 'Salary Expectations Analysis',
+        description: `Average salary expectation is $${Math.round(avgSalary).toLocaleString()}, with median at $${Math.round(medianSalary).toLocaleString()}.`,
+        impact: 'medium',
+        actionable_recommendations: [
+          'Review compensation packages to ensure competitiveness',
+          'Consider non-monetary benefits to offset salary gaps',
+          'Benchmark against industry standards'
+        ],
+        confidence: 0.7,
+        data_points: [{ avgSalary, medianSalary, sampleSize: candidatesWithSalary.length }]
+      });
+    }
+    
+    return insights;
+  },
+
+  async analyzeSkillDemand(candidates: any[]): Promise<MarketInsight[]> {
+    const insights: MarketInsight[] = [];
+    
+    const skillCounts = this.calculateSkillDistribution(candidates);
+    const topSkills = Object.entries(skillCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 5);
+    
+    insights.push({
+      type: 'skill_demand',
+      title: 'Top In-Demand Skills',
+      description: `The most common skills in our talent pool are: ${topSkills.map(([skill]) => skill).join(', ')}.`,
+      impact: 'medium',
+      actionable_recommendations: [
+        'Focus job descriptions on in-demand skills',
+        'Consider skills adjacency for harder-to-fill roles',
+        'Develop targeted sourcing strategies for top skills'
+      ],
+      confidence: 0.9,
+      data_points: topSkills.map(([skill, count]) => ({ skill, count }))
+    });
+    
+    return insights;
+  },
+
+  async analyzeLocationTrends(candidates: any[]): Promise<MarketInsight[]> {
+    const insights: MarketInsight[] = [];
+    
+    const locationCounts = this.calculateLocationDistribution(candidates);
+    const topLocations = Object.entries(locationCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 3);
+    
+    if (topLocations.length > 0) {
+      insights.push({
+        type: 'location_trends',
+        title: 'Geographic Talent Distribution',
+        description: `Highest talent concentration in: ${topLocations.map(([loc]) => loc).join(', ')}.`,
+        impact: 'low',
+        actionable_recommendations: [
+          'Consider remote work options to access broader talent pools',
+          'Establish satellite offices in talent-rich areas',
+          'Partner with local universities and training programs'
+        ],
+        confidence: 0.6,
+        data_points: topLocations.map(([location, count]) => ({ location, count }))
+      });
+    }
+    
+    return insights;
+  },
+
+  async analyzeHiringVelocity(candidates: any[]): Promise<MarketInsight[]> {
+    const insights: MarketInsight[] = [];
+    
+    const activeCandidates = candidates.filter(c => c.availability_status === 'active').length;
+    const passiveCandidates = candidates.filter(c => c.availability_status === 'passive').length;
+    const total = activeCandidates + passiveCandidates;
+    
+    if (total > 0) {
+      const activePercentage = (activeCandidates / total) * 100;
+      
+      insights.push({
+        type: 'hiring_velocity',
+        title: 'Candidate Availability Analysis',
+        description: `${activePercentage.toFixed(1)}% of candidates are actively seeking new opportunities.`,
+        impact: activePercentage > 30 ? 'high' : activePercentage > 15 ? 'medium' : 'low',
+        actionable_recommendations: [
+          activePercentage < 20 
+            ? 'Focus on passive candidate outreach strategies'
+            : 'Expedite hiring processes to capitalize on active candidates',
+          'Develop compelling value propositions for passive candidates',
+          'Consider timing of outreach based on market conditions'
+        ],
+        confidence: 0.8,
+        data_points: [{ activeCandidates, passiveCandidates, activePercentage }]
+      });
+    }
+    
+    return insights;
+  },
+
+  calculateSkillDistribution(candidates: any[]): Record<string, number> {
+    const skillCounts: Record<string, number> = {};
+    
+    candidates.forEach(candidate => {
+      candidate.skills?.forEach((skill: string) => {
+        skillCounts[skill] = (skillCounts[skill] || 0) + 1;
+      });
+    });
+    
+    return skillCounts;
+  },
+
+  calculateExperienceDistribution(candidates: any[]): Record<string, number> {
+    const distribution: Record<string, number> = {
+      'Junior (0-2 years)': 0,
+      'Mid-level (3-5 years)': 0,
+      'Senior (6-10 years)': 0,
+      'Lead (10+ years)': 0
+    };
+    
+    candidates.forEach(candidate => {
+      const years = candidate.experience_years || 0;
+      
+      if (years <= 2) distribution['Junior (0-2 years)']++;
+      else if (years <= 5) distribution['Mid-level (3-5 years)']++;
+      else if (years <= 10) distribution['Senior (6-10 years)']++;
+      else distribution['Lead (10+ years)']++;
+    });
+    
+    return distribution;
+  },
+
+  calculateLocationDistribution(candidates: any[]): Record<string, number> {
+    const locationCounts: Record<string, number> = {};
+    
+    candidates.forEach(candidate => {
+      if (candidate.location) {
+        // Normalize location (extract city/state)
+        const location = candidate.location.split(',')[0].trim();
+        locationCounts[location] = (locationCounts[location] || 0) + 1;
+      }
+    });
+    
+    return locationCounts;
+  },
+
+  calculateAvailabilityTrends(candidates: any[]): Record<string, number> {
+    const trends: Record<string, number> = {
+      active: 0,
+      passive: 0,
+      unavailable: 0
+    };
+    
+    candidates.forEach(candidate => {
+      trends[candidate.availability_status || 'passive']++;
+    });
+    
+    return trends;
+  },
+
+  calculateQualityMetrics(candidates: any[]): any {
+    if (candidates.length === 0) {
+      return {
+        avg_technical_score: 0,
+        avg_influence_score: 0,
+        avg_learning_velocity: 0
+      };
+    }
+    
+    const validCandidates = candidates.filter(c => 
+      c.technical_depth_score !== undefined && 
+      c.community_influence_score !== undefined && 
+      c.learning_velocity_score !== undefined
+    );
+    
+    if (validCandidates.length === 0) {
+      return {
+        avg_technical_score: 0,
+        avg_influence_score: 0,
+        avg_learning_velocity: 0
+      };
+    }
+    
+    return {
+      avg_technical_score: validCandidates.reduce((sum, c) => sum + c.technical_depth_score, 0) / validCandidates.length,
+      avg_influence_score: validCandidates.reduce((sum, c) => sum + c.community_influence_score, 0) / validCandidates.length,
+      avg_learning_velocity: validCandidates.reduce((sum, c) => sum + c.learning_velocity_score, 0) / validCandidates.length
+    };
+  },
+
+  calculateMedian(numbers: number[]): number {
+    const sorted = numbers.sort((a, b) => a - b);
+    const middle = Math.floor(sorted.length / 2);
+    
+    if (sorted.length % 2 === 0) {
+      return (sorted[middle - 1] + sorted[middle]) / 2;
+    }
+    
+    return sorted[middle];
+  }
+};

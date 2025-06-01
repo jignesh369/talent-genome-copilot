@@ -25,23 +25,25 @@ import { EnhancedCandidate } from "@/types/enhanced-candidate";
 
 interface CandidateDetailsModalProps {
   candidate: EnhancedCandidate | null;
-  isOpen: boolean;
+  isOpen?: boolean;
   onClose: () => void;
   onContact?: (candidate: EnhancedCandidate) => void;
+  onContactCandidate?: (candidate: EnhancedCandidate) => void;
 }
 
 const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({ 
   candidate, 
-  isOpen, 
+  isOpen = true,
   onClose,
-  onContact 
+  onContact,
+  onContactCandidate
 }) => {
   if (!candidate) return null;
 
   const osint = candidate.osint_profile;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen && !!candidate} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
@@ -213,7 +215,7 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
           {/* Action Buttons */}
           <div className="flex space-x-3 pt-4">
             <Button 
-              onClick={() => onContact?.(candidate)}
+              onClick={() => (onContact || onContactCandidate)?.(candidate)}
               className="flex-1"
             >
               <MessageCircle className="w-4 h-4 mr-2" />

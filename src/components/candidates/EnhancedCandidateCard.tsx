@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -62,7 +63,7 @@ const EnhancedCandidateCard: React.FC<EnhancedCandidateCardProps> = ({
   };
 
   const hasActiveAvailabilitySignals = candidate.osint_profile?.availability_signals?.some(signal => 
-    signal.signal_type === 'active_job_search' || signal.signal_type === 'career_change'
+    signal.signal_type === 'job_search_activity' || signal.signal_type === 'network_expansion'
   ) || false;
 
   return (
