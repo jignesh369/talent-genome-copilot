@@ -1,3 +1,4 @@
+
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
 import { supabase } from '@/integrations/supabase/client';
 import { mindReaderService, MindReaderResponse } from './mindReaderService';
@@ -93,19 +94,23 @@ export class NaturalLanguageQueryService {
         confidence: mindReaderResult.confidence
       };
 
-      // Store the query for analytics
-      const { error: insertError } = await supabase
-        .from('search_queries')
-        .insert({
-          original_query: userQuery,
-          interpreted_intent: result.interpreted_intent,
-          extracted_requirements: result.extracted_requirements,
-          search_strategy: result.search_strategy,
-          confidence_score: result.confidence
-        });
+      // Store the query for analytics - convert to JSON-compatible format
+      try {
+        const { error: insertError } = await supabase
+          .from('search_queries')
+          .insert({
+            original_query: userQuery,
+            interpreted_intent: result.interpreted_intent,
+            extracted_requirements: JSON.parse(JSON.stringify(result.extracted_requirements)),
+            search_strategy: result.search_strategy,
+            confidence_score: result.confidence
+          });
 
-      if (insertError) {
-        console.error('Error storing search query:', insertError);
+        if (insertError) {
+          console.error('Error storing search query:', insertError);
+        }
+      } catch (dbError) {
+        console.error('Database insert error:', dbError);
       }
 
       return result;
@@ -129,8 +134,6 @@ export class NaturalLanguageQueryService {
   }
 
   private getFallbackInterpretation(query: string): QueryInterpretation {
-    const lowercaseQuery = query.toLowerCase();
-    
     return {
       interpreted_intent: this.generateInterpretedIntent(query),
       extracted_requirements: this.extractRequirements(query),
@@ -202,9 +205,13 @@ export class NaturalLanguageQueryService {
   }
 
   private generateSearchStrategy(jobSpec: any): string {
+    if (typeof jobSpec === 'string') {
+      return 'Multi-platform search combining LinkedIn profile matching, GitHub activity analysis, and Stack Overflow expertise validation';
+    }
+
     const strategies = [];
     
-    if (jobSpec.must_have_skills.length > 0) {
+    if (jobSpec.must_have_skills && jobSpec.must_have_skills.length > 0) {
       strategies.push("Weighted technical skills matching based on GitHub and Stack Overflow activity");
     }
     
@@ -212,7 +219,7 @@ export class NaturalLanguageQueryService {
       strategies.push("Career progression analysis from LinkedIn and professional history");
     }
     
-    if (jobSpec.industries.length > 0) {
+    if (jobSpec.industries && jobSpec.industries.length > 0) {
       strategies.push("Industry background matching using company history and project types");
     }
     
