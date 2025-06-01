@@ -142,4 +142,4 @@ class RiskAlertSystem {
 }
 
 export const riskAlertSystem = RiskAlertSystem.getInstance();
-export type { RiskAlert, RiskMetrics };
+export type { RiskMetrics };
