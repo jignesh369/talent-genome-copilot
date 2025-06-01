@@ -1,8 +1,6 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
-import { AvailabilitySignal } from '@/types/osint';
 
 export const useEnhancedCandidates = () => {
   return useQuery({
@@ -75,7 +73,12 @@ export const useEnhancedCandidates = () => {
           community_engagement: candidate.osint_profiles[0].community_engagement || 0,
           learning_velocity: candidate.osint_profiles[0].influence_score || 0,
           availability_signals: Array.isArray(candidate.osint_profiles[0].availability_signals) 
-            ? candidate.osint_profiles[0].availability_signals as AvailabilitySignal[]
+            ? (candidate.osint_profiles[0].availability_signals as unknown[]).map((signal: any) => ({
+                signal_type: signal?.signal_type || 'profile_update',
+                confidence: signal?.confidence || 0.5,
+                detected_at: signal?.detected_at || new Date().toISOString(),
+                details: signal?.details || ''
+              }))
             : [],
           github_profile: {
             username: candidate.osint_profiles[0].github_username || '',

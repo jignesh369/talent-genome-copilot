@@ -24,7 +24,7 @@ export const enhancedCandidateService = {
         salary_expectation_min: 120000,
         salary_expectation_max: 150000,
         salary_currency: "USD",
-        preferred_contact_method: "email"
+        preferred_contact_method: "email" as const
       },
       {
         name: "Marcus Johnson",
@@ -44,7 +44,7 @@ export const enhancedCandidateService = {
         salary_expectation_min: 140000,
         salary_expectation_max: 180000,
         salary_currency: "USD",
-        preferred_contact_method: "linkedin"
+        preferred_contact_method: "linkedin" as const
       },
       {
         name: "Emily Rodriguez",
@@ -64,7 +64,7 @@ export const enhancedCandidateService = {
         salary_expectation_min: 110000,
         salary_expectation_max: 140000,
         salary_currency: "USD",
-        preferred_contact_method: "email"
+        preferred_contact_method: "email" as const
       },
       {
         name: "David Kim",
@@ -84,7 +84,7 @@ export const enhancedCandidateService = {
         salary_expectation_min: 150000,
         salary_expectation_max: 190000,
         salary_currency: "USD",
-        preferred_contact_method: "linkedin"
+        preferred_contact_method: "linkedin" as const
       },
       {
         name: "Lisa Wang",
@@ -104,7 +104,7 @@ export const enhancedCandidateService = {
         salary_expectation_min: 125000,
         salary_expectation_max: 160000,
         salary_currency: "USD",
-        preferred_contact_method: "email"
+        preferred_contact_method: "email" as const
       }
     ];
 
@@ -114,7 +114,7 @@ export const enhancedCandidateService = {
       for (const candidate of dummyCandidates) {
         const { data, error } = await supabase
           .from('enhanced_candidates')
-          .insert([candidate])
+          .insert(candidate)
           .select()
           .single();
 

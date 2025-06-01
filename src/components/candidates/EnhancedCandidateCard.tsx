@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +17,7 @@ import {
   ChevronRight,
   Clock
 } from "lucide-react";
-import { EnhancedCandidate } from '@/types/enhanced-recruiting';
+import { EnhancedCandidate } from '@/types/enhanced-candidate';
 
 interface EnhancedCandidateCardProps {
   candidate: EnhancedCandidate;
@@ -62,9 +61,9 @@ const EnhancedCandidateCard: React.FC<EnhancedCandidateCardProps> = ({
     return colors[stage] || 'bg-gray-100 text-gray-800';
   };
 
-  const hasActiveAvailabilitySignals = candidate.availability_signals.some(signal => 
+  const hasActiveAvailabilitySignals = candidate.osint_profile?.availability_signals?.some(signal => 
     signal.signal_type === 'active_job_search' || signal.signal_type === 'career_change'
-  );
+  ) || false;
 
   return (
     <Card className="hover:shadow-lg transition-shadow duration-200 border-l-4 border-l-blue-500">
@@ -73,13 +72,15 @@ const EnhancedCandidateCard: React.FC<EnhancedCandidateCardProps> = ({
           <div className="flex items-center space-x-3">
             <Avatar className="h-12 w-12">
               <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold">
-                {candidate.first_name[0]}{candidate.last_name[0]}
+                {candidate.first_name?.[0] || candidate.name[0]}{candidate.last_name?.[0] || candidate.name[1] || ''}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
               <div className="flex items-center space-x-2">
                 <h3 className="font-semibold text-lg text-gray-900">
-                  {candidate.first_name} {candidate.last_name}
+                  {candidate.first_name && candidate.last_name ? 
+                    `${candidate.first_name} ${candidate.last_name}` : 
+                    candidate.name}
                 </h3>
                 {hasActiveAvailabilitySignals && (
                   <Badge className="bg-green-100 text-green-800 text-xs">
@@ -98,17 +99,17 @@ const EnhancedCandidateCard: React.FC<EnhancedCandidateCardProps> = ({
                 <MapPin className="w-4 h-4" />
                 <span>{candidate.location}</span>
                 <span>•</span>
-                <span>{getSourceIcon(candidate.source_details.type)} {candidate.source_details.type}</span>
+                <span>{getSourceIcon(candidate.source_details?.type || 'manual')} {candidate.source_details?.type || 'manual'}</span>
               </div>
             </div>
           </div>
           <div className="flex flex-col items-end space-y-2">
-            <Badge className={getStageColor(candidate.pipeline_stage)}>
-              {candidate.pipeline_stage.replace('_', ' ')}
+            <Badge className={getStageColor(candidate.pipeline_stage || 'sourced')}>
+              {(candidate.pipeline_stage || 'sourced').replace('_', ' ')}
             </Badge>
             <div className="flex items-center space-x-1">
               <Star className="w-4 h-4 text-yellow-500" />
-              <span className="text-sm font-medium">{candidate.score}</span>
+              <span className="text-sm font-medium">{candidate.score || candidate.match_score}</span>
             </div>
           </div>
         </div>
@@ -128,23 +129,23 @@ const EnhancedCandidateCard: React.FC<EnhancedCandidateCardProps> = ({
         {/* Key Metrics */}
         <div className="grid grid-cols-3 gap-4">
           <div className="text-center">
-            <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getEngagementColor(candidate.engagement_score)}`}>
+            <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getEngagementColor(candidate.engagement_score || candidate.community_influence_score || 0)}`}>
               <TrendingUp className="w-3 h-3 mr-1" />
-              {Math.round(candidate.engagement_score)}%
+              {Math.round(candidate.engagement_score || candidate.community_influence_score || 0)}%
             </div>
             <p className="text-xs text-gray-500 mt-1">Engagement</p>
           </div>
           <div className="text-center">
             <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-50 text-purple-600">
               <Activity className="w-3 h-3 mr-1" />
-              {Math.round(candidate.placement_probability_score)}%
+              {Math.round(candidate.placement_probability_score || candidate.match_score || 0)}%
             </div>
             <p className="text-xs text-gray-500 mt-1">Placement</p>
           </div>
           <div className="text-center">
             <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-50 text-green-600">
               <Shield className="w-3 h-3 mr-1" />
-              {Math.round(candidate.cultural_fit_score)}%
+              {Math.round(candidate.cultural_fit_score || candidate.community_influence_score || 0)}%
             </div>
             <p className="text-xs text-gray-500 mt-1">Culture Fit</p>
           </div>
@@ -154,42 +155,42 @@ const EnhancedCandidateCard: React.FC<EnhancedCandidateCardProps> = ({
         <div>
           <p className="text-sm font-medium text-gray-700 mb-2">Skills</p>
           <div className="flex flex-wrap gap-1">
-            {candidate.skills.slice(0, 4).map((skill) => (
+            {candidate.skills?.slice(0, 4).map((skill) => (
               <Badge key={skill} variant="outline" className="text-xs">
                 {skill}
               </Badge>
             ))}
-            {candidate.skills.length > 4 && (
+            {(candidate.skills?.length || 0) > 4 && (
               <Badge variant="outline" className="text-xs bg-gray-50">
-                +{candidate.skills.length - 4} more
+                +{(candidate.skills?.length || 0) - 4} more
               </Badge>
             )}
           </div>
         </div>
 
         {/* Recent Activity */}
-        {candidate.interaction_timeline.length > 0 && (
+        {(candidate.interaction_timeline?.length || 0) > 0 && (
           <div>
             <p className="text-sm font-medium text-gray-700 mb-2">Recent Activity</p>
             <div className="flex items-center space-x-2 text-sm text-gray-600">
               <Clock className="w-4 h-4" />
               <span>
-                Last contact: {new Date(candidate.last_contact_date || candidate.updated_at).toLocaleDateString()}
+                Last contact: {new Date(candidate.last_contact_date || candidate.updated_at || new Date()).toLocaleDateString()}
               </span>
               <span>•</span>
-              <span>{candidate.interaction_timeline.length} interactions</span>
+              <span>{candidate.interaction_timeline?.length || 0} interactions</span>
             </div>
           </div>
         )}
 
         {/* Availability Signals */}
-        {candidate.availability_signals.length > 0 && (
+        {(candidate.availability_signals?.length || candidate.osint_profile?.availability_signals?.length || 0) > 0 && (
           <div>
             <p className="text-sm font-medium text-gray-700 mb-2">Availability Signals</p>
             <div className="flex flex-wrap gap-1">
-              {candidate.availability_signals.slice(0, 2).map((signal, index) => (
+              {(candidate.availability_signals || candidate.osint_profile?.availability_signals || []).slice(0, 2).map((signal, index) => (
                 <Badge key={index} className="text-xs bg-green-100 text-green-800">
-                  {signal.signal_type.replace('_', ' ')}
+                  {signal.signal_type?.replace('_', ' ')}
                 </Badge>
               ))}
             </div>

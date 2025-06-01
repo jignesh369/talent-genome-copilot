@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { riskAlertSystem, RiskAlert } from '@/services/analytics/riskAlertSystem';
 import { useToast } from '@/hooks/use-toast';
-import { EnhancedCandidate } from '@/types/enhanced-recruiting';
+import { EnhancedCandidate } from '@/types/enhanced-candidate';
 
 export const useRiskAlerts = (candidates: EnhancedCandidate[]) => {
   const { toast } = useToast();
