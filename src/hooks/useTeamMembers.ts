@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthProvider';
@@ -147,7 +148,7 @@ export const useTeamMembers = () => {
     return `${Math.floor(diffInDays / 7)} weeks ago`;
   };
 
-  const updateMemberRole = async (userId: string, newRole: string) => {
+  const updateMemberRole = async (userId: string, newRole: UserRole) => {
     try {
       const { error } = await supabase
         .from('user_roles')
@@ -159,7 +160,7 @@ export const useTeamMembers = () => {
 
       setTeamMembers(prev =>
         prev.map(member =>
-          member.id === userId ? { ...member, role: mapRole(newRole) } : member
+          member.id === userId ? { ...member, role: newRole } : member
         )
       );
 
