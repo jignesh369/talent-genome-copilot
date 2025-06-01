@@ -82,10 +82,49 @@ export const insightsGeneratorService = {
       return [];
     }
     
-    return data || [];
+    // Transform database results to match EnhancedCandidate interface
+    return (data || []).map(candidate => ({
+      ...candidate,
+      // Add missing required properties with defaults
+      career_trajectory_analysis: candidate.career_trajectories?.[0] || {
+        progression_type: 'ascending' as const,
+        growth_rate: 0,
+        stability_score: 0,
+        next_likely_move: '',
+        timeline_events: []
+      },
+      osint_profile: candidate.osint_profiles?.[0] || {
+        github_username: '',
+        linkedin_url: '',
+        twitter_username: '',
+        stackoverflow_id: '',
+        reddit_username: '',
+        github_repos: 0,
+        github_stars: 0,
+        github_commits: 0,
+        linkedin_connections: 0,
+        twitter_followers: 0,
+        stackoverflow_reputation: 0,
+        technical_depth: 0,
+        community_engagement: 0,
+        influence_score: 0,
+        overall_score: 0,
+        availability_signals: [],
+        last_updated: new Date().toISOString()
+      },
+      match_score: candidate.match_score || 0,
+      relevance_factors: candidate.relevance_factors || [],
+      best_contact_method: candidate.best_contact_method || {
+        platform: 'email' as const,
+        confidence: 0.8,
+        best_time: '9-17',
+        approach_style: 'direct' as const
+      },
+      cultural_fit_indicators: candidate.cultural_fit_indicators || []
+    })) as EnhancedCandidate[];
   },
 
-  async analyzeTalentScarcity(candidates: any[]): Promise<MarketInsight[]> {
+  async analyzeTalentScarcity(candidates: EnhancedCandidate[]): Promise<MarketInsight[]> {
     const insights: MarketInsight[] = [];
     
     // Analyze skill scarcity
@@ -93,7 +132,7 @@ export const insightsGeneratorService = {
     const totalCandidates = candidates.length;
     
     Object.entries(skillCounts).forEach(([skill, count]) => {
-      const percentage = (count / totalCandidates) * 100;
+      const percentage = totalCandidates > 0 ? (count / totalCandidates) * 100 : 0;
       
       if (percentage < 10 && count > 0) { // Rare skills
         insights.push({
@@ -116,14 +155,17 @@ export const insightsGeneratorService = {
     return insights;
   },
 
-  async analyzeSalaryTrends(candidates: any[]): Promise<MarketInsight[]> {
+  async analyzeSalaryTrends(candidates: EnhancedCandidate[]): Promise<MarketInsight[]> {
     const insights: MarketInsight[] = [];
     
-    const candidatesWithSalary = candidates.filter(c => c.salary_expectation_min);
+    const candidatesWithSalary = candidates.filter(c => 
+      c.salary_expectation_min && typeof c.salary_expectation_min === 'number'
+    );
     
     if (candidatesWithSalary.length > 10) {
-      const avgSalary = candidatesWithSalary.reduce((sum, c) => sum + c.salary_expectation_min, 0) / candidatesWithSalary.length;
-      const medianSalary = this.calculateMedian(candidatesWithSalary.map(c => c.salary_expectation_min));
+      const salaries = candidatesWithSalary.map(c => c.salary_expectation_min!);
+      const avgSalary = salaries.reduce((sum, salary) => sum + salary, 0) / salaries.length;
+      const medianSalary = this.calculateMedian(salaries);
       
       insights.push({
         type: 'salary_trends',
@@ -143,7 +185,7 @@ export const insightsGeneratorService = {
     return insights;
   },
 
-  async analyzeSkillDemand(candidates: any[]): Promise<MarketInsight[]> {
+  async analyzeSkillDemand(candidates: EnhancedCandidate[]): Promise<MarketInsight[]> {
     const insights: MarketInsight[] = [];
     
     const skillCounts = this.calculateSkillDistribution(candidates);
@@ -168,7 +210,7 @@ export const insightsGeneratorService = {
     return insights;
   },
 
-  async analyzeLocationTrends(candidates: any[]): Promise<MarketInsight[]> {
+  async analyzeLocationTrends(candidates: EnhancedCandidate[]): Promise<MarketInsight[]> {
     const insights: MarketInsight[] = [];
     
     const locationCounts = this.calculateLocationDistribution(candidates);
@@ -195,7 +237,7 @@ export const insightsGeneratorService = {
     return insights;
   },
 
-  async analyzeHiringVelocity(candidates: any[]): Promise<MarketInsight[]> {
+  async analyzeHiringVelocity(candidates: EnhancedCandidate[]): Promise<MarketInsight[]> {
     const insights: MarketInsight[] = [];
     
     const activeCandidates = candidates.filter(c => c.availability_status === 'active').length;
@@ -225,7 +267,7 @@ export const insightsGeneratorService = {
     return insights;
   },
 
-  calculateSkillDistribution(candidates: any[]): Record<string, number> {
+  calculateSkillDistribution(candidates: EnhancedCandidate[]): Record<string, number> {
     const skillCounts: Record<string, number> = {};
     
     candidates.forEach(candidate => {
@@ -237,7 +279,7 @@ export const insightsGeneratorService = {
     return skillCounts;
   },
 
-  calculateExperienceDistribution(candidates: any[]): Record<string, number> {
+  calculateExperienceDistribution(candidates: EnhancedCandidate[]): Record<string, number> {
     const distribution: Record<string, number> = {
       'Junior (0-2 years)': 0,
       'Mid-level (3-5 years)': 0,
@@ -257,7 +299,7 @@ export const insightsGeneratorService = {
     return distribution;
   },
 
-  calculateLocationDistribution(candidates: any[]): Record<string, number> {
+  calculateLocationDistribution(candidates: EnhancedCandidate[]): Record<string, number> {
     const locationCounts: Record<string, number> = {};
     
     candidates.forEach(candidate => {
@@ -271,7 +313,7 @@ export const insightsGeneratorService = {
     return locationCounts;
   },
 
-  calculateAvailabilityTrends(candidates: any[]): Record<string, number> {
+  calculateAvailabilityTrends(candidates: EnhancedCandidate[]): Record<string, number> {
     const trends: Record<string, number> = {
       active: 0,
       passive: 0,
@@ -285,7 +327,7 @@ export const insightsGeneratorService = {
     return trends;
   },
 
-  calculateQualityMetrics(candidates: any[]): any {
+  calculateQualityMetrics(candidates: EnhancedCandidate[]): any {
     if (candidates.length === 0) {
       return {
         avg_technical_score: 0,
@@ -295,9 +337,9 @@ export const insightsGeneratorService = {
     }
     
     const validCandidates = candidates.filter(c => 
-      c.technical_depth_score !== undefined && 
-      c.community_influence_score !== undefined && 
-      c.learning_velocity_score !== undefined
+      typeof c.technical_depth_score === 'number' && 
+      typeof c.community_influence_score === 'number' && 
+      typeof c.learning_velocity_score === 'number'
     );
     
     if (validCandidates.length === 0) {
@@ -309,9 +351,9 @@ export const insightsGeneratorService = {
     }
     
     return {
-      avg_technical_score: validCandidates.reduce((sum, c) => sum + c.technical_depth_score, 0) / validCandidates.length,
-      avg_influence_score: validCandidates.reduce((sum, c) => sum + c.community_influence_score, 0) / validCandidates.length,
-      avg_learning_velocity: validCandidates.reduce((sum, c) => sum + c.learning_velocity_score, 0) / validCandidates.length
+      avg_technical_score: validCandidates.reduce((sum, c) => sum + (c.technical_depth_score || 0), 0) / validCandidates.length,
+      avg_influence_score: validCandidates.reduce((sum, c) => sum + (c.community_influence_score || 0), 0) / validCandidates.length,
+      avg_learning_velocity: validCandidates.reduce((sum, c) => sum + (c.learning_velocity_score || 0), 0) / validCandidates.length
     };
   },
 
