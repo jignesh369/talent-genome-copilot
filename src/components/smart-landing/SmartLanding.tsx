@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button';
 import CandidatePortal from '@/pages/CandidatePortal';
 
 const SmartLanding = () => {
-  // TEMPORARY: Show development navigation instead of role-based routing
-  const SHOW_DEV_NAV = true;
+  // DISABLED development navigation to allow proper authentication
+  const SHOW_DEV_NAV = false;
   
   const { user, userRole, loading } = useAuth();
 
@@ -20,7 +20,7 @@ const SmartLanding = () => {
     );
   }
 
-  // Show development navigation
+  // Show development navigation only if explicitly enabled
   if (SHOW_DEV_NAV) {
     return (
       <div className="min-h-screen bg-gray-50">

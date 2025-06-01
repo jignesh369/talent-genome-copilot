@@ -70,7 +70,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUserData = async (user: User) => {
     try {
-      // Fetch user profile - use maybeSingle to avoid errors if no profile exists
+      console.log('Fetching user data for:', user.email);
+      
+      // Fetch user profile first
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
@@ -79,13 +81,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (profileError) {
         console.error('Error fetching profile:', profileError);
-        // Don't stop execution, continue with role fetch
-      } else {
+      } else if (profileData) {
+        console.log('Profile found:', profileData);
         setProfile(profileData);
-        setOrganizationId(profileData?.organization_id);
+        setOrganizationId(profileData.organization_id);
+      } else {
+        console.log('No profile found for user');
       }
 
-      // Fetch user role - use maybeSingle to avoid errors if no role exists
+      // Fetch user role
       const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
@@ -95,17 +99,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (roleError) {
         console.error('Error fetching role:', roleError);
         setUserRole(null);
+      } else if (roleData) {
+        console.log('Role found:', roleData.role);
+        setUserRole(roleData.role);
       } else {
-        setUserRole(roleData?.role || null);
+        console.log('No role found for user, defaulting to candidate');
+        setUserRole('candidate');
       }
-      
-      // Force a small delay to ensure state is updated
-      setTimeout(() => {
-        setLoading(false);
-      }, 100);
       
     } catch (error) {
       console.error('Error fetching user data:', error);
+    } finally {
       setLoading(false);
     }
   };
