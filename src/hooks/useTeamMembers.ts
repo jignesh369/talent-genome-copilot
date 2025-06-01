@@ -34,24 +34,10 @@ export const useTeamMembers = () => {
       setLoading(true);
       console.log('Fetching team members for organization:', organizationId);
 
-      // Get organization members with their profiles and roles
+      // First, get organization members
       const { data: members, error: membersError } = await supabase
         .from('organization_members')
-        .select(`
-          user_id,
-          status,
-          joined_at,
-          profiles!inner(
-            id,
-            first_name,
-            last_name,
-            avatar_url,
-            department
-          ),
-          user_roles!inner(
-            role
-          )
-        `)
+        .select('user_id, status, joined_at')
         .eq('organization_id', organizationId);
 
       if (membersError) {
@@ -68,8 +54,32 @@ export const useTeamMembers = () => {
         return;
       }
 
-      // Get job counts for each user
       const userIds = members.map(m => m.user_id);
+
+      // Get profiles for these users
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, avatar_url, department')
+        .in('id', userIds);
+
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
+        throw profilesError;
+      }
+
+      // Get user roles for these users
+      const { data: userRoles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('user_id, role')
+        .eq('organization_id', organizationId)
+        .in('user_id', userIds);
+
+      if (rolesError) {
+        console.error('Error fetching user roles:', rolesError);
+        throw rolesError;
+      }
+
+      // Get job counts for each user
       const { data: jobs } = await supabase
         .from('jobs')
         .select('created_by')
@@ -81,12 +91,12 @@ export const useTeamMembers = () => {
         return acc;
       }, {} as Record<string, number>) || {};
 
-      // Get emails for each user using the new function
-      const emailPromises = members.map(async (member) => {
+      // Get emails for each user using the function
+      const emailPromises = userIds.map(async (userId) => {
         const { data: emailData } = await supabase.rpc('get_user_email', {
-          user_uuid: member.user_id
+          user_uuid: userId
         });
-        return { userId: member.user_id, email: emailData || 'N/A' };
+        return { userId, email: emailData || 'N/A' };
       });
 
       const emailResults = await Promise.all(emailPromises);
@@ -95,15 +105,27 @@ export const useTeamMembers = () => {
         return acc;
       }, {} as Record<string, string>);
 
+      // Create lookup maps
+      const profileMap = profiles?.reduce((acc, profile) => {
+        acc[profile.id] = profile;
+        return acc;
+      }, {} as Record<string, any>) || {};
+
+      const roleMap = userRoles?.reduce((acc, userRole) => {
+        acc[userRole.user_id] = userRole.role;
+        return acc;
+      }, {} as Record<string, string>) || {};
+
+      // Transform and combine data
       const transformedMembers: TeamMember[] = members.map(member => {
-        const profile = member.profiles;
-        const userRole = member.user_roles;
+        const profile = profileMap[member.user_id];
+        const role = roleMap[member.user_id];
         
         return {
           id: member.user_id,
           name: profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown User' : 'Unknown User',
           email: emailMap[member.user_id] || 'N/A',
-          role: mapRole(userRole?.role || 'candidate'),
+          role: mapRole(role || 'candidate'),
           status: member.status as TeamMember['status'],
           jobs: jobCountMap[member.user_id] || 0,
           department: profile?.department || 'Unassigned',
@@ -122,7 +144,6 @@ export const useTeamMembers = () => {
         variant: 'destructive',
       });
       
-      // Set empty array instead of fallback data so we can see the real issue
       setTeamMembers([]);
     } finally {
       setLoading(false);
