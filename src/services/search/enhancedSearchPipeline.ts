@@ -92,20 +92,22 @@ export class EnhancedSearchPipeline {
     } catch (error) {
       console.error('Enhanced search pipeline error:', error);
       
-      // Return fallback results
-      const fallbackResults = this.getFallbackInternalResults(interpretation || { 
+      // Create fallback interpretation
+      const fallbackInterpretation: QueryInterpretation = { 
         interpreted_intent: query,
         extracted_requirements: [],
         search_strategy: 'Fallback search',
         confidence: 0.5
-      });
+      };
+      
+      // Return fallback results
+      const fallbackResults = this.getFallbackInternalResults(fallbackInterpretation);
       
       this.updateProgress('completed', 100, 'Search completed with fallback results');
       
       return {
         ...fallbackResults,
         osintSearchPlan: {
-          id: 'fallback-plan',
           queries: [],
           platforms: ['internal'],
           expectedResults: 3,
