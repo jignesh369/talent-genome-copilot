@@ -3,27 +3,20 @@ import React, { useState } from 'react';
 import RecruiterLayout from '@/components/recruiter/RecruiterLayout';
 import SearchTabsContainer from '@/components/search/SearchTabsContainer';
 import SearchModalsContainer from '@/components/search/SearchModalsContainer';
-import { useSearch } from '@/hooks/useSearch';
+import { useAISearch } from '@/hooks/useSearch';
 import { useSearchModals } from '@/hooks/useSearchModals';
 import { useRecruitingIntelligence } from '@/hooks/useRecruitingIntelligence';
-import { EnhancedCandidate } from '@/types/enhanced-candidate';
+import { EnhancedCandidate } from '@/hooks/useEnhancedCandidates';
 import { PersonalizedSequence } from '@/types/outreach-sequence';
 import { useToast } from '@/hooks/use-toast';
 
 const Search = () => {
   const [activeTab, setActiveTab] = useState('search');
+  const [query, setQuery] = useState('');
+  const [isListening, setIsListening] = useState(false);
   const { toast } = useToast();
   
-  const {
-    query,
-    setQuery,
-    isSearching,
-    searchResult,
-    isListening,
-    handleSearch,
-    handleVoiceInput,
-    handleFeedback
-  } = useSearch();
+  const searchMutation = useAISearch();
 
   const {
     selectedCandidate,
@@ -38,6 +31,19 @@ const Search = () => {
   } = useSearchModals();
 
   const { processAutomaticOutreach } = useRecruitingIntelligence();
+
+  const handleSearch = async () => {
+    if (!query.trim()) return;
+    await searchMutation.mutateAsync({ query });
+  };
+
+  const handleVoiceInput = () => {
+    setIsListening(!isListening);
+  };
+
+  const handleFeedback = (candidateId: string, isPositive: boolean) => {
+    console.log('Feedback for candidate:', candidateId, isPositive);
+  };
 
   const handleContactCandidate = async (candidate: EnhancedCandidate) => {
     console.log('Opening outreach sequence modal for candidate:', candidate.name);
@@ -94,8 +100,8 @@ const Search = () => {
           setActiveTab={setActiveTab}
           query={query}
           setQuery={setQuery}
-          isSearching={isSearching}
-          searchResult={searchResult}
+          isSearching={searchMutation.isPending}
+          searchResult={searchMutation.data}
           isListening={isListening}
           handleSearch={handleSearch}
           handleVoiceInput={handleVoiceInput}

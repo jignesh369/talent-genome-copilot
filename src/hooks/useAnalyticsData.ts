@@ -5,7 +5,7 @@ import { useCommunicationMetrics } from './useCommunicationMetrics';
 import { useRiskAlerts } from './useRiskAlerts';
 
 export const useAnalyticsData = () => {
-  const { enhancedCandidates } = useEnhancedCandidates();
+  const { data: enhancedCandidates = [] } = useEnhancedCandidates();
   
   const candidateIds = enhancedCandidates.map(c => c.id);
   const { osintMonitoring } = useOSINTMonitoring(candidateIds);

@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 export interface EnhancedCandidate {
   id: string;
-  organization_id: string;
+  organization_id?: string;
   name: string;
   handle?: string;
   email: string;
@@ -28,52 +28,9 @@ export interface EnhancedCandidate {
   osint_last_fetched: string;
   created_at: string;
   updated_at: string;
-  osint_profiles?: OSINTProfile;
-  career_trajectories?: CareerTrajectory[];
-  cultural_fit_indicators?: CulturalFitIndicator[];
-}
-
-export interface OSINTProfile {
-  id: string;
-  candidate_id: string;
-  overall_score: number;
-  influence_score: number;
-  technical_depth: number;
-  community_engagement: number;
-  github_username?: string;
-  github_stars: number;
-  github_commits: number;
-  github_repos: number;
-  linkedin_url?: string;
-  linkedin_connections: number;
-  stackoverflow_id?: string;
-  stackoverflow_reputation: number;
-  twitter_username?: string;
-  twitter_followers: number;
-  reddit_username?: string;
-  availability_signals: any[];
-  last_updated: string;
-}
-
-export interface CareerTrajectory {
-  id: string;
-  candidate_id: string;
-  progression_type: 'ascending' | 'lateral' | 'transitioning' | 'consulting';
-  growth_rate: number;
-  stability_score: number;
-  next_likely_move?: string;
-  timeline_events: any[];
-  analysis_date: string;
-}
-
-export interface CulturalFitIndicator {
-  id: string;
-  candidate_id: string;
-  aspect: 'communication_style' | 'work_values' | 'collaboration' | 'innovation';
-  score: number;
-  evidence: any[];
-  confidence: number;
-  created_at: string;
+  osint_profiles?: any[];
+  career_trajectories?: any[];
+  cultural_fit_indicators?: any[];
 }
 
 export const useEnhancedCandidates = () => {
@@ -98,7 +55,7 @@ export const useEnhancedCandidates = () => {
       }
 
       console.log('Enhanced candidates fetched:', data);
-      return data as EnhancedCandidate[];
+      return data || [];
     },
   });
 };
@@ -107,10 +64,27 @@ export const useCreateEnhancedCandidate = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (candidate: Partial<EnhancedCandidate>) => {
+    mutationFn: async (candidateData: {
+      name: string;
+      email: string;
+      location?: string;
+      current_title?: string;
+      current_company?: string;
+      experience_years?: number;
+      bio?: string;
+      skills?: string[];
+      ai_summary?: string;
+      technical_depth_score?: number;
+      community_influence_score?: number;
+      learning_velocity_score?: number;
+      availability_status?: 'active' | 'passive' | 'unavailable';
+      salary_expectation_min?: number;
+      salary_expectation_max?: number;
+      preferred_contact_method?: 'email' | 'linkedin' | 'phone' | 'sms' | 'slack';
+    }) => {
       const { data, error } = await supabase
         .from('enhanced_candidates')
-        .insert([candidate])
+        .insert([candidateData])
         .select()
         .single();
 
@@ -127,7 +101,7 @@ export const useUpdateEnhancedCandidate = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, ...updates }: Partial<EnhancedCandidate> & { id: string }) => {
+    mutationFn: async ({ id, ...updates }: { id: string } & Partial<EnhancedCandidate>) => {
       const { data, error } = await supabase
         .from('enhanced_candidates')
         .update(updates)

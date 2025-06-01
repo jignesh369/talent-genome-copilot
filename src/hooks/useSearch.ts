@@ -5,8 +5,8 @@ import { EnhancedCandidate } from './useEnhancedCandidates';
 
 export interface SearchQuery {
   id: string;
-  recruiter_id: string;
-  organization_id: string;
+  recruiter_id?: string;
+  organization_id?: string;
   original_query: string;
   interpreted_intent?: string;
   extracted_requirements: any[];
@@ -133,7 +133,7 @@ export const useAISearch = () => {
         // AI scoring algorithm (simplified)
         const skillsMatch = params.filters?.skills 
           ? params.filters.skills.filter(skill => 
-              candidate.skills.some(cs => cs.toLowerCase().includes(skill.toLowerCase()))
+              candidate.skills?.some(cs => cs.toLowerCase().includes(skill.toLowerCase()))
             ).length / params.filters.skills.length
           : 0.8;
 

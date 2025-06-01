@@ -2,57 +2,47 @@
 import { useState } from 'react';
 import { EnhancedCandidate } from './useEnhancedCandidates';
 
-export interface CandidateWithOSINT extends EnhancedCandidate {
-  digitalFootprint?: {
-    github?: {
-      username: string;
-      stars: number;
-      commits: number;
-      repos: number;
-    };
-    linkedin?: {
-      url: string;
-      connections: number;
-    };
-    stackoverflow?: {
-      reputation: number;
-    };
-    twitter?: {
-      followers: number;
-    };
-  };
-  osintScore?: number;
-  availability?: string;
-  lastActivity?: string;
-}
-
 export const useSearchModals = () => {
-  const [selectedCandidate, setSelectedCandidate] = useState<CandidateWithOSINT | null>(null);
+  const [selectedCandidate, setSelectedCandidate] = useState<EnhancedCandidate | null>(null);
+  const [footprintCandidate, setFootprintCandidate] = useState<EnhancedCandidate | null>(null);
+  const [outreachCandidate, setOutreachCandidate] = useState<EnhancedCandidate | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isDigitalFootprintModalOpen, setIsDigitalFootprintModalOpen] = useState(false);
 
-  const openCandidateDetails = (candidate: CandidateWithOSINT) => {
+  const openCandidateDetails = (candidate: EnhancedCandidate) => {
     setSelectedCandidate(candidate);
     setIsDetailsModalOpen(true);
   };
 
-  const openDigitalFootprint = (candidate: CandidateWithOSINT) => {
-    setSelectedCandidate(candidate);
+  const openDigitalFootprint = (candidate: EnhancedCandidate) => {
+    setFootprintCandidate(candidate);
     setIsDigitalFootprintModalOpen(true);
+  };
+
+  const openOutreachSequence = (candidate: EnhancedCandidate) => {
+    setOutreachCandidate(candidate);
   };
 
   const closeModals = () => {
     setIsDetailsModalOpen(false);
     setIsDigitalFootprintModalOpen(false);
     setSelectedCandidate(null);
+    setFootprintCandidate(null);
+    setOutreachCandidate(null);
   };
 
   return {
     selectedCandidate,
+    footprintCandidate,
+    outreachCandidate,
     isDetailsModalOpen,
     isDigitalFootprintModalOpen,
     openCandidateDetails,
     openDigitalFootprint,
+    openOutreachSequence,
     closeModals,
+    setSelectedCandidate,
+    setFootprintCandidate,
+    setOutreachCandidate,
   };
 };

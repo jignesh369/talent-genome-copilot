@@ -1,12 +1,11 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { EnhancedCandidate } from '@/hooks/useEnhancedCandidates';
 
 export const enhancedCandidateService = {
   async populateDummyData() {
     console.log('Populating enhanced candidates with dummy data...');
     
-    const dummyCandidates: Partial<EnhancedCandidate>[] = [
+    const dummyCandidates = [
       {
         name: "Sarah Chen",
         handle: "sarahc_dev",

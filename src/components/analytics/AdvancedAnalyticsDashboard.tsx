@@ -12,7 +12,7 @@ import PipelineTabContent from './PipelineTabContent';
 import PredictionsTabContent from './PredictionsTabContent';
 
 const AdvancedAnalyticsDashboard = () => {
-  const { enhancedCandidates } = useEnhancedCandidates();
+  const { data: enhancedCandidates = [] } = useEnhancedCandidates();
   const [insights, setInsights] = useState<PredictiveInsight[]>([]);
   const [marketData, setMarketData] = useState<MarketIntelligence | null>(null);
 
