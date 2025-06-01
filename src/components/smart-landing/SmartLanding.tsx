@@ -9,6 +9,8 @@ const SmartLanding = () => {
   const navigate = useNavigate();
   const { user, userRole, loading } = useAuth();
 
+  console.log('SmartLanding - User:', user?.email, 'Role:', userRole, 'Loading:', loading);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -29,24 +31,33 @@ const SmartLanding = () => {
       
       switch (userRole) {
         case 'startup_admin':
+          console.log('Redirecting to startup admin');
           navigate('/startup-admin');
           break;
         case 'customer_admin':
+          console.log('Redirecting to customer admin');
           navigate('/customer-admin'); 
           break;
         case 'recruiter':
-          navigate('/candidates');
+          console.log('Redirecting to recruiter dashboard');
+          navigate('/recruiter-dashboard');
           break;
         case 'hiring_manager':
-          navigate('/hiring-manager');
+          console.log('Redirecting to hiring manager dashboard');
+          navigate('/recruiter-dashboard');
           break;
         case 'candidate':
+          console.log('Redirecting to candidate dashboard');
           navigate('/candidate-dashboard');
           break;
         default:
+          console.log('Unknown role, redirecting to auth');
           navigate('/auth');
           break;
       }
+    } else if (user && !userRole) {
+      console.log('User exists but no role found, defaulting to candidate');
+      navigate('/candidate-dashboard');
     }
   }, [user, userRole, navigate]);
 

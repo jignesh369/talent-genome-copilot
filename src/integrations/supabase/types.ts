@@ -1056,6 +1056,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_user_email: {
         Args: { user_uuid: string }
         Returns: string
@@ -1067,6 +1071,10 @@ export type Database = {
       get_user_role: {
         Args: { target_org_id?: string }
         Returns: Database["public"]["Enums"]["app_role"]
+      }
+      is_admin_user: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
       }
       is_startup_admin: {
         Args: Record<PropertyKey, never>

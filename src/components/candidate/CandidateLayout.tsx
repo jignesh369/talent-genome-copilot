@@ -1,18 +1,18 @@
 
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import UserProfileDropdown from '@/components/navigation/UserProfileDropdown';
 import NotificationDropdown from '@/components/navigation/NotificationDropdown';
 import { Bell, Briefcase, User, MessageCircle, FileText, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 interface CandidateLayoutProps {
   children?: React.ReactNode;
 }
 
 const CandidateLayout: React.FC<CandidateLayoutProps> = ({ children }) => {
-  const navigate = useLocation();
+  const navigate = useNavigate();
   const location = useLocation();
 
   const navigationItems = [
@@ -29,7 +29,7 @@ const CandidateLayout: React.FC<CandidateLayoutProps> = ({ children }) => {
   const isActivePath = (path: string) => location.pathname === path;
 
   const handleNavigation = (path: string) => {
-    window.location.href = path;
+    navigate(path);
   };
 
   return (
