@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { EnhancedCandidate, CandidateInteraction, AvailabilitySignal } from '@/types/enhanced-recruiting';
 import { enhancedCandidateService } from '@/services/enhancedCandidateService';
-import { useCandidates } from './useCandidates';
+import { useCandidates, Candidate as BasicCandidate } from './useCandidates';
 
 export const useEnhancedCandidates = () => {
   const { candidates: basicCandidates, loading: basicLoading } = useCandidates();
@@ -12,9 +12,17 @@ export const useEnhancedCandidates = () => {
   // Convert basic candidates to enhanced candidates
   useEffect(() => {
     if (!basicLoading && basicCandidates.length > 0) {
-      const enhanced = basicCandidates.map(candidate => 
-        enhancedCandidateService.enhanceCandidate(candidate)
-      );
+      const enhanced = basicCandidates.map(candidate => {
+        // Convert BasicCandidate to the format expected by enhanceCandidate
+        const recruitingCandidate = {
+          ...candidate,
+          education: [],
+          notes: [],
+          applications: [],
+          interviews: []
+        };
+        return enhancedCandidateService.enhanceCandidate(recruitingCandidate);
+      });
       setEnhancedCandidates(enhanced);
       setLoading(false);
     }

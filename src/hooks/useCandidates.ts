@@ -50,10 +50,10 @@ export const useCandidates = () => {
 
       if (fetchError) throw fetchError;
 
-      // Transform skills array if needed
+      // Transform database candidates to include empty skills array
       const transformedCandidates = data?.map(candidate => ({
         ...candidate,
-        skills: candidate.skills || []
+        skills: [] // Initialize empty skills array since skills are in separate table
       })) || [];
 
       setCandidates(transformedCandidates);
@@ -130,7 +130,7 @@ export const useCandidates = () => {
 
       const transformedCandidates = data?.map(candidate => ({
         ...candidate,
-        skills: candidate.skills || []
+        skills: [] // Initialize empty skills array
       })) || [];
 
       setCandidates(transformedCandidates);
@@ -169,7 +169,6 @@ export const useCandidates = () => {
         current_title: candidateData.current_title || null,
         current_company: candidateData.current_company || null,
         experience_years: candidateData.experience_years || 0,
-        skills: candidateData.skills || [],
         score: candidateData.score || 0,
         status: candidateData.status || 'new' as const,
         source: candidateData.source || 'direct' as const,
@@ -188,7 +187,7 @@ export const useCandidates = () => {
 
       if (createError) throw createError;
 
-      const newCandidate = { ...data, skills: data.skills || [] };
+      const newCandidate = { ...data, skills: [] };
       setCandidates(prev => [newCandidate, ...prev]);
       
       toast({
@@ -213,9 +212,12 @@ export const useCandidates = () => {
     try {
       setError(null);
 
+      // Remove skills from updates since it's not in the database table
+      const { skills, ...dbUpdates } = updates;
+
       const { data, error: updateError } = await supabase
         .from('candidates')
-        .update(updates)
+        .update(dbUpdates)
         .eq('id', candidateId)
         .select()
         .single();
@@ -223,7 +225,7 @@ export const useCandidates = () => {
       if (updateError) throw updateError;
 
       setCandidates(prev => prev.map(candidate => 
-        candidate.id === candidateId ? { ...candidate, ...data, skills: data.skills || [] } : candidate
+        candidate.id === candidateId ? { ...candidate, ...data, skills: candidate.skills } : candidate
       ));
 
       toast({
