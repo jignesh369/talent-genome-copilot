@@ -1,6 +1,6 @@
-
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
 import { supabase } from '@/integrations/supabase/client';
+import { mindReaderService, MindReaderResponse } from './mindReaderService';
 
 export interface QueryInterpretation {
   interpreted_intent: string;
@@ -27,39 +27,90 @@ export interface PlatformSearchQuery {
 
 export class NaturalLanguageQueryService {
   async interpretQuery(userQuery: string): Promise<QueryInterpretation> {
-    console.log('Interpreting natural language query with AI:', userQuery);
+    console.log('Interpreting natural language query with Mind Reader AI:', userQuery);
     
     try {
-      const { data, error } = await supabase.functions.invoke('ai-talent-discovery', {
-        body: {
-          action: 'interpret_query',
-          data: { query: userQuery }
-        }
+      // Use Mind Reader service for enhanced interpretation
+      const mindReaderResult: MindReaderResponse = await mindReaderService.interpretHiringQuery(userQuery);
+      
+      // Convert Mind Reader format to existing QueryInterpretation format
+      const extractedRequirements: ExtractedRequirement[] = [];
+      
+      // Add skills requirements
+      mindReaderResult.job_specification.must_have_skills.forEach(skill => {
+        extractedRequirements.push({
+          category: 'skills',
+          value: skill,
+          importance: 0.9,
+          source: 'explicit'
+        });
+      });
+      
+      mindReaderResult.job_specification.nice_to_have_skills.forEach(skill => {
+        extractedRequirements.push({
+          category: 'skills',
+          value: skill,
+          importance: 0.6,
+          source: 'explicit'
+        });
+      });
+      
+      // Add experience requirement
+      if (mindReaderResult.job_specification.years_of_experience) {
+        extractedRequirements.push({
+          category: 'experience',
+          value: mindReaderResult.job_specification.years_of_experience,
+          importance: 0.8,
+          source: 'explicit'
+        });
+      }
+      
+      // Add location requirements
+      mindReaderResult.job_specification.locations.forEach(location => {
+        extractedRequirements.push({
+          category: 'location',
+          value: location,
+          importance: 0.7,
+          source: 'explicit'
+        });
+      });
+      
+      // Add industry requirements
+      mindReaderResult.job_specification.industries.forEach(industry => {
+        extractedRequirements.push({
+          category: 'industry',
+          value: industry,
+          importance: 0.7,
+          source: 'explicit'
+        });
       });
 
-      if (error) {
-        console.error('Error calling AI function:', error);
-        return this.getFallbackInterpretation(userQuery);
-      }
+      const result = {
+        interpreted_intent: mindReaderResult.job_specification.job_title || 
+          `Looking for candidates based on: ${userQuery}`,
+        extracted_requirements: extractedRequirements,
+        search_strategy: this.generateSearchStrategy(mindReaderResult.job_specification),
+        confidence: mindReaderResult.confidence
+      };
 
       // Store the query for analytics
       const { error: insertError } = await supabase
         .from('search_queries')
         .insert({
           original_query: userQuery,
-          interpreted_intent: data.interpreted_intent,
-          extracted_requirements: data.extracted_requirements,
-          search_strategy: data.search_strategy,
-          confidence_score: data.confidence
+          interpreted_intent: result.interpreted_intent,
+          extracted_requirements: result.extracted_requirements,
+          search_strategy: result.search_strategy,
+          confidence_score: result.confidence
         });
 
       if (insertError) {
         console.error('Error storing search query:', insertError);
       }
 
-      return data;
+      return result;
     } catch (error) {
-      console.error('Failed to interpret query:', error);
+      console.error('Failed to interpret query with Mind Reader:', error);
       return this.getFallbackInterpretation(userQuery);
     }
   }
@@ -150,8 +201,28 @@ export class NaturalLanguageQueryService {
     return requirements;
   }
 
-  private generateSearchStrategy(query: string): string {
-    return 'Multi-platform search combining LinkedIn profile matching, GitHub activity analysis, and Stack Overflow expertise validation';
+  private generateSearchStrategy(jobSpec: any): string {
+    const strategies = [];
+    
+    if (jobSpec.must_have_skills.length > 0) {
+      strategies.push("Weighted technical skills matching based on GitHub and Stack Overflow activity");
+    }
+    
+    if (jobSpec.years_of_experience) {
+      strategies.push("Career progression analysis from LinkedIn and professional history");
+    }
+    
+    if (jobSpec.industries.length > 0) {
+      strategies.push("Industry background matching using company history and project types");
+    }
+    
+    if (jobSpec.working_model) {
+      strategies.push("Work preference alignment and location-based filtering");
+    }
+
+    return strategies.length > 0 ? 
+      strategies.join('. ') + '.' : 
+      'Multi-platform search combining LinkedIn profile matching, GitHub activity analysis, and Stack Overflow expertise validation';
   }
 
   private createPlatformQueries(

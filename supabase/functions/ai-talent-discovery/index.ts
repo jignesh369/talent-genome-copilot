@@ -1,4 +1,3 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
@@ -40,6 +39,9 @@ serve(async (req) => {
         break;
       case 'score_job_match':
         result = await scoreJobMatch(data.candidate, data.jobRequirements, data.companyculture);
+        break;
+      case 'mind_reader_interpret':
+        result = await mindReaderInterpret(data.query);
         break;
       default:
         throw new Error(`Unknown action: ${action}`);
@@ -330,6 +332,99 @@ async function scoreJobMatch(candidate: any, jobRequirements: string[], companyc
       key_strengths: candidate.skills?.slice(0, 3) || ['Professional experience'],
       risk_factors: [],
       recommendations: overallScore >= 7 ? ['Schedule interview', 'Fast-track process'] : ['Additional assessment needed']
+    };
+  }
+}
+
+async function mindReaderInterpret(query: string) {
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${openAIApiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: `🧠 Role:
+You are the Mind Reader, an expert natural language interpreter designed to understand recruiters' hiring intentions with high accuracy and transform them into structured data. You excel at parsing vague, partial, or colloquial expressions into standardized hiring parameters suitable for programmatic candidate search.
+
+🧩 OBJECTIVE:
+Given a recruiter's natural language input about who they want to hire, extract and output a concise, structured JSON object with all necessary search parameters including role, skills, experience, location, and preferences.
+
+🏗️ JSON Output Format (return exactly this structure):
+{
+  "job_specification": {
+    "job_title": "",
+    "must_have_skills": [],
+    "nice_to_have_skills": [],
+    "years_of_experience": "",
+    "locations": [],
+    "industries": [],
+    "education": "",
+    "certifications": [],
+    "employment_type": "",
+    "working_model": "",
+    "salary_range": "",
+    "other_criteria": ""
+  },
+  "confidence": 0.95,
+  "interpretation_notes": []
+}
+
+🔐 RULES & INTERPRETATION GUIDELINES:
+1. Be Precise: Do not hallucinate. If something is not mentioned, leave the field blank or use an empty list.
+2. Resolve Ambiguity: If a role like "ML Engineer with healthcare domain" is mentioned, split "job_title" and "industries" accordingly.
+3. Implicit Mapping: If a recruiter says "someone great with NLP and LLMs", infer must_have_skills: ["Natural Language Processing", "Large Language Models"].
+4. Geography Parsing: Normalize all locations to city-level or remote/hybrid where applicable.
+5. Experience Parsing: Convert phrases like "senior level", "entry-level", or "with 4-5 years of experience" into structured years_of_experience.
+6. Ignore Non-Recruitment Language: Disregard conversational fluff like "we're struggling to find", "our dream hire would be…", etc.
+7. Use Synonym Canonicalization: Map "GPT models", "OpenAI tools", and "ChatGPT" to "Large Language Models".
+
+🛡️ GUARDRAILS:
+• If the input is vague or incomplete, infer only what is reasonably implied. Do not guess.
+• Always ensure the output JSON is valid, parseable, and syntactically correct.
+• Avoid adding speculative fields or values.
+
+Return ONLY the JSON object, no additional text.`
+        },
+        {
+          role: 'user',
+          content: query
+        }
+      ],
+      temperature: 0.3,
+      response_format: { type: "json_object" }
+    }),
+  });
+
+  const data = await response.json();
+  const content = data.choices[0].message.content;
+  
+  try {
+    return JSON.parse(content);
+  } catch (parseError) {
+    console.error('Failed to parse Mind Reader response:', parseError);
+    // Return fallback structure
+    return {
+      job_specification: {
+        job_title: "",
+        must_have_skills: [],
+        nice_to_have_skills: [],
+        years_of_experience: "",
+        locations: [],
+        industries: [],
+        education: "",
+        certifications: [],
+        employment_type: "",
+        working_model: "",
+        salary_range: "",
+        other_criteria: ""
+      },
+      confidence: 0.3,
+      interpretation_notes: ["Failed to parse AI response, using fallback"]
     };
   }
 }
