@@ -202,7 +202,8 @@ export class AITalentDiscoveryAPI {
         return this.getMockCandidates(); // Fallback to mock data
       }
 
-      return data || [];
+      // Transform database records to EnhancedCandidate objects
+      return (data || []).map(record => this.transformDatabaseRecordToEnhancedCandidate(record));
     } catch (error) {
       console.error('Failed to search candidates in database:', error);
       return this.getMockCandidates(); // Fallback to mock data
@@ -222,11 +223,103 @@ export class AITalentDiscoveryAPI {
         return this.getMockCandidate(candidateId); // Fallback to mock data
       }
 
-      return data;
+      return this.transformDatabaseRecordToEnhancedCandidate(data);
     } catch (error) {
       console.error('Database error fetching candidate:', error);
       return this.getMockCandidate(candidateId); // Fallback to mock data
     }
+  }
+
+  private transformDatabaseRecordToEnhancedCandidate(record: any): EnhancedCandidate {
+    return {
+      id: record.id,
+      name: record.name,
+      handle: record.handle || record.email.split('@')[0],
+      email: record.email,
+      location: record.location || '',
+      current_title: record.current_title,
+      current_company: record.current_company,
+      experience_years: record.experience_years || 0,
+      skills: record.skills || [],
+      bio: record.bio,
+      avatar_url: record.avatar_url,
+      ai_summary: record.ai_summary || '',
+      career_trajectory_analysis: {
+        progression_type: 'ascending',
+        growth_rate: 0.8,
+        stability_score: 0.7,
+        next_likely_move: `Senior ${record.current_title || 'Developer'}`,
+        timeline_events: []
+      },
+      technical_depth_score: record.technical_depth_score || 0,
+      community_influence_score: record.community_influence_score || 0,
+      cultural_fit_indicators: [],
+      learning_velocity_score: record.learning_velocity_score || 0,
+      osint_profile: {
+        id: `osint_${record.id}`,
+        candidate_id: record.id,
+        overall_score: record.technical_depth_score || 0,
+        influence_score: record.community_influence_score || 0,
+        technical_depth: record.technical_depth_score || 0,
+        community_engagement: record.community_influence_score || 0,
+        learning_velocity: record.learning_velocity_score || 0,
+        availability_signals: [],
+        social_presence: {
+          platforms: ['linkedin', 'github'],
+          professional_consistency: 0.8,
+          communication_style: 'professional',
+          thought_leadership_score: record.community_influence_score || 0,
+        },
+        professional_reputation: {
+          industry_recognition: [],
+          conference_speaking: false,
+          published_content: 0,
+          community_involvement: [],
+          expertise_areas: record.skills || [],
+        },
+        github: {
+          username: record.handle || '',
+          stars: 0,
+          repos: 0,
+          commits: 0,
+        },
+        linkedin: {
+          connections: 0,
+          url: '',
+        },
+        stackoverflow: {
+          reputation: 0,
+        },
+        twitter: {
+          followers: 0,
+          username: '',
+        },
+        reddit: { username: '' },
+        devto: { username: '' },
+        kaggle: { username: '' },
+        medium: { username: '' },
+        red_flags: [],
+        last_updated: record.updated_at || new Date().toISOString(),
+      },
+      match_score: Math.round((record.technical_depth_score + record.community_influence_score) * 5) || 75,
+      relevance_factors: [],
+      availability_status: record.availability_status || 'passive',
+      best_contact_method: {
+        platform: record.preferred_contact_method === 'github' ? 'email' : (record.preferred_contact_method || 'email'),
+        confidence: 0.8,
+        best_time: '9-17',
+        approach_style: 'direct',
+      },
+      salary_expectation_range: record.salary_expectation_min ? {
+        min: record.salary_expectation_min,
+        max: record.salary_expectation_max || record.salary_expectation_min + 20000,
+        currency: record.salary_currency || 'USD',
+        confidence: 0.7,
+        source: 'database'
+      } : undefined,
+      profile_last_updated: record.profile_last_updated || record.created_at || new Date().toISOString(),
+      osint_last_fetched: record.osint_last_fetched || record.created_at || new Date().toISOString(),
+    };
   }
 
   private async storeCandidateAnalysis(candidateId: string, summary: CandidateSummary) {
@@ -278,63 +371,42 @@ export class AITalentDiscoveryAPI {
 
   // Fallback mock data methods
   private getMockCandidates(): EnhancedCandidate[] {
-    const mockCandidates: Partial<EnhancedCandidate>[] = [
-      {
-        id: 'candidate_001',
-        name: 'Sarah Chen',
-        email: 'sarah.chen@email.com',
-        handle: 'sarahc_dev',
-        location: 'San Francisco, CA',
-        current_title: 'Senior React Developer',
-        current_company: 'TechCorp',
-        experience_years: 5,
-        skills: ['React', 'TypeScript', 'Node.js', 'AWS'],
-        technical_depth_score: 8.5,
-        community_influence_score: 7.2,
-        learning_velocity_score: 9.1,
-        availability_status: 'passive',
-        ai_summary: 'High-performing frontend developer with strong full-stack capabilities.'
-      },
-      {
-        id: 'candidate_002',
-        name: 'Marcus Johnson',
-        email: 'marcus.johnson@email.com',
-        handle: 'mjohnson_ai',
-        location: 'Austin, TX',
-        current_title: 'Machine Learning Engineer',
-        current_company: 'DataFlow Inc',
-        experience_years: 7,
-        skills: ['Python', 'TensorFlow', 'PyTorch', 'Kubernetes'],
-        technical_depth_score: 9.2,
-        community_influence_score: 8.7,
-        learning_velocity_score: 8.9,
-        availability_status: 'active',
-        ai_summary: 'Expert ML engineer with strong research background.'
-      }
+    return [
+      this.createMockCandidate('candidate_001', 'Sarah Chen', 'Senior React Developer', 'TechCorp', 5, ['React', 'TypeScript', 'Node.js', 'AWS']),
+      this.createMockCandidate('candidate_002', 'Marcus Johnson', 'Machine Learning Engineer', 'DataFlow Inc', 7, ['Python', 'TensorFlow', 'PyTorch', 'Kubernetes']),
     ];
-    
-    return mockCandidates as EnhancedCandidate[];
   }
 
   private getMockCandidate(candidateId: string): EnhancedCandidate {
-    const mockCandidate: EnhancedCandidate = {
-      id: candidateId,
-      name: 'Sarah Chen',
-      handle: 'sarahc_dev',
-      email: 'sarah.chen@email.com',
+    return this.createMockCandidate(candidateId, 'Sarah Chen', 'Senior React Developer', 'TechCorp', 5, ['React', 'TypeScript', 'Node.js', 'AWS']);
+  }
+
+  private createMockCandidate(
+    id: string, 
+    name: string, 
+    title: string, 
+    company: string, 
+    years: number, 
+    skills: string[]
+  ): EnhancedCandidate {
+    return {
+      id,
+      name,
+      handle: name.toLowerCase().replace(' ', '_'),
+      email: `${name.toLowerCase().replace(' ', '.')}@email.com`,
       location: 'San Francisco, CA',
-      current_title: 'Senior React Developer',
-      current_company: 'TechCorp',
-      experience_years: 5,
-      skills: ['React', 'TypeScript', 'Node.js', 'AWS'],
-      bio: 'Passionate React developer with expertise in TypeScript and AWS',
+      current_title: title,
+      current_company: company,
+      experience_years: years,
+      skills,
+      bio: `Passionate ${title.toLowerCase()} with expertise in ${skills.slice(0, 2).join(' and ')}`,
       avatar_url: '',
-      ai_summary: 'High-performing frontend developer with strong full-stack capabilities.',
+      ai_summary: `High-performing ${title.toLowerCase()} with strong technical capabilities.`,
       career_trajectory_analysis: {
         progression_type: 'ascending',
         growth_rate: 8.5,
         stability_score: 7.8,
-        next_likely_move: 'Senior Frontend Architect',
+        next_likely_move: `Senior ${title}`,
         timeline_events: []
       },
       technical_depth_score: 8.5,
@@ -342,8 +414,8 @@ export class AITalentDiscoveryAPI {
       cultural_fit_indicators: [],
       learning_velocity_score: 9.1,
       osint_profile: {
-        id: 'osint_001',
-        candidate_id: candidateId,
+        id: `osint_${id}`,
+        candidate_id: id,
         overall_score: 8.2,
         influence_score: 7.2,
         technical_depth: 8.5,
@@ -361,29 +433,29 @@ export class AITalentDiscoveryAPI {
           conference_speaking: false,
           published_content: 3,
           community_involvement: [],
-          expertise_areas: ['React', 'TypeScript', 'Node.js']
+          expertise_areas: skills
         },
         github: {
-          username: 'sarahc_dev',
+          username: name.toLowerCase().replace(' ', '_'),
           stars: 150,
           repos: 25,
           commits: 1250
         },
         linkedin: {
           connections: 800,
-          url: 'https://linkedin.com/in/sarahchen'
+          url: `https://linkedin.com/in/${name.toLowerCase().replace(' ', '')}`
         },
         stackoverflow: {
           reputation: 5200
         },
         twitter: {
           followers: 320,
-          username: 'sarahc_dev'
+          username: name.toLowerCase().replace(' ', '_')
         },
-        reddit: { username: 'sarahc_dev' },
-        devto: { username: 'sarahc_dev' },
-        kaggle: { username: 'sarahc_dev' },
-        medium: { username: 'sarahc_dev' },
+        reddit: { username: name.toLowerCase().replace(' ', '_') },
+        devto: { username: name.toLowerCase().replace(' ', '_') },
+        kaggle: { username: name.toLowerCase().replace(' ', '_') },
+        medium: { username: name.toLowerCase().replace(' ', '_') },
         red_flags: [],
         last_updated: new Date().toISOString()
       },
@@ -406,8 +478,6 @@ export class AITalentDiscoveryAPI {
       profile_last_updated: new Date().toISOString(),
       osint_last_fetched: new Date().toISOString()
     };
-    
-    return mockCandidate;
   }
 
   private mapSeniorityToDifficulty(seniority: string): string {
