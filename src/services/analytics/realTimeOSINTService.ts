@@ -11,11 +11,20 @@ interface OSINTUpdate {
   timestamp: string;
 }
 
-export const realTimeOSINTService = {
+class RealTimeOSINTService {
+  private static instance: RealTimeOSINTService;
+  private monitoringStatus = { total: 0, active: [] };
+
+  static getInstance(): RealTimeOSINTService {
+    if (!RealTimeOSINTService.instance) {
+      RealTimeOSINTService.instance = new RealTimeOSINTService();
+    }
+    return RealTimeOSINTService.instance;
+  }
+
   async monitorCandidateActivity(candidateIds: string[]): Promise<OSINTUpdate[]> {
     console.log(`Monitoring ${candidateIds.length} candidates for real-time updates`);
     
-    // Simulate real-time monitoring
     const updates: OSINTUpdate[] = [];
     
     for (const candidateId of candidateIds.slice(0, 3)) {
@@ -36,14 +45,24 @@ export const realTimeOSINTService = {
     }
     
     return updates;
-  },
+  }
+
+  startMonitoring(candidateIds: string[]): void {
+    this.monitoringStatus = {
+      total: candidateIds.length,
+      active: candidateIds.slice(0, 5)
+    };
+    console.log(`Started monitoring ${candidateIds.length} candidates`);
+  }
+
+  getMonitoringStatus() {
+    return this.monitoringStatus;
+  }
 
   async updateCandidateProfile(candidateId: string, updates: OSINTUpdate[]): Promise<EnhancedCandidate | null> {
     console.log(`Updating candidate ${candidateId} with ${updates.length} new data points`);
-    
-    // In a real implementation, this would update the database
     return null;
-  },
+  }
 
   async generateOSINTProfile(candidateId: string): Promise<OSINTProfile> {
     const baseProfile: OSINTProfile = {
@@ -54,7 +73,6 @@ export const realTimeOSINTService = {
       technical_depth: 7.1,
       community_engagement: 4.8,
       learning_velocity: 6.3,
-      last_updated: new Date().toISOString(),
       availability_signals: [],
       social_presence: {
         platforms: ['linkedin', 'github'],
@@ -103,10 +121,9 @@ export const realTimeOSINTService = {
     };
 
     return baseProfile;
-  },
+  }
 
   async getAvailabilitySignals(candidateId: string): Promise<any[]> {
-    // Simulate availability signals
     return [
       {
         signal_type: 'job_search_activity',
@@ -119,4 +136,6 @@ export const realTimeOSINTService = {
       }
     ];
   }
-};
+}
+
+export const realTimeOSINTService = RealTimeOSINTService.getInstance();

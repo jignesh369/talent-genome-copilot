@@ -4,7 +4,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { 
   X, 
@@ -14,9 +13,7 @@ import {
   Star, 
   TrendingUp, 
   Users, 
-  Code, 
   MessageCircle,
-  Phone,
   Mail,
   Linkedin,
   Github

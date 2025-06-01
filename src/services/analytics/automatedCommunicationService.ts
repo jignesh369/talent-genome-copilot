@@ -53,20 +53,17 @@ export const automatedCommunicationService = {
   ): Promise<string> {
     let message = template.content;
     
-    // Replace placeholders with candidate data
     message = message.replace(/{{candidate\.name}}/g, candidate.name);
     message = message.replace(/{{candidate\.title}}/g, candidate.current_title || 'professional');
     message = message.replace(/{{candidate\.company}}/g, candidate.current_company || 'their field');
     message = message.replace(/{{candidate\.skills}}/g, candidate.skills.join(', '));
     message = message.replace(/{{candidate\.location}}/g, candidate.location);
     
-    // Add context-specific replacements
     Object.entries(context).forEach(([key, value]) => {
       const regex = new RegExp(`{{context\\.${key}}}`, 'g');
       message = message.replace(regex, value);
     });
     
-    // Add dynamic insights
     const candidateInsights = await this.generateCandidateInsights(candidate);
     message += `\n\n${candidateInsights}`;
     
@@ -76,7 +73,6 @@ export const automatedCommunicationService = {
   async generateCandidateInsights(candidate: EnhancedCandidate): Promise<string> {
     const insights = [];
     
-    // GitHub insights
     if (candidate.osint_profile?.github?.username) {
       const github = candidate.osint_profile.github;
       if (github.repos > 10) {
@@ -87,7 +83,6 @@ export const automatedCommunicationService = {
       }
     }
     
-    // Career trajectory insights
     if (candidate.career_trajectory_analysis) {
       const trajectory = candidate.career_trajectory_analysis;
       if (trajectory.progression_type === 'ascending') {
@@ -98,14 +93,12 @@ export const automatedCommunicationService = {
       }
     }
     
-    // Technical depth insights
     if (candidate.technical_depth_score > 8) {
       insights.push('Exceptional technical expertise');
     } else if (candidate.technical_depth_score > 6) {
       insights.push('Strong technical background');
     }
     
-    // Community involvement
     if (candidate.community_influence_score > 7) {
       insights.push('Active in professional community');
     }
@@ -121,16 +114,13 @@ export const automatedCommunicationService = {
       ...log
     };
     
-    // In real implementation, this would save to a database
     console.log('Communication Logged:', newLog);
     return newLog;
   },
 
   async sendMessage(messageId: string): Promise<boolean> {
-    // Simulate sending message
     console.log(`Sending message with ID: ${messageId}`);
     
-    // Simulate success/failure
     const success = Math.random() > 0.1;
     
     if (success) {
@@ -143,7 +133,6 @@ export const automatedCommunicationService = {
   },
 
   async getCommunicationMetrics(): Promise<CommunicationMetrics> {
-    // In real implementation, this would fetch from a database
     return {
       total_messages_sent: 1250,
       delivery_rate: 0.98,
@@ -169,8 +158,11 @@ export const automatedCommunicationService = {
     };
   },
 
+  async getPerformanceMetrics(): Promise<CommunicationMetrics> {
+    return this.getCommunicationMetrics();
+  },
+
   async getMessageTemplates(): Promise<MessageTemplate[]> {
-    // In real implementation, this would fetch from a database
     return [
       {
         id: 'template_1',
@@ -200,21 +192,6 @@ export const automatedCommunicationService = {
         metadata: {
           tone: 'assertive',
           length: 'very short'
-        }
-      },
-      {
-        id: 'template_3',
-        name: 'Assessment Request',
-        type: 'assessment_request',
-        content: "Hi {{candidate.name}}, we'd like to invite you to complete a short assessment to evaluate your skills. Please click the link below to get started.",
-        created_at: '2024-01-10T00:00:00Z',
-        updated_at: '2024-01-25T00:00:00Z',
-        usage_count: 85,
-        ai_quality_score: 0.92,
-        tags: ['assessment', 'technical'],
-        metadata: {
-          tone: 'formal',
-          length: 'medium'
         }
       }
     ];

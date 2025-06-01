@@ -1,200 +1,106 @@
 
-import { supabase } from '@/integrations/supabase/client';
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
+import { OSINTProfile } from '@/types/osint';
 
-export interface StandardCandidate {
-  id: string;
-  name: string;
-  email: string;
-  location: string;
-  current_title?: string;
-  current_company?: string;
-  experience_years: number;
-  skills: string[];
-  bio?: string;
-  avatar_url?: string;
-  match_score?: number;
-  availability_status: 'active' | 'passive' | 'unavailable';
-  contact_method: 'email' | 'linkedin' | 'phone';
-  created_at: string;
-}
+export const convertToEnhancedCandidate = (candidateData: any): EnhancedCandidate => {
+  const osintProfile: OSINTProfile = {
+    id: `osint_${candidateData.id}`,
+    candidate_id: candidateData.id,
+    overall_score: candidateData.osint_overall_score || 6.5,
+    influence_score: candidateData.osint_influence_score || 5.2,
+    technical_depth: candidateData.osint_technical_depth || 7.1,
+    community_engagement: candidateData.osint_community_engagement || 4.8,
+    learning_velocity: candidateData.osint_learning_velocity || 6.3,
+    availability_signals: candidateData.availability_signals || [],
+    social_presence: {
+      platforms: ['linkedin', 'github'],
+      professional_consistency: 0.8,
+      communication_style: 'professional',
+      thought_leadership_score: 3.2
+    },
+    professional_reputation: {
+      industry_recognition: [],
+      conference_speaking: false,
+      published_content: 0,
+      community_involvement: [],
+      expertise_areas: candidateData.skills || []
+    },
+    github: {
+      username: candidateData.github_username || '',
+      stars: candidateData.github_stars || 0,
+      repos: candidateData.github_repos || 0,
+      commits: candidateData.github_commits || 0
+    },
+    linkedin: {
+      connections: candidateData.linkedin_connections || 0,
+      url: candidateData.linkedin_url || ''
+    },
+    stackoverflow: {
+      reputation: candidateData.stackoverflow_reputation || 0
+    },
+    twitter: {
+      followers: candidateData.twitter_followers || 0,
+      username: candidateData.twitter_username || ''
+    },
+    reddit: {
+      username: candidateData.reddit_username || ''
+    },
+    devto: {
+      username: candidateData.devto_username || ''
+    },
+    kaggle: {
+      username: candidateData.kaggle_username || ''
+    },
+    medium: {
+      username: candidateData.medium_username || ''
+    },
+    red_flags: [],
+    last_updated: new Date().toISOString()
+  };
 
-export const candidateConverter = {
-  async convertToEnhancedCandidate(standardCandidate: StandardCandidate): Promise<EnhancedCandidate> {
-    console.log('Converting standard candidate to enhanced:', standardCandidate.name);
-    
-    // Generate basic OSINT profile if none exists
-    const osintProfile = {
-      id: `osint_${standardCandidate.id}`,
-      candidate_id: standardCandidate.id,
-      overall_score: 5.0 + Math.random() * 3, // Random score between 5-8
-      influence_score: 4.0 + Math.random() * 4, // Random score between 4-8
-      technical_depth: 5.0 + Math.random() * 3,
-      community_engagement: 3.0 + Math.random() * 4,
-      learning_velocity: 4.0 + Math.random() * 3,
-      last_updated: new Date().toISOString(),
-      availability_signals: [],
-      social_presence: {
-        platforms: ['linkedin'] as const,
-        professional_consistency: 0.7,
-        communication_style: 'professional' as const,
-        thought_leadership_score: Math.random() * 5
-      },
-      professional_reputation: {
-        industry_recognition: [],
-        conference_speaking: false,
-        published_content: 0,
-        community_involvement: [],
-        expertise_areas: standardCandidate.skills.slice(0, 3)
-      },
-      github: {
-        username: '',
-        stars: 0,
-        repos: 0,
-        commits: 0,
-      },
-      linkedin: {
-        connections: Math.floor(Math.random() * 500) + 100,
-        url: '',
-      },
-      stackoverflow: {
-        reputation: Math.floor(Math.random() * 1000),
-      },
-      twitter: {
-        followers: 0,
-        username: '',
-      },
-      reddit: {
-        username: '',
-      },
-      devto: {
-        username: '',
-      },
-      kaggle: {
-        username: '',
-      },
-      medium: {
-        username: '',
-      },
-      red_flags: [],
-      last_updated: new Date().toISOString(),
-    };
+  const enhancedCandidate: EnhancedCandidate = {
+    id: candidateData.id,
+    name: candidateData.name || `${candidateData.first_name || ''} ${candidateData.last_name || ''}`.trim(),
+    handle: candidateData.handle || candidateData.email?.split('@')[0] || '',
+    email: candidateData.email,
+    location: candidateData.location || '',
+    current_title: candidateData.current_title,
+    current_company: candidateData.current_company,
+    experience_years: candidateData.experience_years || candidateData.years_of_experience || 0,
+    skills: candidateData.skills || [],
+    bio: candidateData.bio,
+    avatar_url: candidateData.avatar_url,
+    ai_summary: candidateData.ai_summary || 'Enhanced candidate profile',
+    career_trajectory_analysis: {
+      progression_type: 'ascending',
+      growth_rate: 5.0,
+      stability_score: 6.0,
+      next_likely_move: 'Senior Role',
+      timeline_events: []
+    },
+    technical_depth_score: candidateData.technical_depth_score || 7.0,
+    community_influence_score: candidateData.community_influence_score || 5.0,
+    cultural_fit_indicators: [],
+    learning_velocity_score: candidateData.learning_velocity_score || 6.0,
+    osint_profile: osintProfile,
+    match_score: candidateData.match_score || candidateData.score || 75,
+    relevance_factors: [],
+    availability_status: candidateData.availability_status || 'passive',
+    best_contact_method: {
+      platform: 'email',
+      confidence: 0.8,
+      best_time: '9-17',
+      approach_style: 'direct'
+    },
+    profile_last_updated: candidateData.profile_last_updated || new Date().toISOString(),
+    osint_last_fetched: candidateData.osint_last_fetched || new Date().toISOString(),
+    created_at: candidateData.created_at || new Date().toISOString(),
+    updated_at: candidateData.updated_at || new Date().toISOString()
+  };
 
-    const enhancedCandidate: EnhancedCandidate = {
-      id: standardCandidate.id,
-      name: standardCandidate.name,
-      handle: standardCandidate.email.split('@')[0],
-      email: standardCandidate.email,
-      location: standardCandidate.location,
-      current_title: standardCandidate.current_title,
-      current_company: standardCandidate.current_company,
-      experience_years: standardCandidate.experience_years,
-      skills: standardCandidate.skills,
-      bio: standardCandidate.bio,
-      avatar_url: standardCandidate.avatar_url,
-      
-      // AI-generated insights
-      ai_summary: `${standardCandidate.current_title || 'Professional'} with ${standardCandidate.experience_years} years of experience. Strong background in ${standardCandidate.skills.slice(0, 3).join(', ')}.`,
-      career_trajectory_analysis: {
-        progression_type: 'ascending' as const,
-        growth_rate: 6.0 + Math.random() * 2,
-        stability_score: 5.0 + Math.random() * 3,
-        next_likely_move: `Senior ${standardCandidate.current_title || 'Role'}`,
-        timeline_events: []
-      },
-      technical_depth_score: 5.0 + Math.random() * 3,
-      community_influence_score: 4.0 + Math.random() * 4,
-      cultural_fit_indicators: [],
-      learning_velocity_score: 5.0 + Math.random() * 3,
-      
-      // OSINT data
-      osint_profile: osintProfile,
-      
-      // Search relevance
-      match_score: standardCandidate.match_score || Math.floor(Math.random() * 40) + 60,
-      relevance_factors: [],
-      
-      // Availability & outreach
-      availability_status: standardCandidate.availability_status,
-      best_contact_method: {
-        platform: standardCandidate.contact_method,
-        confidence: 0.8,
-        best_time: '9-17',
-        approach_style: 'direct' as const,
-      },
-      
-      // Timestamps
-      profile_last_updated: standardCandidate.created_at,
-      osint_last_fetched: new Date().toISOString(),
-      
-      // Additional compatibility fields
-      source_details: {
-        type: 'manual_upload' as const,
-        platform: 'conversion',
-        verified: true,
-        imported_date: standardCandidate.created_at,
-        confidence_score: 0.8
-      },
-      first_name: standardCandidate.name.split(' ')[0],
-      last_name: standardCandidate.name.split(' ').slice(1).join(' '),
-      score: standardCandidate.match_score || Math.floor(Math.random() * 40) + 60,
-      education: [],
-      applications: [],
-      interviews: [],
-      notes: [],
-      tags: [],
-      organization_id: '',
-      created_at: standardCandidate.created_at,
-      updated_at: new Date().toISOString(),
-      portal_activity_score: Math.random() * 100,
-      interaction_timeline: [],
-      engagement_score: Math.random() * 100,
-      response_rate: 0.6 + Math.random() * 0.4,
-      preferred_contact_method: standardCandidate.contact_method,
-      osint_last_updated: new Date().toISOString(),
-      background_verification_status: 'verified' as const,
-      placement_probability_score: Math.floor(Math.random() * 40) + 60,
-      cultural_fit_score: Math.random() * 100,
-      availability_signals: [],
-      job_interests: [],
-      career_aspirations: standardCandidate.bio,
-      pipeline_stage: 'sourced',
-      stage_history: [],
-      priority_level: 'medium' as const,
-      status: 'new' as const,
-      source: 'direct' as const,
-    };
+  return enhancedCandidate;
+};
 
-    return enhancedCandidate;
-  },
-
-  async convertFromEnhancedCandidate(enhancedCandidate: EnhancedCandidate): Promise<StandardCandidate> {
-    return {
-      id: enhancedCandidate.id,
-      name: enhancedCandidate.name,
-      email: enhancedCandidate.email,
-      location: enhancedCandidate.location,
-      current_title: enhancedCandidate.current_title,
-      current_company: enhancedCandidate.current_company,
-      experience_years: enhancedCandidate.experience_years,
-      skills: enhancedCandidate.skills,
-      bio: enhancedCandidate.bio,
-      avatar_url: enhancedCandidate.avatar_url,
-      match_score: enhancedCandidate.match_score,
-      availability_status: enhancedCandidate.availability_status,
-      contact_method: enhancedCandidate.best_contact_method.platform as 'email' | 'linkedin' | 'phone',
-      created_at: enhancedCandidate.created_at || new Date().toISOString()
-    };
-  },
-
-  async batchConvertToEnhanced(standardCandidates: StandardCandidate[]): Promise<EnhancedCandidate[]> {
-    console.log(`Converting ${standardCandidates.length} candidates to enhanced format`);
-    
-    const enhanced = await Promise.all(
-      standardCandidates.map(candidate => this.convertToEnhancedCandidate(candidate))
-    );
-    
-    console.log('Batch conversion completed');
-    return enhanced;
-  }
+export const convertToSearchCandidate = (enhancedCandidate: EnhancedCandidate): EnhancedCandidate => {
+  return enhancedCandidate;
 };

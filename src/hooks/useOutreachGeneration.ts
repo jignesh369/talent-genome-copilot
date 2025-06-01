@@ -29,7 +29,7 @@ export const useOutreachGeneration = () => {
       recommendations: result.recommendations
     });
 
-    return result.message;
+    return result.body;
   };
 
   const processAutomaticOutreach = async (candidates: SearchCandidate[]) => {

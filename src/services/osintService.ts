@@ -1,11 +1,10 @@
 
-import { OSINTProfile } from '@/types/osint';
+import { OSINTProfile, Recognition, CommunityInvolvement } from '@/types/osint';
 
 export const osintService = {
   async fetchCandidateOSINT(candidateId: string): Promise<OSINTProfile> {
     console.log(`Fetching OSINT data for candidate: ${candidateId}`);
     
-    // Simulate API calls to various platforms
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     const profile: OSINTProfile = {
@@ -16,7 +15,6 @@ export const osintService = {
       technical_depth: 7.2,
       community_engagement: 4.9,
       learning_velocity: 6.1,
-      last_updated: new Date().toISOString(),
       availability_signals: [],
       social_presence: {
         platforms: ['linkedin', 'github', 'twitter'],
@@ -25,10 +23,25 @@ export const osintService = {
         thought_leadership_score: 4.2
       },
       professional_reputation: {
-        industry_recognition: ['Featured in TechCrunch'],
+        industry_recognition: [{
+          type: 'feature',
+          source: 'TechCrunch',
+          title: 'Featured in TechCrunch',
+          date: new Date().toISOString()
+        }] as Recognition[],
         conference_speaking: true,
         published_content: 5,
-        community_involvement: ['Open Source Contributor', 'Tech Meetup Organizer'],
+        community_involvement: [{
+          type: 'open_source',
+          name: 'Open Source Contributor',
+          role: 'contributor',
+          activity_level: 'high'
+        }, {
+          type: 'meetup',
+          name: 'Tech Meetup Organizer',
+          role: 'organizer',
+          activity_level: 'medium'
+        }] as CommunityInvolvement[],
         expertise_areas: ['React', 'Node.js', 'AWS', 'TypeScript']
       },
       github: {

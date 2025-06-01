@@ -9,7 +9,6 @@ export const candidateProfileService = {
     
     const candidateId = `candidate_${Date.now()}`;
     
-    // Create enhanced candidate object
     const enhancedCandidate: EnhancedCandidate = {
       id: candidateId,
       name: profileData.name || '',
@@ -62,7 +61,6 @@ export const candidateProfileService = {
       technical_depth: 5.0 + Math.random() * 3,
       community_engagement: 3.0 + Math.random() * 4,
       learning_velocity: 4.0 + Math.random() * 3,
-      last_updated: new Date().toISOString(),
       availability_signals: [],
       social_presence: {
         platforms: ['linkedin'],
@@ -115,12 +113,10 @@ export const candidateProfileService = {
 
   async updateProfile(candidateId: string, updates: Partial<EnhancedCandidate>): Promise<void> {
     console.log(`Updating profile for candidate: ${candidateId}`);
-    // Implementation would update the database
   },
 
   async getProfile(candidateId: string): Promise<EnhancedCandidate | null> {
     console.log(`Fetching profile for candidate: ${candidateId}`);
-    // Implementation would fetch from database
     return null;
   }
 };
