@@ -1,4 +1,5 @@
 
+
 import { supabase } from '@/integrations/supabase/client';
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
 import { convertToEnhancedCandidate } from '@/utils/candidateConverter';
@@ -95,9 +96,11 @@ export const insightsGeneratorService = {
     const totalCandidates = candidates.length;
     
     Object.entries(skillCounts).forEach(([skill, count]) => {
-      const percentage = totalCandidates > 0 ? (count / totalCandidates) * 100 : 0;
+      // Ensure count is a number for arithmetic operations
+      const candidateCount = Number(count) || 0;
+      const percentage = totalCandidates > 0 ? (candidateCount / totalCandidates) * 100 : 0;
       
-      if (percentage < 10 && count > 0) { // Rare skills
+      if (percentage < 10 && candidateCount > 0) { // Rare skills
         insights.push({
           type: 'talent_scarcity',
           title: `${skill} Talent Scarcity`,
@@ -110,7 +113,7 @@ export const insightsGeneratorService = {
             'Partner with bootcamps or training programs'
           ],
           confidence: 0.8,
-          data_points: [{ skill, count, percentage }]
+          data_points: [{ skill, count: candidateCount, percentage }]
         });
       }
     });
@@ -126,23 +129,27 @@ export const insightsGeneratorService = {
     );
     
     if (candidatesWithSalary.length > 10) {
-      const salaries = candidatesWithSalary.map(c => c.salary_expectation_range!.min);
-      const avgSalary = salaries.reduce((sum, salary) => sum + salary, 0) / salaries.length;
-      const medianSalary = this.calculateMedian(salaries);
+      const salaries = candidatesWithSalary.map(c => Number(c.salary_expectation_range!.min) || 0);
+      const validSalaries = salaries.filter(salary => salary > 0);
       
-      insights.push({
-        type: 'salary_trends',
-        title: 'Salary Expectations Analysis',
-        description: `Average salary expectation is $${Math.round(avgSalary).toLocaleString()}, with median at $${Math.round(medianSalary).toLocaleString()}.`,
-        impact: 'medium',
-        actionable_recommendations: [
-          'Review compensation packages to ensure competitiveness',
-          'Consider non-monetary benefits to offset salary gaps',
-          'Benchmark against industry standards'
-        ],
-        confidence: 0.7,
-        data_points: [{ avgSalary, medianSalary, sampleSize: candidatesWithSalary.length }]
-      });
+      if (validSalaries.length > 0) {
+        const avgSalary = validSalaries.reduce((sum, salary) => sum + salary, 0) / validSalaries.length;
+        const medianSalary = this.calculateMedian(validSalaries);
+        
+        insights.push({
+          type: 'salary_trends',
+          title: 'Salary Expectations Analysis',
+          description: `Average salary expectation is $${Math.round(avgSalary).toLocaleString()}, with median at $${Math.round(medianSalary).toLocaleString()}.`,
+          impact: 'medium',
+          actionable_recommendations: [
+            'Review compensation packages to ensure competitiveness',
+            'Consider non-monetary benefits to offset salary gaps',
+            'Benchmark against industry standards'
+          ],
+          confidence: 0.7,
+          data_points: [{ avgSalary, medianSalary, sampleSize: validSalaries.length }]
+        });
+      }
     }
     
     return insights;
@@ -153,6 +160,7 @@ export const insightsGeneratorService = {
     
     const skillCounts = this.calculateSkillDistribution(candidates);
     const topSkills = Object.entries(skillCounts)
+      .map(([skill, count]) => [skill, Number(count) || 0] as [string, number])
       .sort(([,a], [,b]) => b - a)
       .slice(0, 5);
     
@@ -178,6 +186,7 @@ export const insightsGeneratorService = {
     
     const locationCounts = this.calculateLocationDistribution(candidates);
     const topLocations = Object.entries(locationCounts)
+      .map(([location, count]) => [location, Number(count) || 0] as [string, number])
       .sort(([,a], [,b]) => b - a)
       .slice(0, 3);
     
@@ -234,9 +243,11 @@ export const insightsGeneratorService = {
     const skillCounts: Record<string, number> = {};
     
     candidates.forEach(candidate => {
-      candidate.skills?.forEach((skill: string) => {
-        skillCounts[skill] = (skillCounts[skill] || 0) + 1;
-      });
+      if (Array.isArray(candidate.skills)) {
+        candidate.skills.forEach((skill: string) => {
+          skillCounts[skill] = (skillCounts[skill] || 0) + 1;
+        });
+      }
     });
     
     return skillCounts;
@@ -251,7 +262,7 @@ export const insightsGeneratorService = {
     };
     
     candidates.forEach(candidate => {
-      const years = candidate.experience_years || 0;
+      const years = Number(candidate.experience_years) || 0;
       
       if (years <= 2) distribution['Junior (0-2 years)']++;
       else if (years <= 5) distribution['Mid-level (3-5 years)']++;
@@ -266,7 +277,7 @@ export const insightsGeneratorService = {
     const locationCounts: Record<string, number> = {};
     
     candidates.forEach(candidate => {
-      if (candidate.location) {
+      if (candidate.location && typeof candidate.location === 'string') {
         // Normalize location (extract city/state)
         const location = candidate.location.split(',')[0].trim();
         locationCounts[location] = (locationCounts[location] || 0) + 1;
@@ -284,7 +295,8 @@ export const insightsGeneratorService = {
     };
     
     candidates.forEach(candidate => {
-      trends[candidate.availability_status || 'passive']++;
+      const status = candidate.availability_status || 'passive';
+      trends[status] = (trends[status] || 0) + 1;
     });
     
     return trends;
@@ -314,9 +326,9 @@ export const insightsGeneratorService = {
     }
     
     return {
-      avg_technical_score: validCandidates.reduce((sum, c) => sum + (c.technical_depth_score || 0), 0) / validCandidates.length,
-      avg_influence_score: validCandidates.reduce((sum, c) => sum + (c.community_influence_score || 0), 0) / validCandidates.length,
-      avg_learning_velocity: validCandidates.reduce((sum, c) => sum + (c.learning_velocity_score || 0), 0) / validCandidates.length
+      avg_technical_score: validCandidates.reduce((sum, c) => sum + (Number(c.technical_depth_score) || 0), 0) / validCandidates.length,
+      avg_influence_score: validCandidates.reduce((sum, c) => sum + (Number(c.community_influence_score) || 0), 0) / validCandidates.length,
+      avg_learning_velocity: validCandidates.reduce((sum, c) => sum + (Number(c.learning_velocity_score) || 0), 0) / validCandidates.length
     };
   },
 
@@ -331,3 +343,4 @@ export const insightsGeneratorService = {
     return sorted[middle];
   }
 };
+
