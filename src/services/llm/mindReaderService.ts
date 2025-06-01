@@ -1,32 +1,27 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
-export interface MindReaderJobSpec {
+export interface JobSpecification {
   job_title: string;
   must_have_skills: string[];
   nice_to_have_skills: string[];
   years_of_experience: string;
   locations: string[];
   industries: string[];
-  education: string;
-  certifications: string[];
-  employment_type: string;
-  working_model: string;
-  salary_range: string;
-  other_criteria: string;
+  working_model: 'remote' | 'hybrid' | 'onsite';
 }
 
 export interface MindReaderResponse {
-  job_specification: MindReaderJobSpec;
+  job_specification: JobSpecification;
   confidence: number;
-  interpretation_notes: string[];
 }
 
 export class MindReaderService {
   async interpretHiringQuery(query: string): Promise<MindReaderResponse> {
-    console.log('Mind Reader interpreting hiring query:', query);
+    console.log('Mind Reader interpreting query:', query);
     
     try {
+      // Try to use the edge function first
       const { data, error } = await supabase.functions.invoke('ai-talent-discovery', {
         body: {
           action: 'mind_reader_interpret',
@@ -35,183 +30,107 @@ export class MindReaderService {
       });
 
       if (error) {
-        console.error('Error calling Mind Reader AI function:', error);
+        console.error('Mind Reader edge function error:', error);
         return this.getFallbackInterpretation(query);
       }
 
       return data;
     } catch (error) {
-      console.error('Failed to interpret hiring query:', error);
+      console.error('Mind Reader service error:', error);
       return this.getFallbackInterpretation(query);
     }
   }
 
   private getFallbackInterpretation(query: string): MindReaderResponse {
+    console.log('Using fallback interpretation for:', query);
+    
     const lowercaseQuery = query.toLowerCase();
     
-    // Skill extraction with synonym canonicalization
-    const skillMappings = {
-      'react': 'React',
-      'typescript': 'TypeScript',
-      'javascript': 'JavaScript',
-      'python': 'Python',
-      'java': 'Java',
-      'node.js': 'Node.js',
-      'nodejs': 'Node.js',
-      'aws': 'AWS',
-      'kubernetes': 'Kubernetes',
-      'docker': 'Docker',
-      'machine learning': 'Machine Learning',
-      'ml': 'Machine Learning',
-      'ai': 'Artificial Intelligence',
-      'nlp': 'Natural Language Processing',
-      'natural language processing': 'Natural Language Processing',
-      'llm': 'Large Language Models',
-      'large language models': 'Large Language Models',
-      'gpt': 'Large Language Models',
-      'gpt models': 'Large Language Models',
-      'chatgpt': 'Large Language Models',
-      'openai tools': 'Large Language Models',
-      'openai': 'Large Language Models'
-    };
-
-    const mustHaveSkills: string[] = [];
-    const niceToHaveSkills: string[] = [];
-
-    Object.entries(skillMappings).forEach(([keyword, skill]) => {
-      if (lowercaseQuery.includes(keyword)) {
-        if (lowercaseQuery.includes(`nice to have ${keyword}`) || 
-            lowercaseQuery.includes(`bonus ${keyword}`) || 
-            lowercaseQuery.includes(`preferred ${keyword}`)) {
-          if (!niceToHaveSkills.includes(skill)) {
-            niceToHaveSkills.push(skill);
-          }
-        } else {
-          if (!mustHaveSkills.includes(skill)) {
-            mustHaveSkills.push(skill);
-          }
-        }
-      }
-    });
-
-    // Experience parsing
-    let experienceYears = '';
-    if (lowercaseQuery.includes('senior') || lowercaseQuery.includes('5+ years') || lowercaseQuery.includes('5-8 years')) {
-      experienceYears = '5+ years';
-    } else if (lowercaseQuery.includes('junior') || lowercaseQuery.includes('entry-level') || lowercaseQuery.includes('0-2 years')) {
-      experienceYears = '0-2 years';
-    } else if (lowercaseQuery.includes('mid-level') || lowercaseQuery.includes('3-5 years') || lowercaseQuery.includes('intermediate')) {
-      experienceYears = '3-5 years';
-    } else if (lowercaseQuery.includes('lead') || lowercaseQuery.includes('principal') || lowercaseQuery.includes('8+ years')) {
-      experienceYears = '8+ years';
-    }
-
-    // Job title inference with experience level
-    let jobTitle = '';
-    const experiencePrefix = experienceYears.includes('5+') || experienceYears.includes('8+') ? 'Senior ' : '';
-    
-    if (lowercaseQuery.includes('frontend') || lowercaseQuery.includes('front-end')) {
-      jobTitle = `${experiencePrefix}Frontend Developer`;
-    } else if (lowercaseQuery.includes('backend') || lowercaseQuery.includes('back-end')) {
-      jobTitle = `${experiencePrefix}Backend Developer`;
+    // Extract job title
+    let jobTitle = 'Software Engineer';
+    if (lowercaseQuery.includes('react') || lowercaseQuery.includes('frontend')) {
+      jobTitle = 'React Developer';
+    } else if (lowercaseQuery.includes('backend') || lowercaseQuery.includes('api')) {
+      jobTitle = 'Backend Developer';
     } else if (lowercaseQuery.includes('fullstack') || lowercaseQuery.includes('full-stack')) {
-      jobTitle = `${experiencePrefix}Full Stack Developer`;
-    } else if (lowercaseQuery.includes('data scientist')) {
-      jobTitle = `${experiencePrefix}Data Scientist`;
+      jobTitle = 'Full Stack Developer';
+    } else if (lowercaseQuery.includes('python')) {
+      jobTitle = 'Python Developer';
     } else if (lowercaseQuery.includes('devops')) {
-      jobTitle = `${experiencePrefix}DevOps Engineer`;
-    } else if (lowercaseQuery.includes('ml engineer') || lowercaseQuery.includes('machine learning engineer')) {
-      jobTitle = `${experiencePrefix}ML Engineer`;
-    } else if (lowercaseQuery.includes('software engineer') || lowercaseQuery.includes('developer')) {
-      jobTitle = `${experiencePrefix}Software Engineer`;
+      jobTitle = 'DevOps Engineer';
     }
 
-    // Geography parsing - normalize to proper case
-    const locations: string[] = [];
-    const locationKeywords = [
-      'remote', 'hybrid', 'san francisco', 'new york', 'seattle', 'austin', 
-      'boston', 'chicago', 'denver', 'los angeles', 'hyderabad', 'bangalore', 
-      'mumbai', 'pune', 'delhi', 'chennai'
-    ];
+    // Extract skills
+    const mustHaveSkills = [];
+    const niceToHaveSkills = [];
     
-    locationKeywords.forEach(location => {
-      if (lowercaseQuery.includes(location)) {
-        const formattedLocation = location.split(' ')
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(' ');
-        if (!locations.includes(formattedLocation)) {
-          locations.push(formattedLocation);
-        }
+    const skillKeywords = ['react', 'python', 'java', 'javascript', 'typescript', 'node.js', 'aws', 'kubernetes', 'docker'];
+    skillKeywords.forEach(skill => {
+      if (lowercaseQuery.includes(skill)) {
+        mustHaveSkills.push(skill);
       }
     });
 
-    // Industry extraction
-    const industries: string[] = [];
-    const industryMappings = {
-      'fintech': 'Fintech',
-      'healthcare': 'Healthcare',
-      'e-commerce': 'E-commerce',
-      'ecommerce': 'E-commerce',
-      'saas': 'SaaS',
-      'startup': 'Startup',
-      'enterprise': 'Enterprise',
-      'blockchain': 'Blockchain',
-      'crypto': 'Cryptocurrency',
-      'edtech': 'EdTech',
-      'gaming': 'Gaming'
-    };
-
-    Object.entries(industryMappings).forEach(([keyword, industry]) => {
-      if (lowercaseQuery.includes(keyword) && !industries.includes(industry)) {
-        industries.push(industry);
-      }
-    });
-
-    // Working model extraction
-    let workingModel = '';
-    if (lowercaseQuery.includes('fully remote') || (lowercaseQuery.includes('remote') && !lowercaseQuery.includes('hybrid'))) {
-      workingModel = 'Remote';
-    } else if (lowercaseQuery.includes('hybrid')) {
-      workingModel = 'Hybrid';
-    } else if (lowercaseQuery.includes('onsite') || lowercaseQuery.includes('on-site') || lowercaseQuery.includes('office')) {
-      workingModel = 'Onsite';
+    if (mustHaveSkills.length === 0) {
+      mustHaveSkills.push('JavaScript'); // Default skill
     }
 
-    // Employment type extraction
-    let employmentType = '';
-    if (lowercaseQuery.includes('full-time') || lowercaseQuery.includes('fulltime')) {
-      employmentType = 'Full-time';
-    } else if (lowercaseQuery.includes('part-time') || lowercaseQuery.includes('parttime')) {
-      employmentType = 'Part-time';
-    } else if (lowercaseQuery.includes('contract') || lowercaseQuery.includes('contractor')) {
-      employmentType = 'Contract';
-    } else if (lowercaseQuery.includes('internship') || lowercaseQuery.includes('intern')) {
-      employmentType = 'Internship';
+    // Extract experience
+    let experience = '3+ years';
+    if (lowercaseQuery.includes('senior')) {
+      experience = '5+ years';
+    } else if (lowercaseQuery.includes('junior')) {
+      experience = '1-2 years';
+    } else if (lowercaseQuery.includes('lead') || lowercaseQuery.includes('principal')) {
+      experience = '8+ years';
     }
 
-    const interpretationNotes = [
-      'Fallback interpretation used due to AI service unavailability',
-      'Basic keyword matching applied for skill extraction',
-      'Experience level inferred from common phrases'
-    ];
+    // Extract locations
+    const locations = [];
+    if (lowercaseQuery.includes('remote')) {
+      locations.push('Remote');
+    }
+    if (lowercaseQuery.includes('san francisco') || lowercaseQuery.includes('sf')) {
+      locations.push('San Francisco');
+    }
+    if (lowercaseQuery.includes('new york') || lowercaseQuery.includes('nyc')) {
+      locations.push('New York');
+    }
+    if (locations.length === 0) {
+      locations.push('Remote'); // Default to remote
+    }
+
+    // Extract industries
+    const industries = [];
+    if (lowercaseQuery.includes('fintech')) {
+      industries.push('Financial Technology');
+    }
+    if (lowercaseQuery.includes('startup')) {
+      industries.push('Startup');
+    }
+    if (lowercaseQuery.includes('enterprise')) {
+      industries.push('Enterprise');
+    }
+
+    // Extract working model
+    let workingModel: 'remote' | 'hybrid' | 'onsite' = 'hybrid';
+    if (lowercaseQuery.includes('remote')) {
+      workingModel = 'remote';
+    } else if (lowercaseQuery.includes('onsite') || lowercaseQuery.includes('office')) {
+      workingModel = 'onsite';
+    }
 
     return {
       job_specification: {
         job_title: jobTitle,
         must_have_skills: mustHaveSkills,
         nice_to_have_skills: niceToHaveSkills,
-        years_of_experience: experienceYears,
+        years_of_experience: experience,
         locations: locations,
         industries: industries,
-        education: '',
-        certifications: [],
-        employment_type: employmentType,
-        working_model: workingModel,
-        salary_range: '',
-        other_criteria: ''
+        working_model: workingModel
       },
-      confidence: 0.6,
-      interpretation_notes: interpretationNotes
+      confidence: 0.7 // Lower confidence for fallback
     };
   }
 }
