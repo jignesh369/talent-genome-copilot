@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,12 +19,35 @@ import {
   MapPin,
   DollarSign
 } from 'lucide-react';
+import CreateJobForm from '@/components/forms/CreateJobForm';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const JobsManagement: React.FC = () => {
   const { jobs, metrics, loading, createJob, updateJob } = useJobs();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [departmentFilter, setDepartmentFilter] = useState('all');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
+  const handleCreateJob = async (jobData: any) => {
+    const newJob = await createJob({
+      title: jobData.title,
+      department: jobData.department,
+      location: jobData.location,
+      type: jobData.jobType as 'full-time' | 'part-time' | 'contract' | 'internship',
+      priority: jobData.urgent ? 'urgent' : 'medium' as 'low' | 'medium' | 'high' | 'urgent',
+      description: jobData.description,
+      requirements: jobData.requirements.filter((req: string) => req.trim() !== ''),
+      experience: jobData.experienceLevel,
+      salary_min: jobData.salary.min ? parseInt(jobData.salary.min) : null,
+      salary_max: jobData.salary.max ? parseInt(jobData.salary.max) : null,
+      remote: jobData.remote,
+    });
+
+    if (newJob) {
+      setShowCreateModal(false);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -147,7 +169,7 @@ const JobsManagement: React.FC = () => {
               <Users className="w-5 h-5 mr-2" />
               Jobs Management ({filteredJobs.length})
             </CardTitle>
-            <Button>
+            <Button onClick={() => setShowCreateModal(true)}>
               <Plus className="w-4 h-4 mr-2" />
               Create Job
             </Button>
@@ -263,6 +285,19 @@ const JobsManagement: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Create Job Modal */}
+      <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create New Job</DialogTitle>
+          </DialogHeader>
+          <CreateJobForm
+            onSubmit={handleCreateJob}
+            onCancel={() => setShowCreateModal(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

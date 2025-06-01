@@ -3,23 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
-
-// Updated types to match database schema
-export interface CandidateEducation {
-  id: string;
-  institution: string;
-  degree: string;
-  field: string;
-  start_year: number;
-  end_year: number | null;
-}
-
-export interface CandidateNote {
-  id: string;
-  content: string;
-  author: string;
-  created_at: string;
-}
+import { CandidateSearch } from '@/types/recruiting';
 
 export interface Candidate {
   id: string;
@@ -32,40 +16,25 @@ export interface Candidate {
   current_company: string | null;
   experience_years: number;
   skills: string[];
-  education: CandidateEducation[];
   score: number;
   status: 'new' | 'screening' | 'interviewing' | 'offer' | 'hired' | 'rejected';
   source: 'direct' | 'referral' | 'job_board' | 'linkedin' | 'agency' | 'other';
   resume_url: string | null;
-  linkedin_url: string | null;
-  portfolio_url: string | null;
   avatar_url: string | null;
-  notes: CandidateNote[];
-  applications: any[];
-  interviews: any[];
+  portfolio_url: string | null;
+  linkedin_url: string | null;
+  organization_id: string;
   created_at: string;
   updated_at: string;
 }
 
-export interface CandidateSearch {
-  query?: string;
-  skills?: string[];
-  status?: string;
-  experience_min?: number;
-  experience_max?: number;
-  sort_by?: 'score' | 'date' | 'name';
-  sort_order?: 'asc' | 'desc';
-}
-
 export const useCandidates = () => {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
-  const [filteredCandidates, setFilteredCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { organizationId } = useAuth();
   const { toast } = useToast();
 
-  // Fetch candidates from database
   const fetchCandidates = async () => {
     if (!organizationId) return;
     
@@ -75,46 +44,19 @@ export const useCandidates = () => {
 
       const { data, error: fetchError } = await supabase
         .from('candidates')
-        .select(`
-          *,
-          education (*),
-          candidate_skills (
-            skill_id,
-            proficiency_level,
-            skills (name)
-          ),
-          notes (
-            id,
-            content,
-            author_name,
-            created_at
-          ),
-          applications (
-            id,
-            status,
-            jobs (title)
-          )
-        `)
+        .select('*')
         .eq('organization_id', organizationId)
         .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
 
-      // Transform data to match expected interface
-      const transformedCandidates: Candidate[] = data?.map(candidate => ({
+      // Transform skills array if needed
+      const transformedCandidates = data?.map(candidate => ({
         ...candidate,
-        skills: candidate.candidate_skills?.map((cs: any) => cs.skills.name) || [],
-        notes: candidate.notes?.map((note: any) => ({
-          id: note.id,
-          content: note.content,
-          author: note.author_name,
-          created_at: note.created_at
-        })) || [],
-        interviews: [], // Will be populated from applications if needed
+        skills: candidate.skills || []
       })) || [];
 
       setCandidates(transformedCandidates);
-      setFilteredCandidates(transformedCandidates);
     } catch (err: any) {
       console.error('Error fetching candidates:', err);
       setError(err.message);
@@ -134,73 +76,75 @@ export const useCandidates = () => {
     }
   }, [organizationId]);
 
-  const searchCandidates = (searchParams: CandidateSearch) => {
-    let filtered = [...candidates];
+  const searchCandidates = async (searchParams: CandidateSearch) => {
+    if (!organizationId) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
 
-    if (searchParams.query) {
-      const query = searchParams.query.toLowerCase();
-      filtered = filtered.filter(candidate =>
-        candidate.first_name.toLowerCase().includes(query) ||
-        candidate.last_name.toLowerCase().includes(query) ||
-        candidate.email.toLowerCase().includes(query) ||
-        candidate.current_title?.toLowerCase().includes(query) ||
-        candidate.skills.some(skill => skill.toLowerCase().includes(query))
-      );
-    }
+      let query = supabase
+        .from('candidates')
+        .select('*')
+        .eq('organization_id', organizationId);
 
-    if (searchParams.skills && searchParams.skills.length > 0) {
-      filtered = filtered.filter(candidate =>
-        searchParams.skills!.some(skill =>
-          candidate.skills.some(cSkill => 
-            cSkill.toLowerCase().includes(skill.toLowerCase())
-          )
-        )
-      );
-    }
+      if (searchParams.query) {
+        query = query.or(`first_name.ilike.%${searchParams.query}%,last_name.ilike.%${searchParams.query}%,email.ilike.%${searchParams.query}%`);
+      }
 
-    if (searchParams.status) {
-      filtered = filtered.filter(candidate => candidate.status === searchParams.status);
-    }
+      if (searchParams.status) {
+        query = query.eq('status', searchParams.status);
+      }
 
-    if (searchParams.experience_min) {
-      filtered = filtered.filter(candidate => candidate.experience_years >= searchParams.experience_min!);
-    }
+      if (searchParams.experience_min) {
+        query = query.gte('experience_years', searchParams.experience_min);
+      }
 
-    if (searchParams.experience_max) {
-      filtered = filtered.filter(candidate => candidate.experience_years <= searchParams.experience_max!);
-    }
+      if (searchParams.experience_max) {
+        query = query.lte('experience_years', searchParams.experience_max);
+      }
 
-    // Sort results
-    if (searchParams.sort_by) {
-      filtered.sort((a, b) => {
-        let aValue: any, bValue: any;
-        
+      // Add sorting
+      if (searchParams.sort_by) {
+        const ascending = searchParams.sort_order === 'asc';
         switch (searchParams.sort_by) {
           case 'score':
-            aValue = a.score;
-            bValue = b.score;
+            query = query.order('score', { ascending });
             break;
           case 'date':
-            aValue = new Date(a.created_at);
-            bValue = new Date(b.created_at);
+            query = query.order('created_at', { ascending });
             break;
           case 'name':
-            aValue = `${a.first_name} ${a.last_name}`;
-            bValue = `${b.first_name} ${b.last_name}`;
+            query = query.order('first_name', { ascending });
             break;
           default:
-            aValue = a.score;
-            bValue = b.score;
+            query = query.order('created_at', { ascending: false });
         }
+      } else {
+        query = query.order('created_at', { ascending: false });
+      }
 
-        if (searchParams.sort_order === 'desc') {
-          return bValue > aValue ? 1 : -1;
-        }
-        return aValue > bValue ? 1 : -1;
+      const { data, error: searchError } = await query;
+
+      if (searchError) throw searchError;
+
+      const transformedCandidates = data?.map(candidate => ({
+        ...candidate,
+        skills: candidate.skills || []
+      })) || [];
+
+      setCandidates(transformedCandidates);
+    } catch (err: any) {
+      console.error('Error searching candidates:', err);
+      setError(err.message);
+      toast({
+        title: 'Error searching candidates',
+        description: err.message,
+        variant: 'destructive',
       });
+    } finally {
+      setLoading(false);
     }
-
-    setFilteredCandidates(filtered);
   };
 
   const createCandidate = async (candidateData: Partial<Candidate>) => {
@@ -225,13 +169,14 @@ export const useCandidates = () => {
         current_title: candidateData.current_title || null,
         current_company: candidateData.current_company || null,
         experience_years: candidateData.experience_years || 0,
+        skills: candidateData.skills || [],
         score: candidateData.score || 0,
         status: candidateData.status || 'new' as const,
         source: candidateData.source || 'direct' as const,
         resume_url: candidateData.resume_url || null,
-        linkedin_url: candidateData.linkedin_url || null,
-        portfolio_url: candidateData.portfolio_url || null,
         avatar_url: candidateData.avatar_url || null,
+        portfolio_url: candidateData.portfolio_url || null,
+        linkedin_url: candidateData.linkedin_url || null,
         organization_id: organizationId,
       };
 
@@ -243,17 +188,8 @@ export const useCandidates = () => {
 
       if (createError) throw createError;
 
-      const newCandidate: Candidate = {
-        ...data,
-        skills: [],
-        education: [],
-        notes: [],
-        applications: [],
-        interviews: [],
-      };
-
+      const newCandidate = { ...data, skills: data.skills || [] };
       setCandidates(prev => [newCandidate, ...prev]);
-      setFilteredCandidates(prev => [newCandidate, ...prev]);
       
       toast({
         title: 'Success',
@@ -286,15 +222,9 @@ export const useCandidates = () => {
 
       if (updateError) throw updateError;
 
-      const updateCandidates = (candidates: Candidate[]) =>
-        candidates.map(candidate =>
-          candidate.id === candidateId
-            ? { ...candidate, ...data, updated_at: new Date().toISOString() }
-            : candidate
-        );
-
-      setCandidates(updateCandidates);
-      setFilteredCandidates(updateCandidates);
+      setCandidates(prev => prev.map(candidate => 
+        candidate.id === candidateId ? { ...candidate, ...data, skills: data.skills || [] } : candidate
+      ));
 
       toast({
         title: 'Success',
@@ -314,80 +244,45 @@ export const useCandidates = () => {
     }
   };
 
-  const addNote = async (candidateId: string, content: string) => {
+  const deleteCandidate = async (candidateId: string) => {
     try {
       setError(null);
 
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) throw new Error('User not authenticated');
+      const { error: deleteError } = await supabase
+        .from('candidates')
+        .delete()
+        .eq('id', candidateId);
 
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('first_name, last_name')
-        .eq('id', userData.user.id)
-        .single();
+      if (deleteError) throw deleteError;
 
-      const authorName = profileData 
-        ? `${profileData.first_name} ${profileData.last_name}`
-        : userData.user.email || 'Unknown User';
-
-      const { data, error: noteError } = await supabase
-        .from('notes')
-        .insert({
-          candidate_id: candidateId,
-          content,
-          author_id: userData.user.id,
-          author_name: authorName
-        })
-        .select()
-        .single();
-
-      if (noteError) throw noteError;
-
-      const newNote: CandidateNote = {
-        id: data.id,
-        content: data.content,
-        author: data.author_name,
-        created_at: data.created_at
-      };
-
-      const updateCandidateNotes = (candidates: Candidate[]) =>
-        candidates.map(candidate =>
-          candidate.id === candidateId
-            ? { ...candidate, notes: [...candidate.notes, newNote] }
-            : candidate
-        );
-
-      setCandidates(updateCandidateNotes);
-      setFilteredCandidates(updateCandidateNotes);
-
+      setCandidates(prev => prev.filter(candidate => candidate.id !== candidateId));
+      
       toast({
         title: 'Success',
-        description: 'Note added successfully',
+        description: 'Candidate deleted successfully',
       });
 
-      return newNote;
+      return true;
     } catch (err: any) {
-      console.error('Error adding note:', err);
+      console.error('Error deleting candidate:', err);
       setError(err.message);
       toast({
-        title: 'Error adding note',
+        title: 'Error deleting candidate',
         description: err.message,
         variant: 'destructive',
       });
-      return null;
+      return false;
     }
   };
 
   return {
-    candidates: filteredCandidates,
-    allCandidates: candidates,
+    candidates,
     loading,
     error,
     searchCandidates,
     createCandidate,
     updateCandidate,
-    addNote,
+    deleteCandidate,
     refetch: fetchCandidates,
   };
 };
