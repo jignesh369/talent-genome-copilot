@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Brain, Users, Building } from 'lucide-react';
 import { useAuth } from './AuthProvider';
-import { AuthService } from '@/services/authService';
+import { useNavigate } from 'react-router-dom';
 import TestUserInitializer from './TestUserInitializer';
 
 const AuthPage = () => {
@@ -23,15 +23,15 @@ const AuthPage = () => {
   const [organizationName, setOrganizationName] = useState('');
   const { toast } = useToast();
   const { user, userRole } = useAuth();
+  const navigate = useNavigate();
 
   // Redirect authenticated users
   useEffect(() => {
     if (user && userRole) {
-      const redirectPath = AuthService.getDefaultRedirect(userRole as any);
-      console.log('Redirecting authenticated user to:', redirectPath);
-      window.location.href = redirectPath;
+      console.log('Auth page: Redirecting authenticated user with role:', userRole);
+      navigate('/');
     }
-  }, [user, userRole]);
+  }, [user, userRole, navigate]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,7 +50,7 @@ const AuthPage = () => {
           title: 'Welcome back!',
           description: 'You have been signed in successfully.',
         });
-        // The useEffect above will handle the redirect
+        // Navigation will be handled by the useEffect above
       }
     } catch (error: any) {
       toast({
@@ -78,6 +78,7 @@ const AuthPage = () => {
             role: role,
             organization_name: organizationName,
           },
+          emailRedirectTo: `${window.location.origin}/`,
         },
       });
 

@@ -72,21 +72,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       console.log('Fetching user data for:', user.email);
       
-      // Fetch user profile first
-      const { data: profileData, error: profileError } = await supabase
+      // First, ensure the user has a profile - create one if it doesn't exist
+      let profileData;
+      const { data: existingProfile, error: profileFetchError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .maybeSingle();
 
-      if (profileError) {
-        console.error('Error fetching profile:', profileError);
-      } else if (profileData) {
-        console.log('Profile found:', profileData);
+      if (profileFetchError) {
+        console.error('Error fetching profile:', profileFetchError);
+      }
+
+      if (!existingProfile) {
+        console.log('No profile found, creating one...');
+        // Create a basic profile for the user
+        const { data: newProfile, error: createError } = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            first_name: user.user_metadata?.first_name || '',
+            last_name: user.user_metadata?.last_name || ''
+          })
+          .select()
+          .single();
+
+        if (createError) {
+          console.error('Error creating profile:', createError);
+        } else {
+          profileData = newProfile;
+        }
+      } else {
+        profileData = existingProfile;
+      }
+
+      if (profileData) {
+        console.log('Profile found/created:', profileData);
         setProfile(profileData);
         setOrganizationId(profileData.organization_id);
-      } else {
-        console.log('No profile found for user');
       }
 
       // Fetch user role
@@ -98,8 +121,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (roleError) {
         console.error('Error fetching role:', roleError);
-        setUserRole(null);
-      } else if (roleData) {
+      }
+
+      if (roleData) {
         console.log('Role found:', roleData.role);
         setUserRole(roleData.role);
       } else {
