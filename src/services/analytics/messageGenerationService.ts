@@ -1,132 +1,83 @@
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
-import { enhancedPersonalizationEngine } from './enhancedPersonalizationEngine';
-import { automatedCommunicationService } from './automatedCommunicationService';
 
-interface OutreachMessage {
-  subject: string;
-  body: string;
-  quality_score: number;
-  recommendations: string[];
-}
+export class MessageGenerationService {
+  async generatePersonalizedMessage(request: any): Promise<{
+    body: string;
+    quality_score: number;
+    recommendations: string[];
+  }> {
+    const candidate = request.candidate || request;
+    const messageType = request.message_type || 'initial_outreach';
+    const context = request.context || {};
 
-interface MessageTemplate {
-  id: string;
-  name: string;
-  type: 'initial_outreach' | 'follow_up' | 'assessment_request' | 'reminder' | 'update';
-  content: string;
-  created_at: string;
-  updated_at: string;
-  usage_count: number;
-  ai_quality_score: number;
-  tags: string[];
-  metadata?: Record<string, any>;
-}
-
-export const messageGenerationService = {
-  async generatePersonalizedMessage(
-    candidate: EnhancedCandidate,
-    context: Record<string, any> = {}
-  ): Promise<OutreachMessage> {
-    console.log('Generating personalized message for:', candidate.name);
-    
-    return await enhancedPersonalizationEngine.generatePersonalizedOutreach(candidate, context);
-  },
-
-  async generateMultiChannelMessages(
-    candidate: EnhancedCandidate,
-    channels: string[] = ['email', 'linkedin']
-  ): Promise<Record<string, OutreachMessage>> {
-    const messages: Record<string, OutreachMessage> = {};
-    
-    for (const channel of channels) {
-      const context = { channel, tone: this.getChannelTone(channel) };
-      messages[channel] = await this.generatePersonalizedMessage(candidate, context);
-    }
-    
-    return messages;
-  },
-
-  async generateTemplateBasedMessage(
-    candidate: EnhancedCandidate,
-    templateContent: string,
-    context: Record<string, any> = {}
-  ): Promise<string> {
-    const template: MessageTemplate = {
-      id: 'temp_template',
-      name: 'Temporary Template',
-      type: 'initial_outreach',
-      content: templateContent,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      usage_count: 0,
-      ai_quality_score: 0.8,
-      tags: ['generated']
+    const variables = {
+      candidate_name: candidate.name,
+      current_title: candidate.current_title || 'Professional',
+      current_company: candidate.current_company || 'their current role',
+      top_skills: candidate.skills?.slice(0, 3).join(', ') || 'technical skills',
+      company_name: context.company_name || 'TechCorp',
+      role_title: context.role_title || 'Senior Software Engineer',
+      recruiter_name: context.recruiter_name || 'Sarah'
     };
-    
-    return await automatedCommunicationService.generatePersonalizedMessage(
-      candidate,
-      template,
-      context
-    );
-  },
 
-  getChannelTone(channel: string): string {
-    const tones = {
-      email: 'professional',
-      linkedin: 'networking',
-      sms: 'casual',
-      phone: 'conversational'
-    };
-    return tones[channel as keyof typeof tones] || 'professional';
-  },
-
-  async optimizeMessageForChannel(
-    message: OutreachMessage,
-    channel: string
-  ): Promise<OutreachMessage> {
-    let optimizedBody = message.body;
+    let messageBody = '';
     
-    switch (channel) {
-      case 'linkedin':
-        optimizedBody = this.optimizeForLinkedIn(message.body);
-        break;
-      case 'sms':
-        optimizedBody = this.optimizeForSMS(message.body);
-        break;
-      case 'email':
-        optimizedBody = this.optimizeForEmail(message.body);
-        break;
+    if (messageType === 'initial_outreach') {
+      messageBody = `Hi ${variables.candidate_name},
+
+I hope this message finds you well. I'm ${variables.recruiter_name} from ${variables.company_name}, and I came across your profile while looking for talented professionals.
+
+Your experience as a ${variables.current_title} at ${variables.current_company}, particularly your expertise in ${variables.top_skills}, caught my attention. We have an exciting ${variables.role_title} opportunity that I believe could be a great fit for your background.
+
+Would you be open to a brief conversation about this role? I'd love to share more details about how your skills could contribute to our team's success.
+
+Best regards,
+${variables.recruiter_name}`;
+    } else if (messageType === 'follow_up') {
+      messageBody = `Hi ${variables.candidate_name},
+
+I wanted to follow up on my previous message about the ${variables.role_title} position at ${variables.company_name}. 
+
+Given your strong background in ${variables.top_skills}, I believe this opportunity could be an excellent next step in your career.
+
+Are you available for a quick 15-minute call this week to discuss?
+
+Best,
+${variables.recruiter_name}`;
+    } else {
+      messageBody = `Hi ${variables.candidate_name},
+
+Thank you for your interest in the ${variables.role_title} position. I'd like to invite you to complete a brief assessment that will help us better understand your technical background.
+
+The assessment should take about 30 minutes and covers areas related to ${variables.top_skills}.
+
+Please let me know if you have any questions.
+
+Best regards,
+${variables.recruiter_name}`;
     }
-    
+
     return {
-      ...message,
-      body: optimizedBody,
-      quality_score: this.recalculateQualityScore(optimizedBody)
+      body: messageBody,
+      quality_score: 0.8,
+      recommendations: [
+        'Consider personalizing further based on recent activity',
+        'Add specific project examples if available'
+      ]
     };
-  },
-
-  optimizeForLinkedIn(message: string): string {
-    // Keep it shorter and more casual for LinkedIn
-    return message.length > 200 ? message.substring(0, 197) + '...' : message;
-  },
-
-  optimizeForSMS(message: string): string {
-    // Much shorter for SMS
-    return message.length > 160 ? message.substring(0, 157) + '...' : message;
-  },
-
-  optimizeForEmail(message: string): string {
-    // Can be longer for email, add professional formatting
-    return message;
-  },
-
-  recalculateQualityScore(message: string): number {
-    let score = 0.5; // Base score
-    
-    if (message.includes('GitHub') || message.includes('experience')) score += 0.2;
-    if (message.length > 50 && message.length < 300) score += 0.2;
-    if (message.includes('skill') || message.includes('background')) score += 0.1;
-    
-    return Math.min(score, 1.0);
   }
-};
+
+  async generateBulkMessages(candidates: any[], templateType: string, context: any): Promise<any[]> {
+    return Promise.all(
+      candidates.map(candidate => 
+        this.generatePersonalizedMessage({
+          candidate,
+          message_type: templateType,
+          context
+        })
+      )
+    );
+  }
+}
+
+export const messageGenerationService = new MessageGenerationService();

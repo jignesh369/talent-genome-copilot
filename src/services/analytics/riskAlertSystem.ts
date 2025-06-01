@@ -104,8 +104,8 @@ class RiskAlertSystem {
     this.alertHandlers.push(handler);
   }
 
-  analyzeCandidate(candidate: EnhancedCandidate): RiskAlert[] {
-    const alerts = this.generateRiskAlerts(candidate);
+  async analyzeCandidate(candidate: EnhancedCandidate): Promise<RiskAlert[]> {
+    const alerts = await this.generateRiskAlerts(candidate);
     alerts.forEach(alert => {
       this.alerts.push(alert);
       this.alertHandlers.forEach(handler => handler(alert));
@@ -142,3 +142,4 @@ class RiskAlertSystem {
 }
 
 export const riskAlertSystem = RiskAlertSystem.getInstance();
+export type { RiskAlert, RiskMetrics };

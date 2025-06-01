@@ -1,43 +1,25 @@
 
 import { useState, useEffect } from 'react';
 import { riskAlertSystem, RiskAlert } from '@/services/analytics/riskAlertSystem';
-import { useToast } from '@/hooks/use-toast';
-import { EnhancedCandidate } from '@/types/enhanced-candidate';
 
-export const useRiskAlerts = (candidates: EnhancedCandidate[]) => {
-  const { toast } = useToast();
+export const useRiskAlerts = () => {
   const [alerts, setAlerts] = useState<RiskAlert[]>([]);
 
   useEffect(() => {
     const handleNewAlert = (alert: RiskAlert) => {
-      setAlerts(prev => [alert, ...prev]);
-      
-      if (alert.severity === 'high' || alert.severity === 'critical') {
-        toast({
-          title: `🚨 ${alert.severity.toUpperCase()} Alert`,
-          description: alert.title,
-          variant: alert.severity === 'critical' ? 'destructive' : 'default'
-        });
-      }
+      setAlerts(prev => [...prev, alert]);
     };
 
     riskAlertSystem.onAlert(handleNewAlert);
-    
-    candidates.forEach(candidate => {
-      const candidateRisks = riskAlertSystem.analyzeCandidate(candidate);
-      if (candidateRisks.length > 0) {
-        setAlerts(prev => [...candidateRisks, ...prev]);
-      }
-    });
-  }, [candidates, toast]);
+  }, []);
 
   const resolveAlert = (alertId: string) => {
-    riskAlertSystem.resolveAlert(alertId, 'recruiter');
-    setAlerts(prev => prev.filter(alert => alert.id !== alertId));
-    toast({
-      title: "Alert Resolved",
-      description: "Risk alert has been marked as resolved"
-    });
+    riskAlertSystem.resolveAlert(alertId, 'user');
+    setAlerts(prev => prev.map(alert => 
+      alert.id === alertId 
+        ? { ...alert, is_resolved: true }
+        : alert
+    ));
   };
 
   const getAlertStats = () => {
@@ -48,8 +30,14 @@ export const useRiskAlerts = (candidates: EnhancedCandidate[]) => {
     return alerts.filter(alert => alert.candidate_id === candidateId);
   };
 
+  // Transform alerts to include title from message for backwards compatibility
+  const alertsWithTitle = alerts.map(alert => ({
+    ...alert,
+    title: alert.message.split('.')[0] || alert.message.substring(0, 50)
+  }));
+
   return {
-    alerts,
+    alerts: alertsWithTitle,
     resolveAlert,
     getAlertStats,
     getCandidateAlerts

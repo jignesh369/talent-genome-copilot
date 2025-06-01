@@ -16,7 +16,9 @@ import {
   MessageCircle,
   Mail,
   Linkedin,
-  Github
+  Github,
+  ThumbsUp,
+  ThumbsDown
 } from "lucide-react";
 import { EnhancedCandidate } from "@/types/enhanced-candidate";
 
@@ -26,6 +28,7 @@ interface CandidateDetailsModalProps {
   onClose: () => void;
   onContact?: (candidate: EnhancedCandidate) => void;
   onContactCandidate?: (candidate: EnhancedCandidate) => void;
+  onFeedback?: (candidateId: string, isPositive: boolean) => void;
 }
 
 const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({ 
@@ -33,11 +36,16 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
   isOpen = true,
   onClose,
   onContact,
-  onContactCandidate
+  onContactCandidate,
+  onFeedback
 }) => {
   if (!candidate) return null;
 
   const osint = candidate.osint_profile;
+
+  const handleFeedback = (isPositive: boolean) => {
+    onFeedback?.(candidate.id, isPositive);
+  };
 
   return (
     <Dialog open={isOpen && !!candidate} onOpenChange={onClose}>
@@ -79,6 +87,31 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
               <p className="text-sm text-gray-500">Match Score</p>
             </div>
           </div>
+
+          {/* Feedback Section */}
+          {onFeedback && (
+            <div className="flex items-center space-x-2">
+              <span className="text-sm font-medium text-gray-700">Was this candidate helpful?</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleFeedback(true)}
+                className="flex items-center space-x-1"
+              >
+                <ThumbsUp className="h-4 w-4" />
+                <span>Yes</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleFeedback(false)}
+                className="flex items-center space-x-1"
+              >
+                <ThumbsDown className="h-4 w-4" />
+                <span>No</span>
+              </Button>
+            </div>
+          )}
 
           {/* Contact Information */}
           <div className="grid grid-cols-2 gap-4">
