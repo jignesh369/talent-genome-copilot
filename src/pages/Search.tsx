@@ -3,7 +3,9 @@ import React, { useState } from 'react';
 import RecruiterLayout from '@/components/recruiter/RecruiterLayout';
 import SearchTabsContainer from '@/components/search/SearchTabsContainer';
 import SearchModalsContainer from '@/components/search/SearchModalsContainer';
+import SearchProgressIndicator from '@/components/search/SearchProgressIndicator';
 import { useAISearch } from '@/hooks/useSearch';
+import { useEnhancedSearch } from '@/hooks/useEnhancedSearch';
 import { useSearchModals } from '@/hooks/useSearchModals';
 import { useRecruitingIntelligence } from '@/hooks/useRecruitingIntelligence';
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
@@ -14,9 +16,11 @@ const Search = () => {
   const [activeTab, setActiveTab] = useState('search');
   const [query, setQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
+  const [useEnhancedMode, setUseEnhancedMode] = useState(false);
   const { toast } = useToast();
   
   const searchMutation = useAISearch();
+  const enhancedSearch = useEnhancedSearch();
 
   const {
     selectedCandidate,
@@ -34,7 +38,12 @@ const Search = () => {
 
   const handleSearch = async () => {
     if (!query.trim()) return;
-    await searchMutation.mutateAsync({ query });
+    
+    if (useEnhancedMode) {
+      await enhancedSearch.executeSearch(query);
+    } else {
+      await searchMutation.mutateAsync({ query });
+    }
   };
 
   const handleVoiceInput = () => {
@@ -88,6 +97,9 @@ const Search = () => {
     }
   };
 
+  const currentSearchResult = useEnhancedMode ? enhancedSearch.searchResult : searchMutation.data;
+  const isSearching = useEnhancedMode ? enhancedSearch.isSearching : searchMutation.isPending;
+
   return (
     <RecruiterLayout 
       title="AI-Powered Talent Discovery" 
@@ -95,13 +107,18 @@ const Search = () => {
       showSearch={false}
     >
       <div className="max-w-7xl mx-auto space-y-6">
+        {/* Enhanced Search Progress Indicator */}
+        {useEnhancedMode && enhancedSearch.searchProgress && (
+          <SearchProgressIndicator progress={enhancedSearch.searchProgress} />
+        )}
+
         <SearchTabsContainer
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           query={query}
           setQuery={setQuery}
-          isSearching={searchMutation.isPending}
-          searchResult={searchMutation.data}
+          isSearching={isSearching}
+          searchResult={currentSearchResult}
           isListening={isListening}
           handleSearch={handleSearch}
           handleVoiceInput={handleVoiceInput}
@@ -110,6 +127,8 @@ const Search = () => {
           onViewProfile={openCandidateDetails}
           onViewSnapshot={openDigitalFootprint}
           onContactCandidate={handleContactCandidate}
+          useEnhancedMode={useEnhancedMode}
+          setUseEnhancedMode={setUseEnhancedMode}
         />
 
         <SearchModalsContainer

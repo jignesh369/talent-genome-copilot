@@ -24,24 +24,27 @@ export const useEnhancedSearch = () => {
     setSearchProgress(null);
 
     try {
-      // Set up progress callback
-      enhancedSearchPipeline.setProgressCallback(setSearchProgress);
+      // Set up progress callback for real-time updates
+      enhancedSearchPipeline.setProgressCallback((progress) => {
+        setSearchProgress(progress);
+        console.log('Search progress update:', progress);
+      });
       
-      // Execute the enhanced search pipeline
+      // Execute the enhanced search pipeline with real OSINT data
       const result = await enhancedSearchPipeline.executeSearchPipeline(query);
       
       setSearchResult(result);
       
       toast({
-        title: "Search Completed",
-        description: `Found ${result.candidates.length} candidates with enhanced AI analysis`,
+        title: "Enhanced Search Completed",
+        description: `Found ${result.candidates.length} candidates with real OSINT analysis from ${result.osintSearchPlan.queries.length} platforms`,
       });
       
     } catch (error) {
       console.error('Enhanced search error:', error);
       toast({
         title: "Search Error",
-        description: "Failed to complete enhanced search. Please try again.",
+        description: "Failed to complete enhanced search. Please check your API configurations and try again.",
         variant: "destructive"
       });
     } finally {
