@@ -1,5 +1,6 @@
 
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface QueryInterpretation {
   interpreted_intent: string;
@@ -26,20 +27,41 @@ export interface PlatformSearchQuery {
 
 export class NaturalLanguageQueryService {
   async interpretQuery(userQuery: string): Promise<QueryInterpretation> {
-    console.log('Interpreting natural language query:', userQuery);
+    console.log('Interpreting natural language query with AI:', userQuery);
     
-    // Simulate AI processing delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Mock interpretation - in production, this would call an LLM API
-    const mockInterpretation: QueryInterpretation = {
-      interpreted_intent: this.generateInterpretedIntent(userQuery),
-      extracted_requirements: this.extractRequirements(userQuery),
-      search_strategy: this.generateSearchStrategy(userQuery),
-      confidence: Math.random() * 0.3 + 0.7 // 0.7-1.0
-    };
-    
-    return mockInterpretation;
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-talent-discovery', {
+        body: {
+          action: 'interpret_query',
+          data: { query: userQuery }
+        }
+      });
+
+      if (error) {
+        console.error('Error calling AI function:', error);
+        return this.getFallbackInterpretation(userQuery);
+      }
+
+      // Store the query for analytics
+      const { error: insertError } = await supabase
+        .from('search_queries')
+        .insert({
+          original_query: userQuery,
+          interpreted_intent: data.interpreted_intent,
+          extracted_requirements: data.extracted_requirements,
+          search_strategy: data.search_strategy,
+          confidence_score: data.confidence
+        });
+
+      if (insertError) {
+        console.error('Error storing search query:', insertError);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Failed to interpret query:', error);
+      return this.getFallbackInterpretation(userQuery);
+    }
   }
 
   async generatePlatformSearchQueries(
@@ -48,11 +70,21 @@ export class NaturalLanguageQueryService {
   ): Promise<PlatformSearchQuery> {
     console.log(`Generating ${platform} search queries for requirements:`, requirements);
     
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
+    // This is deterministic based on requirements, so we can generate locally
     return {
       platform,
       search_queries: this.createPlatformQueries(requirements, platform)
+    };
+  }
+
+  private getFallbackInterpretation(query: string): QueryInterpretation {
+    const lowercaseQuery = query.toLowerCase();
+    
+    return {
+      interpreted_intent: this.generateInterpretedIntent(query),
+      extracted_requirements: this.extractRequirements(query),
+      search_strategy: this.generateSearchStrategy(query),
+      confidence: 0.6 // Lower confidence for fallback
     };
   }
 

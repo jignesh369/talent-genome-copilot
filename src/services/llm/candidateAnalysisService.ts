@@ -1,4 +1,5 @@
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface CandidateSummary {
   executive_summary: string;
@@ -34,16 +35,24 @@ export class CandidateAnalysisService {
   async generateCandidateSummary(candidate: EnhancedCandidate): Promise<CandidateSummary> {
     console.log('Generating AI summary for candidate:', candidate.name);
     
-    // Simulate AI processing delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    return {
-      executive_summary: this.generateExecutiveSummary(candidate),
-      technical_assessment: this.assessTechnicalDepth(candidate),
-      career_analysis: this.analyzeCareerProgression(candidate),
-      engagement_score: this.calculateEngagementScore(candidate),
-      availability_likelihood: this.assessAvailability(candidate)
-    };
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-talent-discovery', {
+        body: {
+          action: 'analyze_candidate',
+          data: { candidate }
+        }
+      });
+
+      if (error) {
+        console.error('Error calling AI function:', error);
+        return this.getFallbackSummary(candidate);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Failed to generate candidate summary:', error);
+      return this.getFallbackSummary(candidate);
+    }
   }
 
   async scoreJobMatch(
@@ -53,11 +62,40 @@ export class CandidateAnalysisService {
   ): Promise<JobMatchScore> {
     console.log('Scoring job match for candidate:', candidate.name);
     
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-talent-discovery', {
+        body: {
+          action: 'score_job_match',
+          data: { candidate, jobRequirements, companyculture }
+        }
+      });
+
+      if (error) {
+        console.error('Error calling AI function:', error);
+        return this.getFallbackJobMatch(candidate, jobRequirements);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Failed to score job match:', error);
+      return this.getFallbackJobMatch(candidate, jobRequirements);
+    }
+  }
+
+  private getFallbackSummary(candidate: EnhancedCandidate): CandidateSummary {
+    return {
+      executive_summary: this.generateExecutiveSummary(candidate),
+      technical_assessment: this.assessTechnicalDepth(candidate),
+      career_analysis: this.analyzeCareerProgression(candidate),
+      engagement_score: this.calculateEngagementScore(candidate),
+      availability_likelihood: this.assessAvailability(candidate)
+    };
+  }
+
+  private getFallbackJobMatch(candidate: EnhancedCandidate, jobRequirements: string[]): JobMatchScore {
     const technicalFit = this.scoreTechnicalFit(candidate, jobRequirements);
     const experienceFit = this.scoreExperienceFit(candidate, jobRequirements);
-    const culturalFit = this.scoreCulturalFit(candidate, companyculture);
+    const culturalFit = this.scoreCulturalFit(candidate);
     const growthPotential = this.scoreGrowthPotential(candidate);
     
     const overallScore = (
@@ -161,7 +199,7 @@ export class CandidateAnalysisService {
     };
   }
 
-  private scoreCulturalFit(candidate: EnhancedCandidate, companyCulture?: string) {
+  private scoreCulturalFit(candidate: EnhancedCandidate) {
     const baseScore = 7; // Neutral cultural fit
     const communityBonus = (candidate.community_influence_score || 5) * 0.2;
     

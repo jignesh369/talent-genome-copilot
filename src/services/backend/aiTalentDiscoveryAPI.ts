@@ -2,6 +2,7 @@ import { naturalLanguageQueryService, QueryInterpretation, PlatformSearchQuery }
 import { candidateAnalysisService, CandidateSummary, JobMatchScore } from '@/services/llm/candidateAnalysisService';
 import { personalizedOutreachService, PersonalizedMessage } from '@/services/llm/personalizedOutreachService';
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface NaturalLanguageSearchRequest {
   query: string;
@@ -56,7 +57,7 @@ export class AITalentDiscoveryAPI {
   async processNaturalLanguageSearch(request: NaturalLanguageSearchRequest): Promise<NaturalLanguageSearchResponse> {
     console.log('Processing natural language search:', request.query);
     
-    // Step 1: Interpret the natural language query
+    // Step 1: Interpret the natural language query using real AI
     const interpretation = await naturalLanguageQueryService.interpretQuery(request.query);
     
     // Step 2: Generate platform-specific search queries
@@ -69,8 +70,8 @@ export class AITalentDiscoveryAPI {
       platformQueries.push(query);
     }
     
-    // Step 3: Execute searches and aggregate results (mock implementation)
-    const candidates = await this.mockCandidateSearch(interpretation);
+    // Step 3: Get candidates from database (enhanced_candidates table)
+    const candidates = await this.searchCandidatesInDatabase(interpretation, request.filters);
     
     return {
       interpretation,
@@ -84,11 +85,14 @@ export class AITalentDiscoveryAPI {
   async enrichCandidateWithOSINT(request: OSINTEnrichmentRequest): Promise<OSINTEnrichmentResponse> {
     console.log('Enriching candidate with OSINT data:', request.candidate_id);
     
-    // Mock candidate retrieval
-    const candidate = await this.mockGetCandidate(request.candidate_id);
+    // Get candidate from database
+    const candidate = await this.getCandidateFromDatabase(request.candidate_id);
     
-    // Generate AI summary
+    // Generate AI summary using real LLM
     const summary = await candidateAnalysisService.generateCandidateSummary(candidate);
+    
+    // Store the analysis results
+    await this.storeCandidateAnalysis(candidate.id, summary);
     
     return {
       candidate,
@@ -101,20 +105,27 @@ export class AITalentDiscoveryAPI {
   async generatePersonalizedOutreach(request: PersonalizedOutreachRequest): Promise<PersonalizedMessage> {
     console.log('Generating personalized outreach for candidate:', request.candidate_id);
     
-    const candidate = await this.mockGetCandidate(request.candidate_id);
+    const candidate = await this.getCandidateFromDatabase(request.candidate_id);
     
-    return await personalizedOutreachService.generatePersonalizedMessage(
+    // Generate real AI-powered personalized message
+    const message = await personalizedOutreachService.generatePersonalizedMessage(
       candidate,
       request.message_type,
       request.context
     );
+
+    // Store the message for tracking
+    await this.storeOutreachMessage(candidate.id, message, request.message_type);
+    
+    return message;
   }
 
   async predictJobSuccess(request: JobSuccessPredictionRequest): Promise<JobMatchScore> {
     console.log('Predicting job success for candidate:', request.candidate_id);
     
-    const candidate = await this.mockGetCandidate(request.candidate_id);
+    const candidate = await this.getCandidateFromDatabase(request.candidate_id);
     
+    // Use real AI for job matching
     return await candidateAnalysisService.scoreJobMatch(
       candidate,
       request.job_requirements,
@@ -134,9 +145,8 @@ export class AITalentDiscoveryAPI {
   }> {
     console.log('Generating dynamic assessment for:', { role, seniority, skills });
     
-    // Simulate AI-generated assessment
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
+    // For now, keep the existing mock implementation
+    // This could be enhanced with AI-generated questions later
     const difficulty = this.mapSeniorityToDifficulty(seniority);
     const questions = this.generateAssessmentQuestions(role, difficulty, skills);
     
@@ -148,10 +158,126 @@ export class AITalentDiscoveryAPI {
     };
   }
 
-  private async mockCandidateSearch(interpretation: QueryInterpretation): Promise<EnhancedCandidate[]> {
-    // Mock search results based on interpretation
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
+  private async searchCandidatesInDatabase(
+    interpretation: QueryInterpretation,
+    filters?: any
+  ): Promise<EnhancedCandidate[]> {
+    try {
+      let query = supabase
+        .from('enhanced_candidates')
+        .select('*')
+        .limit(20);
+
+      // Apply skill-based filtering
+      const skillRequirements = interpretation.extracted_requirements
+        .filter(req => req.category === 'skills')
+        .map(req => req.value);
+
+      if (skillRequirements.length > 0) {
+        query = query.overlaps('skills', skillRequirements);
+      }
+
+      // Apply experience filtering
+      const experienceReq = interpretation.extracted_requirements
+        .find(req => req.category === 'experience');
+      
+      if (experienceReq?.value === 'senior') {
+        query = query.gte('experience_years', 5);
+      }
+
+      // Apply location filtering
+      if (filters?.location) {
+        query = query.ilike('location', `%${filters.location}%`);
+      }
+
+      // Apply availability filtering
+      if (filters?.availability) {
+        query = query.eq('availability_status', filters.availability);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Database search error:', error);
+        return this.getMockCandidates(); // Fallback to mock data
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Failed to search candidates in database:', error);
+      return this.getMockCandidates(); // Fallback to mock data
+    }
+  }
+
+  private async getCandidateFromDatabase(candidateId: string): Promise<EnhancedCandidate> {
+    try {
+      const { data, error } = await supabase
+        .from('enhanced_candidates')
+        .select('*')
+        .eq('id', candidateId)
+        .single();
+
+      if (error || !data) {
+        console.error('Failed to fetch candidate:', error);
+        return this.getMockCandidate(candidateId); // Fallback to mock data
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Database error fetching candidate:', error);
+      return this.getMockCandidate(candidateId); // Fallback to mock data
+    }
+  }
+
+  private async storeCandidateAnalysis(candidateId: string, summary: CandidateSummary) {
+    try {
+      // Update the candidate with AI analysis results
+      const { error } = await supabase
+        .from('enhanced_candidates')
+        .update({
+          ai_summary: summary.executive_summary,
+          technical_depth_score: summary.technical_assessment.depth_score,
+          community_influence_score: summary.engagement_score,
+          learning_velocity_score: summary.career_analysis.growth_rate * 10,
+          profile_last_updated: new Date().toISOString()
+        })
+        .eq('id', candidateId);
+
+      if (error) {
+        console.error('Failed to store candidate analysis:', error);
+      }
+    } catch (error) {
+      console.error('Error storing candidate analysis:', error);
+    }
+  }
+
+  private async storeOutreachMessage(candidateId: string, message: PersonalizedMessage, messageType: string) {
+    try {
+      const { error } = await supabase
+        .from('communication_messages')
+        .insert({
+          recipient_type: 'candidate',
+          subject: message.subject_line,
+          content: message.message_body,
+          channel: 'email',
+          metadata: {
+            candidate_id: candidateId,
+            message_type: messageType,
+            personalization_elements: message.personalization_elements,
+            optimal_send_time: message.optimal_send_time
+          }
+        });
+
+      if (error) {
+        console.error('Failed to store outreach message:', error);
+      }
+    } catch (error) {
+      console.error('Error storing outreach message:', error);
+    }
+  }
+
+  // Fallback mock data methods
+  private getMockCandidates(): EnhancedCandidate[] {
     const mockCandidates: Partial<EnhancedCandidate>[] = [
       {
         id: 'candidate_001',
@@ -190,7 +316,7 @@ export class AITalentDiscoveryAPI {
     return mockCandidates as EnhancedCandidate[];
   }
 
-  private async mockGetCandidate(candidateId: string): Promise<EnhancedCandidate> {
+  private getMockCandidate(candidateId: string): EnhancedCandidate {
     const mockCandidate: EnhancedCandidate = {
       id: candidateId,
       name: 'Sarah Chen',

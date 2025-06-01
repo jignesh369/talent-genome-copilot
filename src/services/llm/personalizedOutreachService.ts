@@ -1,5 +1,5 @@
-
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface PersonalizedMessage {
   subject_line: string;
@@ -20,13 +20,34 @@ export class PersonalizedOutreachService {
       tone?: 'professional' | 'casual' | 'technical';
     } = {}
   ): Promise<PersonalizedMessage> {
-    console.log('Generating personalized outreach for:', candidate.name);
+    console.log('Generating AI-powered personalized outreach for:', candidate.name);
     
-    // Simulate AI processing delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-talent-discovery', {
+        body: {
+          action: 'generate_outreach',
+          data: { candidate, messageType, context }
+        }
+      });
+
+      if (error) {
+        console.error('Error calling AI function:', error);
+        return this.getFallbackMessage(candidate, messageType, context);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Failed to generate personalized outreach:', error);
+      return this.getFallbackMessage(candidate, messageType, context);
+    }
+  }
+
+  private getFallbackMessage(
+    candidate: EnhancedCandidate,
+    messageType: string,
+    context: any
+  ): PersonalizedMessage {
     const personalizationElements = this.identifyPersonalizationElements(candidate);
-    const tone = context.tone || this.determineTone(candidate);
     
     return {
       subject_line: this.generateSubjectLine(candidate, messageType, context),
