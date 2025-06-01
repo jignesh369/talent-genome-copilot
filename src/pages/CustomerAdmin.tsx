@@ -14,7 +14,6 @@ import CustomerAdminWelcome from '@/components/admin/CustomerAdminWelcome';
 import CustomerAdminSidebar from '@/components/admin/CustomerAdminSidebar';
 import CustomerAdminContent from '@/components/admin/CustomerAdminContent';
 import { Organization } from '@/types/organization';
-import { UserRole } from '@/types/auth';
 import { Users, Briefcase, CheckCircle } from 'lucide-react';
 
 const CustomerAdmin = () => {

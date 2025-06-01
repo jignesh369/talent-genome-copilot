@@ -1,14 +1,14 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
+import { UserRole } from '@/types/auth';
 
 export interface TeamMember {
   id: string;
   name: string;
   email: string;
-  role: 'recruiter' | 'hiring_manager' | 'admin' | 'member';
+  role: UserRole;
   status: 'active' | 'inactive' | 'pending';
   jobs: number;
   department: string;
@@ -74,7 +74,7 @@ export const useTeamMembers = () => {
           id: member.user_id,
           name: profile ? `${profile.first_name} ${profile.last_name}` : 'Unknown User',
           email: 'user@example.com', // We don't have access to auth.users emails
-          role: mapRole(userRole?.role || 'member'),
+          role: mapRole(userRole?.role || 'candidate'),
           status: member.status as TeamMember['status'],
           jobs: jobCountMap[member.user_id] || 0,
           department: profile?.department || 'Unassigned',
@@ -98,7 +98,7 @@ export const useTeamMembers = () => {
           id: '1',
           name: 'John Smith',
           email: 'john@example.com',
-          role: 'admin',
+          role: 'customer_admin',
           status: 'active',
           jobs: 5,
           department: 'Engineering',
@@ -120,17 +120,17 @@ export const useTeamMembers = () => {
     }
   };
 
-  const mapRole = (role: string): TeamMember['role'] => {
+  const mapRole = (role: string): UserRole => {
     switch (role) {
       case 'customer_admin':
       case 'startup_admin':
-        return 'admin';
+        return role as UserRole;
       case 'recruiter':
         return 'recruiter';
       case 'hiring_manager':
         return 'hiring_manager';
       default:
-        return 'member';
+        return 'candidate';
     }
   };
 

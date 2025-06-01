@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthProvider';
@@ -125,7 +124,7 @@ export const useOrganizationAnalytics = () => {
     });
   };
 
-  const processDepartmentData = (jobs: any[]) => {
+  const processDepartmentData = (jobs: any[]): Array<{name: string; value: number; color: string}> => {
     const colors = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#6B7280'];
     const deptCounts = jobs.reduce((acc, job) => {
       const dept = job.department || 'Other';
@@ -135,7 +134,7 @@ export const useOrganizationAnalytics = () => {
     
     return Object.entries(deptCounts).map(([name, value], index) => ({
       name,
-      value,
+      value: Number(value), // Ensure value is a number
       color: colors[index % colors.length]
     }));
   };
