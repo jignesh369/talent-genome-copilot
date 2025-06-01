@@ -1,5 +1,49 @@
+import { EnhancedCandidate } from '@/types/enhanced-candidate';
 
-import { CommunicationTemplate, OutreachCampaign, CampaignMetrics, TriggerCondition } from '@/types/enhanced-recruiting';
+interface CommunicationTemplate {
+  id: string;
+  name: string;
+  type: 'initial_outreach' | 'follow_up' | 'assessment_request' | 'reminder';
+  channel: 'email' | 'linkedin' | 'phone' | 'sms';
+  template_content: string;
+  personalization_fields: string[];
+  ai_optimized: boolean;
+  success_rate: number;
+}
+
+interface OutreachCampaign {
+  id: string;
+  name: string;
+  description: string;
+  target_persona: string;
+  industry: string;
+  experience_level: string;
+  steps: CommunicationStep[];
+  is_active: boolean;
+  performance_metrics: CampaignMetrics;
+}
+
+interface CommunicationStep {
+  id: string;
+  type: 'email' | 'linkedin' | 'phone' | 'sms';
+  delay_days: number;
+  template_id: string;
+  trigger_conditions: TriggerCondition[];
+}
+
+interface CampaignMetrics {
+  sent_count: number;
+  response_rate: number;
+  positive_response_rate: number;
+  conversion_to_interview: number;
+  roi_score: number;
+}
+
+interface TriggerCondition {
+  type: 'time_based' | 'action_based' | 'behavior_based';
+  condition: string;
+  value: any;
+}
 
 class CommunicationService {
   private templates: CommunicationTemplate[] = [];

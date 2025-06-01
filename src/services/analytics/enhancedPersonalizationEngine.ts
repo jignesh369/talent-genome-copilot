@@ -1,3 +1,4 @@
+
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
 
 interface PersonalizationContext {
@@ -36,7 +37,7 @@ export const enhancedPersonalizationEngine = {
     };
   },
 
-  private generatePersonalizedSubject(
+  generatePersonalizedSubject(
     candidate: EnhancedCandidate,
     context: PersonalizationContext
   ): string {
@@ -54,7 +55,7 @@ export const enhancedPersonalizationEngine = {
     return `${firstName}, exciting opportunity you might like`;
   },
 
-  private generatePersonalizedBody(
+  generatePersonalizedBody(
     candidate: EnhancedCandidate,
     context: PersonalizationContext
   ): string {
@@ -81,7 +82,7 @@ export const enhancedPersonalizationEngine = {
     return `${opening} ${coreMessage}. ${closing}.`;
   },
 
-  private generateGitHubPersonalization(candidate: EnhancedCandidate): string[] {
+  generateGitHubPersonalization(candidate: EnhancedCandidate): string[] {
     const personalizations: string[] = [];
     const github = candidate.osint_profile?.github;
     
@@ -98,7 +99,7 @@ export const enhancedPersonalizationEngine = {
     return personalizations;
   },
 
-  private generateCareerPersonalization(candidate: EnhancedCandidate): string[] {
+  generateCareerPersonalization(candidate: EnhancedCandidate): string[] {
     const personalizations: string[] = [];
     const trajectory = candidate.career_trajectory_analysis;
     
@@ -113,11 +114,10 @@ export const enhancedPersonalizationEngine = {
     return personalizations;
   },
 
-  private generateTechnicalPersonalization(candidate: EnhancedCandidate): string[] {
+  generateTechnicalPersonalization(candidate: EnhancedCandidate): string[] {
     const personalizations: string[] = [];
     const github = candidate.osint_profile?.github;
     
-    // Use repos instead of primary_languages since that field doesn't exist
     if (github?.repos && github.repos > 10) {
       personalizations.push(`Your ${github.repos} repositories show a diverse technical skillset`);
     }
@@ -130,7 +130,7 @@ export const enhancedPersonalizationEngine = {
     return personalizations;
   },
 
-  private scorePersonalizationQuality(message: string): number {
+  scorePersonalizationQuality(message: string): number {
     let score = 0;
     
     // Check for specific mentions
@@ -146,7 +146,7 @@ export const enhancedPersonalizationEngine = {
     return Math.min(score, 1.0);
   },
 
-  private generatePersonalizationInsights(candidate: EnhancedCandidate): string[] {
+  generatePersonalizationInsights(candidate: EnhancedCandidate): string[] {
     const insights: string[] = [];
     
     if (candidate.osint_profile?.github?.username) {

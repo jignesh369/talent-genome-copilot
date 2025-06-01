@@ -1,124 +1,132 @@
-
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
 import { enhancedPersonalizationEngine } from './enhancedPersonalizationEngine';
-import { automatedCommunicationService, OutreachMessage } from './automatedCommunicationService';
+import { automatedCommunicationService } from './automatedCommunicationService';
 
-interface MessageGenerationRequest {
-  candidate: EnhancedCandidate;
-  message_type: 'initial_outreach' | 'follow_up' | 'assessment_request';
-  context: {
-    company_name: string;
-    role_title: string;
-    recruiter_name: string;
-    role_benefits?: string[];
-    urgency_level?: 'low' | 'medium' | 'high';
-  };
-}
-
-interface GeneratedMessage {
-  message: OutreachMessage;
-  personalization_data: any;
+interface OutreachMessage {
+  subject: string;
+  body: string;
   quality_score: number;
   recommendations: string[];
 }
 
-export class MessageGenerationService {
-  async generatePersonalizedMessage(request: MessageGenerationRequest): Promise<GeneratedMessage> {
-    console.log('Generating personalized message for:', request.candidate.name);
-
-    // Generate enhanced personalization
-    const personalizationData = await enhancedPersonalizationEngine.generateEnhancedPersonalization(
-      request.candidate,
-      request.context
-    );
-
-    // Prepare custom data for message generation
-    const customData: Record<string, string> = {
-      company_name: request.context.company_name,
-      role_title: request.context.role_title,
-      recruiter_name: request.context.recruiter_name,
-      candidate_name: personalizationData.candidate_name,
-      personalized_greeting: personalizationData.personalized_greeting,
-      technical_highlight: personalizationData.technical_highlights.join(', '),
-      career_story_hook: personalizationData.career_story_hook,
-      value_add_content: personalizationData.value_propositions.join('\n• '),
-      call_to_action: personalizationData.call_to_action,
-      optimal_channel: personalizationData.preferred_channel,
-      role_benefits: request.context.role_benefits ? request.context.role_benefits.join(', ') : '',
-      urgency_level: request.context.urgency_level || 'medium'
-    };
-
-    // Generate the message
-    const message = await automatedCommunicationService.generatePersonalizedMessage(
-      request.candidate,
-      request.message_type,
-      customData
-    );
-
-    // Calculate quality score
-    const qualityScore = this.calculateMessageQuality(personalizationData, message);
-
-    // Generate recommendations
-    const recommendations = this.generateOptimizationRecommendations(
-      personalizationData,
-      qualityScore
-    );
-
-    return {
-      message,
-      personalization_data: personalizationData,
-      quality_score: qualityScore,
-      recommendations
-    };
-  }
-
-  private calculateMessageQuality(personalizationData: any, message: OutreachMessage): number {
-    let score = 0;
-
-    // Personalization depth (40%)
-    const personalizationScore = personalizationData.personalization_score.overall_score;
-    score += personalizationScore * 0.4;
-
-    // Message length appropriateness (20%)
-    const messageLength = message.content.length;
-    const lengthScore = messageLength >= 200 && messageLength <= 800 ? 1 : 0.7;
-    score += lengthScore * 0.2;
-
-    // Technical relevance (20%)
-    const technicalScore = personalizationData.personalization_score.technical_relevance;
-    score += technicalScore * 0.2;
-
-    // Call-to-action clarity (20%)
-    const ctaScore = message.content.includes('?') ? 1 : 0.8;
-    score += ctaScore * 0.2;
-
-    return Math.min(score, 1);
-  }
-
-  private generateOptimizationRecommendations(
-    personalizationData: any,
-    qualityScore: number
-  ): string[] {
-    const recommendations = [];
-
-    if (qualityScore < 0.7) {
-      recommendations.push('Consider adding more specific technical achievements');
-    }
-
-    if (personalizationData.personalization_score.technical_relevance < 0.6) {
-      recommendations.push('Highlight more relevant technical skills match');
-    }
-
-    if (personalizationData.personalization_score.cultural_fit < 0.7) {
-      recommendations.push('Emphasize company culture alignment');
-    }
-
-    if (personalizationData.preferred_channel !== 'email') {
-      recommendations.push(`Consider reaching out via ${personalizationData.preferred_channel} for better response rates`);
-    }
-
-    return recommendations;
-  }
+interface MessageTemplate {
+  id: string;
+  name: string;
+  type: 'initial_outreach' | 'follow_up' | 'assessment_request' | 'reminder' | 'update';
+  content: string;
+  created_at: string;
+  updated_at: string;
+  usage_count: number;
+  ai_quality_score: number;
+  tags: string[];
+  metadata?: Record<string, any>;
 }
 
-export const messageGenerationService = new MessageGenerationService();
+export const messageGenerationService = {
+  async generatePersonalizedMessage(
+    candidate: EnhancedCandidate,
+    context: Record<string, any> = {}
+  ): Promise<OutreachMessage> {
+    console.log('Generating personalized message for:', candidate.name);
+    
+    return await enhancedPersonalizationEngine.generatePersonalizedOutreach(candidate, context);
+  },
+
+  async generateMultiChannelMessages(
+    candidate: EnhancedCandidate,
+    channels: string[] = ['email', 'linkedin']
+  ): Promise<Record<string, OutreachMessage>> {
+    const messages: Record<string, OutreachMessage> = {};
+    
+    for (const channel of channels) {
+      const context = { channel, tone: this.getChannelTone(channel) };
+      messages[channel] = await this.generatePersonalizedMessage(candidate, context);
+    }
+    
+    return messages;
+  },
+
+  async generateTemplateBasedMessage(
+    candidate: EnhancedCandidate,
+    templateContent: string,
+    context: Record<string, any> = {}
+  ): Promise<string> {
+    const template: MessageTemplate = {
+      id: 'temp_template',
+      name: 'Temporary Template',
+      type: 'initial_outreach',
+      content: templateContent,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      usage_count: 0,
+      ai_quality_score: 0.8,
+      tags: ['generated']
+    };
+    
+    return await automatedCommunicationService.generatePersonalizedMessage(
+      candidate,
+      template,
+      context
+    );
+  },
+
+  getChannelTone(channel: string): string {
+    const tones = {
+      email: 'professional',
+      linkedin: 'networking',
+      sms: 'casual',
+      phone: 'conversational'
+    };
+    return tones[channel as keyof typeof tones] || 'professional';
+  },
+
+  async optimizeMessageForChannel(
+    message: OutreachMessage,
+    channel: string
+  ): Promise<OutreachMessage> {
+    let optimizedBody = message.body;
+    
+    switch (channel) {
+      case 'linkedin':
+        optimizedBody = this.optimizeForLinkedIn(message.body);
+        break;
+      case 'sms':
+        optimizedBody = this.optimizeForSMS(message.body);
+        break;
+      case 'email':
+        optimizedBody = this.optimizeForEmail(message.body);
+        break;
+    }
+    
+    return {
+      ...message,
+      body: optimizedBody,
+      quality_score: this.recalculateQualityScore(optimizedBody)
+    };
+  },
+
+  optimizeForLinkedIn(message: string): string {
+    // Keep it shorter and more casual for LinkedIn
+    return message.length > 200 ? message.substring(0, 197) + '...' : message;
+  },
+
+  optimizeForSMS(message: string): string {
+    // Much shorter for SMS
+    return message.length > 160 ? message.substring(0, 157) + '...' : message;
+  },
+
+  optimizeForEmail(message: string): string {
+    // Can be longer for email, add professional formatting
+    return message;
+  },
+
+  recalculateQualityScore(message: string): number {
+    let score = 0.5; // Base score
+    
+    if (message.includes('GitHub') || message.includes('experience')) score += 0.2;
+    if (message.length > 50 && message.length < 300) score += 0.2;
+    if (message.includes('skill') || message.includes('background')) score += 0.1;
+    
+    return Math.min(score, 1.0);
+  }
+};

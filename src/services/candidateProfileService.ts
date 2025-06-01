@@ -1,192 +1,126 @@
+
+import { supabase } from '@/integrations/supabase/client';
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
 import { OSINTProfile } from '@/types/osint';
 
-export interface CandidateSearchRequest {
-  candidateName: string;
-  perplexityApiKey: string;
-}
-
-export interface ProfileGenerationResult {
-  searchResults: string;
-  profile: Partial<EnhancedCandidate>;
-}
-
-export class CandidateProfileService {
-  static async searchCandidateInfo(request: CandidateSearchRequest): Promise<string> {
-    const response = await fetch('https://api.perplexity.ai/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${request.perplexityApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'llama-3.1-sonar-small-128k-online',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a professional recruiter assistant. Search for professional information about the person including their current job, company, skills, experience, education, and any professional achievements. Be precise and focus on career-related information.'
-          },
-          {
-            role: 'user',
-            content: `Find professional information about ${request.candidateName}. Include their current position, company, experience, skills, education, and professional background. Focus on publicly available professional information.`
-          }
-        ],
-        temperature: 0.2,
-        top_p: 0.9,
-        max_tokens: 1000,
-        return_images: false,
-        return_related_questions: false,
-        search_recency_filter: 'month',
-        frequency_penalty: 1,
-        presence_penalty: 0
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API request failed: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.choices[0]?.message?.content || 'No information found';
-  }
-
-  static generateCandidateProfile(name: string, searchInfo: string): Partial<EnhancedCandidate> {
-    return {
-      id: `candidate_${Date.now()}`,
-      name: name,
-      handle: name.toLowerCase().replace(/\s+/g, '_'),
-      email: `${name.toLowerCase().replace(/\s+/g, '.')}@example.com`,
-      location: 'Unknown',
-      current_title: this.extractFromText(searchInfo, ['title', 'position', 'role']) || 'Software Engineer',
-      current_company: this.extractFromText(searchInfo, ['company', 'organization', 'employer']) || 'Tech Company',
-      experience_years: this.extractExperienceYears(searchInfo),
-      skills: this.extractSkills(searchInfo),
-      bio: searchInfo.substring(0, 500) + (searchInfo.length > 500 ? '...' : ''),
-      ai_summary: this.generateAISummary(name, searchInfo),
-      career_trajectory_analysis: {
+export const candidateProfileService = {
+  async createCandidateProfile(profileData: Partial<EnhancedCandidate>): Promise<EnhancedCandidate> {
+    console.log('Creating candidate profile:', profileData.name);
+    
+    const candidateId = `candidate_${Date.now()}`;
+    
+    // Create enhanced candidate object
+    const enhancedCandidate: EnhancedCandidate = {
+      id: candidateId,
+      name: profileData.name || '',
+      handle: profileData.handle || profileData.email?.split('@')[0] || '',
+      email: profileData.email || '',
+      location: profileData.location || '',
+      current_title: profileData.current_title,
+      current_company: profileData.current_company,
+      experience_years: profileData.experience_years || 0,
+      skills: profileData.skills || [],
+      bio: profileData.bio,
+      avatar_url: profileData.avatar_url,
+      ai_summary: profileData.ai_summary || 'Profile created',
+      career_trajectory_analysis: profileData.career_trajectory_analysis || {
         progression_type: 'ascending',
-        growth_rate: 0.8,
-        stability_score: 0.7,
-        next_likely_move: 'Senior technical role',
+        growth_rate: 5.0,
+        stability_score: 6.0,
+        next_likely_move: 'Senior Role',
         timeline_events: []
       },
-      technical_depth_score: 8.0,
-      community_influence_score: 7.0,
-      cultural_fit_indicators: [],
-      learning_velocity_score: 8.0,
-      osint_profile: {
-        candidate_id: `candidate_${Date.now()}`,
-        overall_score: 8.0,
-        influence_score: 7.0,
-        technical_depth: 8.0,
-        community_engagement: 7.0,
-        learning_velocity: 8.0,
-        last_updated: new Date().toISOString(),
-        availability_signals: []
-      },
-      match_score: 85,
-      relevance_factors: [],
-      availability_status: 'passive',
-      best_contact_method: {
+      technical_depth_score: profileData.technical_depth_score || 5.0,
+      community_influence_score: profileData.community_influence_score || 4.0,
+      cultural_fit_indicators: profileData.cultural_fit_indicators || [],
+      learning_velocity_score: profileData.learning_velocity_score || 5.0,
+      osint_profile: await this.generateDefaultOSINTProfile(candidateId),
+      match_score: profileData.match_score || 70,
+      relevance_factors: profileData.relevance_factors || [],
+      availability_status: profileData.availability_status || 'passive',
+      best_contact_method: profileData.best_contact_method || {
         platform: 'email',
         confidence: 0.8,
-        best_time: '10:00 AM',
+        best_time: '9-17',
         approach_style: 'direct'
       },
       profile_last_updated: new Date().toISOString(),
-      osint_last_fetched: new Date().toISOString()
+      osint_last_fetched: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     };
-  }
-
-  private static extractFromText(text: string, keywords: string[]): string | undefined {
-    for (const keyword of keywords) {
-      const regex = new RegExp(`${keyword}[:\\s]+([^\\n\\r\\.]{1,100})`, 'i');
-      const match = text.match(regex);
-      if (match) {
-        return match[1].trim();
-      }
-    }
-    return undefined;
-  }
-
-  private static extractExperienceYears(text: string): number {
-    const yearMatches = text.match(/(\d+)\s*years?\s*(of\s*)?experience/i);
-    if (yearMatches) {
-      return parseInt(yearMatches[1]);
-    }
-    return 5; // Default
-  }
-
-  private static extractSkills(text: string): string[] {
-    const commonTechSkills = [
-      'JavaScript', 'TypeScript', 'React', 'Node.js', 'Python', 'Java', 'AWS', 
-      'Docker', 'Kubernetes', 'Machine Learning', 'AI', 'Data Science', 'SQL',
-      'MongoDB', 'PostgreSQL', 'GraphQL', 'REST API', 'Microservices'
-    ];
     
-    return commonTechSkills.filter(skill => 
-      text.toLowerCase().includes(skill.toLowerCase())
-    ).slice(0, 8);
-  }
+    return enhancedCandidate;
+  },
 
-  private static generateAISummary(name: string, searchInfo: string): string {
-    return `${name} is a skilled professional with expertise in software development and technology. Based on available information, they demonstrate strong technical capabilities and professional experience in their field.`;
-  }
-}
+  async generateDefaultOSINTProfile(candidateId: string): Promise<OSINTProfile> {
+    const profile: OSINTProfile = {
+      id: `osint_${candidateId}`,
+      candidate_id: candidateId,
+      overall_score: 5.0 + Math.random() * 3,
+      influence_score: 4.0 + Math.random() * 4,
+      technical_depth: 5.0 + Math.random() * 3,
+      community_engagement: 3.0 + Math.random() * 4,
+      learning_velocity: 4.0 + Math.random() * 3,
+      last_updated: new Date().toISOString(),
+      availability_signals: [],
+      social_presence: {
+        platforms: ['linkedin'],
+        professional_consistency: 0.7,
+        communication_style: 'professional',
+        thought_leadership_score: Math.random() * 5
+      },
+      professional_reputation: {
+        industry_recognition: [],
+        conference_speaking: false,
+        published_content: 0,
+        community_involvement: [],
+        expertise_areas: []
+      },
+      github: {
+        username: '',
+        stars: 0,
+        repos: 0,
+        commits: 0
+      },
+      linkedin: {
+        connections: Math.floor(Math.random() * 500) + 100,
+        url: ''
+      },
+      stackoverflow: {
+        reputation: Math.floor(Math.random() * 1000)
+      },
+      twitter: {
+        followers: 0,
+        username: ''
+      },
+      reddit: {
+        username: ''
+      },
+      devto: {
+        username: ''
+      },
+      kaggle: {
+        username: ''
+      },
+      medium: {
+        username: ''
+      },
+      red_flags: [],
+      last_updated: new Date().toISOString()
+    };
 
-const createBasicOSINTProfile = (candidateId: string): OSINTProfile => {
-  return {
-    id: `osint-${candidateId}`,
-    candidate_id: candidateId,
-    overall_score: Math.random() * 3 + 7,
-    influence_score: Math.random() * 3 + 6,
-    technical_depth: Math.random() * 3 + 7,
-    community_engagement: Math.random() * 3 + 6,
-    learning_velocity: Math.random() * 3 + 8,
-    last_updated: new Date().toISOString(),
-    availability_signals: [],
-    social_presence: {
-      platforms: ['github', 'linkedin'],
-      professional_consistency: 0.8,
-      communication_style: 'professional' as const,
-      thought_leadership_score: Math.random() * 3 + 6,
-    },
-    professional_reputation: {
-      industry_recognition: [],
-      conference_speaking: false,
-      published_content: 0,
-      community_involvement: [],
-      expertise_areas: [],
-    },
-    red_flags: [],
-    github: {
-      username: '',
-      stars: 0,
-      repos: 0,
-      commits: 0,
-    },
-    linkedin: {
-      connections: 0,
-      url: '',
-    },
-    stackoverflow: {
-      reputation: 0,
-    },
-    twitter: {
-      followers: 0,
-      username: '',
-    },
-    reddit: {
-      username: '',
-    },
-    devto: {
-      username: '',
-    },
-    kaggle: {
-      username: '',
-    },
-    medium: {
-      username: '',
-    },
-  };
+    return profile;
+  },
+
+  async updateProfile(candidateId: string, updates: Partial<EnhancedCandidate>): Promise<void> {
+    console.log(`Updating profile for candidate: ${candidateId}`);
+    // Implementation would update the database
+  },
+
+  async getProfile(candidateId: string): Promise<EnhancedCandidate | null> {
+    console.log(`Fetching profile for candidate: ${candidateId}`);
+    // Implementation would fetch from database
+    return null;
+  }
 };
