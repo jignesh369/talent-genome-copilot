@@ -35,15 +35,15 @@ export class PersonalizationService {
       };
     });
 
-    const confidenceScore = calculateOverallConfidence(personalizedSteps);
-    const successRate = estimateSuccessRate(candidate, template, confidenceScore);
+    const confidenceScore = calculateOverallConfidence(candidate);
+    const successRate = estimateSuccessRate(candidate);
 
     return {
       template_id: template.id,
       candidate_id: candidate.id,
       personalized_steps: personalizedSteps,
       confidence_score: confidenceScore,
-      recommendation_reason: generateRecommendationReason(candidate, template),
+      recommendation_reason: generateRecommendationReason(candidate),
       estimated_success_rate: successRate
     };
   }
@@ -63,8 +63,8 @@ export class PersonalizationService {
       }
     });
 
-    const highlights = generatePersonalizationHighlights(candidate, personalizations);
-    const qualityScore = calculateQualityScore(personalizedContent, highlights, candidate);
+    const highlights = generatePersonalizationHighlights(candidate);
+    const qualityScore = calculateQualityScore(personalizedContent);
 
     return {
       personalized_content: personalizedContent,
