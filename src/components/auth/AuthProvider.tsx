@@ -82,6 +82,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (profileFetchError) {
         console.error('Error fetching profile:', profileFetchError);
+        setLoading(false);
+        return;
       }
 
       if (!existingProfile) {
@@ -99,6 +101,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (createError) {
           console.error('Error creating profile:', createError);
+          setLoading(false);
+          return;
         } else {
           profileData = newProfile;
         }
@@ -121,14 +125,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (roleError) {
         console.error('Error fetching role:', roleError);
+        setLoading(false);
+        return;
       }
 
       if (roleData) {
         console.log('Role found:', roleData.role);
         setUserRole(roleData.role);
       } else {
-        console.log('No role found for user, defaulting to candidate');
-        setUserRole('candidate');
+        console.log('No role found for user:', user.email);
+        // Don't default to candidate, leave as null so we can handle this case
+        setUserRole(null);
       }
       
     } catch (error) {

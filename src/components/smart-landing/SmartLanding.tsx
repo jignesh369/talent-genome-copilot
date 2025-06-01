@@ -55,15 +55,23 @@ const SmartLanding = () => {
           navigate('/auth');
           break;
       }
-    } else if (user && !userRole) {
-      console.log('User exists but no role found, defaulting to candidate');
-      navigate('/candidate-dashboard');
+    } else if (user && userRole === null) {
+      // User exists but no role found - show error or redirect to role assignment
+      console.log('User exists but no role found - redirecting to auth for role assignment');
+      navigate('/auth');
     }
   }, [user, userRole, navigate]);
 
+  // Show loading while determining where to redirect
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <Loader2 className="w-8 h-8 animate-spin" />
+      <div className="text-center">
+        <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+        <p className="text-gray-600">Setting up your account...</p>
+        {user && userRole === null && (
+          <p className="text-sm text-red-600 mt-2">No role assigned. Please contact administrator.</p>
+        )}
+      </div>
     </div>
   );
 };
