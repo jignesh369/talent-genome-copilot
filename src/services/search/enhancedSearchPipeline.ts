@@ -1,8 +1,9 @@
 
+
 import { naturalLanguageQueryService, QueryInterpretation } from '@/services/llm/naturalLanguageQueryService';
 import { platformQueryGenerator, OSINTSearchPlan } from '@/services/osint/platformQueryGenerator';
 import { candidateAnalysisService, CandidateAnalysisResult } from '@/services/osint/candidateAnalysisService';
-import { realOSINTCollector } from '@/services/osint/realOSINTCollector';
+import { webOSINTCollector } from '@/services/osint/webOSINTCollector';
 import { useAISearch } from '@/hooks/useSearch';
 import { EnhancedCandidate, SearchResult } from '@/types/enhanced-candidate';
 import { supabase } from '@/integrations/supabase/client';
