@@ -1,284 +1,180 @@
-import { EnhancedCandidate, CandidateInteraction, AvailabilitySignal, OSINTProfile } from '@/types/enhanced-recruiting';
-import { Candidate } from '@/types/recruiting';
 
-class EnhancedCandidateService {
-  private candidates: EnhancedCandidate[] = [];
+import { supabase } from '@/integrations/supabase/client';
+import { EnhancedCandidate } from '@/hooks/useEnhancedCandidates';
 
-  // Convert basic candidate to enhanced candidate
-  enhanceCandidate(basicCandidate: Candidate): EnhancedCandidate {
-    console.log('Enhancing candidate:', basicCandidate);
-    return {
-      ...basicCandidate,
-      source_details: {
-        type: basicCandidate.source === 'direct' ? 'portal' : 
-              basicCandidate.source === 'linkedin' ? 'linkedin' : 'manual_upload',
-        imported_date: basicCandidate.created_at,
-        confidence_score: 0.8
+export const enhancedCandidateService = {
+  async populateDummyData() {
+    console.log('Populating enhanced candidates with dummy data...');
+    
+    const dummyCandidates: Partial<EnhancedCandidate>[] = [
+      {
+        name: "Sarah Chen",
+        handle: "sarahc_dev",
+        email: "sarah.chen@email.com",
+        location: "San Francisco, CA",
+        current_title: "Senior React Developer",
+        current_company: "TechCorp",
+        experience_years: 5,
+        bio: "Passionate React developer with expertise in TypeScript, Node.js, and AWS. Love building scalable web applications.",
+        skills: ["React", "TypeScript", "Node.js", "AWS", "PostgreSQL", "GraphQL"],
+        ai_summary: "High-performing frontend developer with strong full-stack capabilities. Excellent track record in scaling applications.",
+        technical_depth_score: 8.5,
+        community_influence_score: 7.2,
+        learning_velocity_score: 9.1,
+        availability_status: "passive",
+        salary_expectation_min: 120000,
+        salary_expectation_max: 150000,
+        preferred_contact_method: "email"
       },
-      portal_activity_score: 0,
-      interaction_timeline: [],
-      engagement_score: 0,
-      response_rate: 0,
-      preferred_contact_method: 'email',
-      background_verification_status: 'pending',
-      placement_probability_score: 0,
-      cultural_fit_score: 0,
-      availability_signals: [],
-      job_interests: basicCandidate.skills,
-      pipeline_stage: this.mapStatusToStage(basicCandidate.status),
-      stage_history: [{
-        stage: this.mapStatusToStage(basicCandidate.status),
-        entered_date: basicCandidate.created_at,
-        moved_by: 'system',
-        automated: true
-      }],
-      priority_level: 'medium'
-    };
-  }
-
-  private mapStatusToStage(status: string): string {
-    const stageMap: Record<string, string> = {
-      'new': 'sourced',
-      'screening': 'qualified',
-      'interviewing': 'interviewing',
-      'offer': 'offer_stage',
-      'hired': 'hired',
-      'rejected': 'rejected'
-    };
-    return stageMap[status] || 'sourced';
-  }
-
-  // Add interaction to candidate timeline
-  addInteraction(candidateId: string, interaction: Omit<CandidateInteraction, 'id'>): void {
-    const candidate = this.candidates.find(c => c.id === candidateId);
-    if (candidate) {
-      const newInteraction: CandidateInteraction = {
-        ...interaction,
-        id: Date.now().toString()
-      };
-      candidate.interaction_timeline.push(newInteraction);
-      this.updateEngagementScore(candidate);
-    }
-  }
-
-  // Update engagement score based on interactions
-  private updateEngagementScore(candidate: EnhancedCandidate): void {
-    const interactions = candidate.interaction_timeline;
-    const totalInteractions = interactions.length;
-    const responses = interactions.filter(i => i.response_received).length;
-    const recentActivity = interactions.filter(i => 
-      new Date(i.timestamp) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-    ).length;
-
-    candidate.response_rate = totalInteractions > 0 ? responses / totalInteractions : 0;
-    candidate.engagement_score = Math.min(100, 
-      (candidate.response_rate * 40) + 
-      (recentActivity * 10) + 
-      (candidate.portal_activity_score * 0.5)
-    );
-  }
-
-  // Add availability signal
-  addAvailabilitySignal(candidateId: string, signal: AvailabilitySignal): void {
-    const candidate = this.candidates.find(c => c.id === candidateId);
-    if (candidate) {
-      candidate.availability_signals.push(signal);
-      // Update placement probability based on availability signals
-      this.updatePlacementProbability(candidate);
-    }
-  }
-
-  // Make this method public so it can be called from hooks
-  updatePlacementProbability(candidate: EnhancedCandidate): void {
-    let score = 50; // Base score
-
-    // Factor in engagement
-    score += candidate.engagement_score * 0.3;
-
-    // Factor in availability signals
-    const activeSignals = candidate.availability_signals.filter(s => 
-      s.signal_type === 'active_job_search' || s.signal_type === 'career_change'
-    );
-    score += activeSignals.length * 15;
-
-    // Factor in response rate
-    score += candidate.response_rate * 20;
-
-    // Factor in skill match (simplified)
-    if (candidate.skills.length > 3) {
-      score += 10;
-    }
-
-    candidate.placement_probability_score = Math.min(100, Math.max(0, score));
-  }
-
-  // Update OSINT profile
-  updateOSINTProfile(candidateId: string, osintProfile: OSINTProfile): void {
-    console.log('Updating OSINT profile for candidate:', candidateId, osintProfile);
-    const candidate = this.candidates.find(c => c.id === candidateId);
-    if (candidate) {
-      candidate.osint_profile = osintProfile;
-      candidate.osint_last_updated = new Date().toISOString();
-      
-      // Update cultural fit score based on OSINT data
-      this.updateCulturalFitScore(candidate);
-      
-      // Check for red flags
-      if (osintProfile.red_flags && osintProfile.red_flags.length > 0) {
-        candidate.background_verification_status = 'flagged';
-      } else {
-        candidate.background_verification_status = 'verified';
+      {
+        name: "Marcus Johnson",
+        handle: "mjohnson_ai",
+        email: "marcus.johnson@email.com",
+        location: "Austin, TX",
+        current_title: "Machine Learning Engineer",
+        current_company: "DataFlow Inc",
+        experience_years: 7,
+        bio: "ML engineer specializing in NLP and computer vision. PhD in Computer Science with focus on deep learning.",
+        skills: ["Python", "TensorFlow", "PyTorch", "Kubernetes", "Docker", "MLOps", "AWS"],
+        ai_summary: "Expert ML engineer with strong research background. Proven ability to deploy production ML systems at scale.",
+        technical_depth_score: 9.2,
+        community_influence_score: 8.7,
+        learning_velocity_score: 8.9,
+        availability_status: "active",
+        salary_expectation_min: 140000,
+        salary_expectation_max: 180000,
+        preferred_contact_method: "linkedin"
+      },
+      {
+        name: "Emily Rodriguez",
+        handle: "emily_fullstack",
+        email: "emily.rodriguez@email.com",
+        location: "New York, NY",
+        current_title: "Full Stack Developer",
+        current_company: "StartupXYZ",
+        experience_years: 4,
+        bio: "Full-stack developer with experience in React, Node.js, and cloud infrastructure. Enjoys working in fast-paced startup environments.",
+        skills: ["React", "Node.js", "Python", "MongoDB", "Redis", "Docker", "GCP"],
+        ai_summary: "Versatile full-stack developer with startup experience. Strong problem-solving skills and adaptability.",
+        technical_depth_score: 7.8,
+        community_influence_score: 6.9,
+        learning_velocity_score: 8.5,
+        availability_status: "passive",
+        salary_expectation_min: 110000,
+        salary_expectation_max: 140000,
+        preferred_contact_method: "email"
+      },
+      {
+        name: "David Kim",
+        handle: "dkim_backend",
+        email: "david.kim@email.com",
+        location: "Seattle, WA",
+        current_title: "Backend Architect",
+        current_company: "CloudTech Solutions",
+        experience_years: 8,
+        bio: "Backend architect with expertise in microservices, distributed systems, and high-performance computing.",
+        skills: ["Java", "Spring", "Kafka", "Redis", "PostgreSQL", "Kubernetes", "AWS"],
+        ai_summary: "Senior backend architect with deep expertise in distributed systems. Strong leadership and mentoring capabilities.",
+        technical_depth_score: 9.0,
+        community_influence_score: 8.1,
+        learning_velocity_score: 7.8,
+        availability_status: "passive",
+        salary_expectation_min: 150000,
+        salary_expectation_max: 190000,
+        preferred_contact_method: "linkedin"
+      },
+      {
+        name: "Lisa Wang",
+        handle: "lisa_devops",
+        email: "lisa.wang@email.com",
+        location: "Los Angeles, CA",
+        current_title: "DevOps Engineer",
+        current_company: "ScaleUp Technologies",
+        experience_years: 6,
+        bio: "DevOps engineer passionate about automation, infrastructure as code, and CI/CD pipelines.",
+        skills: ["Terraform", "Kubernetes", "Docker", "Jenkins", "Prometheus", "Grafana", "AWS"],
+        ai_summary: "Expert DevOps engineer with strong automation and monitoring skills. Experienced in scaling infrastructure for high-growth companies.",
+        technical_depth_score: 8.7,
+        community_influence_score: 7.5,
+        learning_velocity_score: 8.3,
+        availability_status: "active",
+        salary_expectation_min: 125000,
+        salary_expectation_max: 160000,
+        preferred_contact_method: "email"
       }
-    }
-  }
-
-  private updateCulturalFitScore(candidate: EnhancedCandidate): void {
-    console.log('Updating cultural fit score for candidate:', candidate.id);
-    
-    if (!candidate.osint_profile) {
-      console.log('No OSINT profile found, skipping cultural fit score update');
-      return;
-    }
-
-    let score = 50; // Base score
-    const osint = candidate.osint_profile;
-    
-    console.log('OSINT profile structure:', osint);
+    ];
 
     try {
-      // Factor in professional reputation (simplified scoring)
-      if (osint.professional_reputation) {
-        console.log('Professional reputation data:', osint.professional_reputation);
-        
-        const industryRecognition = osint.professional_reputation.industry_recognition;
-        if (industryRecognition !== undefined && industryRecognition !== null) {
-          const industryRecognitionNum = Number(industryRecognition);
-          if (!isNaN(industryRecognitionNum)) {
-            score += industryRecognitionNum * 0.2;
-            console.log('Added industry recognition score:', industryRecognitionNum * 0.2);
-          }
-        }
-        
-        const communityInvolvement = osint.professional_reputation.community_involvement;
-        if (Array.isArray(communityInvolvement)) {
-          const communityScore = communityInvolvement.length * 5;
-          score += communityScore;
-          console.log('Added community involvement score:', communityScore);
-        }
+      const { data, error } = await supabase
+        .from('enhanced_candidates')
+        .insert(dummyCandidates)
+        .select();
+
+      if (error) throw error;
+
+      console.log('Dummy candidates created:', data);
+
+      // Add OSINT data for each candidate
+      if (data) {
+        const osintData = data.map(candidate => ({
+          candidate_id: candidate.id,
+          overall_score: Math.random() * 3 + 7, // 7-10 range
+          influence_score: Math.random() * 3 + 6, // 6-9 range
+          technical_depth: Math.random() * 3 + 7, // 7-10 range
+          community_engagement: Math.random() * 3 + 6, // 6-9 range
+          github_username: candidate.handle?.replace('_', ''),
+          github_stars: Math.floor(Math.random() * 1000) + 100,
+          github_commits: Math.floor(Math.random() * 2000) + 500,
+          github_repos: Math.floor(Math.random() * 50) + 10,
+          linkedin_connections: Math.floor(Math.random() * 1000) + 500,
+          stackoverflow_reputation: Math.floor(Math.random() * 10000) + 1000,
+          twitter_followers: Math.floor(Math.random() * 5000) + 100,
+          availability_signals: [
+            { platform: 'github', last_activity: '2024-01-15', frequency: 'high' },
+            { platform: 'linkedin', last_activity: '2024-01-10', frequency: 'medium' }
+          ]
+        }));
+
+        await supabase.from('osint_profiles').insert(osintData);
+
+        // Add career trajectories
+        const careerData = data.map(candidate => ({
+          candidate_id: candidate.id,
+          progression_type: 'ascending',
+          growth_rate: Math.random() * 3 + 2, // 2-5 range
+          stability_score: Math.random() * 3 + 7, // 7-10 range
+          next_likely_move: `Senior ${candidate.current_title?.replace('Senior ', '')}`,
+          timeline_events: [
+            { year: 2022, role: candidate.current_title, company: candidate.current_company },
+            { year: 2020, role: 'Developer', company: 'Previous Company' }
+          ]
+        }));
+
+        await supabase.from('career_trajectories').insert(careerData);
+
+        console.log('OSINT and career data added successfully');
       }
 
-      // Factor in social presence
-      if (osint.social_presence) {
-        console.log('Social presence data:', osint.social_presence);
-        
-        const professionalConsistency = osint.social_presence.professional_consistency;
-        if (professionalConsistency !== undefined && professionalConsistency !== null) {
-          const professionalConsistencyNum = Number(professionalConsistency);
-          if (!isNaN(professionalConsistencyNum)) {
-            score += professionalConsistencyNum * 0.3;
-            console.log('Added professional consistency score:', professionalConsistencyNum * 0.3);
-          }
-        }
-      }
-
-      // Factor in GitHub activity (for technical roles)
-      if (osint.github_profile) {
-        console.log('GitHub profile data:', osint.github_profile);
-        
-        const contributionActivity = osint.github_profile.contribution_activity;
-        if (contributionActivity !== undefined && contributionActivity !== null) {
-          const contributionActivityNum = Number(contributionActivity);
-          if (!isNaN(contributionActivityNum)) {
-            const githubScore = Math.min(20, contributionActivityNum * 0.1);
-            score += githubScore;
-            console.log('Added GitHub contribution score:', githubScore);
-          }
-        }
-      }
-
-      const finalScore = Math.min(100, Math.max(0, score));
-      candidate.cultural_fit_score = finalScore;
-      console.log('Final cultural fit score:', finalScore);
-      
+      return data;
     } catch (error) {
-      console.error('Error updating cultural fit score:', error);
-      candidate.cultural_fit_score = 50; // Fallback to base score
+      console.error('Error creating dummy candidates:', error);
+      throw error;
     }
+  },
+
+  async getCandidateInsights(candidateId: string) {
+    const { data, error } = await supabase
+      .from('enhanced_candidates')
+      .select(`
+        *,
+        osint_profiles(*),
+        career_trajectories(*),
+        cultural_fit_indicators(*)
+      `)
+      .eq('id', candidateId)
+      .single();
+
+    if (error) throw error;
+    return data;
   }
-
-  // Move candidate through pipeline stages
-  moveToStage(candidateId: string, newStage: string, movedBy: string, reason?: string): void {
-    const candidate = this.candidates.find(c => c.id === candidateId);
-    if (candidate && candidate.pipeline_stage !== newStage) {
-      // Add to stage history
-      const currentStageEntry = candidate.stage_history.find(s => s.stage === candidate.pipeline_stage);
-      if (currentStageEntry && !currentStageEntry.duration_days) {
-        currentStageEntry.duration_days = Math.floor(
-          (Date.now() - new Date(currentStageEntry.entered_date).getTime()) / (1000 * 60 * 60 * 24)
-        );
-      }
-
-      candidate.stage_history.push({
-        stage: newStage,
-        entered_date: new Date().toISOString(),
-        moved_by: movedBy,
-        reason,
-        automated: false
-      });
-
-      candidate.pipeline_stage = newStage;
-      candidate.updated_at = new Date().toISOString();
-    }
-  }
-
-  // Get candidates by various filters
-  getCandidatesByEngagement(minScore: number): EnhancedCandidate[] {
-    return this.candidates.filter(c => c.engagement_score >= minScore);
-  }
-
-  getCandidatesByAvailability(signalTypes: string[]): EnhancedCandidate[] {
-    return this.candidates.filter(c => 
-      c.availability_signals.some(s => signalTypes.includes(s.signal_type))
-    );
-  }
-
-  getCandidatesByStage(stage: string): EnhancedCandidate[] {
-    return this.candidates.filter(c => c.pipeline_stage === stage);
-  }
-
-  // AI-powered candidate ranking
-  rankCandidatesForJob(jobId: string, jobRequirements: string[]): EnhancedCandidate[] {
-    return this.candidates
-      .map(candidate => ({
-        ...candidate,
-        relevance_score: this.calculateJobRelevanceScore(candidate, jobRequirements)
-      }))
-      .sort((a, b) => b.relevance_score - a.relevance_score);
-  }
-
-  private calculateJobRelevanceScore(candidate: EnhancedCandidate, requirements: string[]): number {
-    let score = 0;
-
-    // Skill matching
-    const skillMatches = candidate.skills.filter(skill => 
-      requirements.some(req => skill.toLowerCase().includes(req.toLowerCase()))
-    ).length;
-    score += (skillMatches / requirements.length) * 40;
-
-    // Experience level
-    score += Math.min(25, candidate.experience_years * 2);
-
-    // Engagement and availability
-    score += candidate.engagement_score * 0.2;
-    score += candidate.placement_probability_score * 0.15;
-
-    return Math.min(100, score);
-  }
-
-  // Mock data population (for development)
-  initializeMockData(): void {
-    console.log('Enhanced candidate service initialized with mock data');
-  }
-}
-
-export const enhancedCandidateService = new EnhancedCandidateService();
+};
