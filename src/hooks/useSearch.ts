@@ -111,12 +111,7 @@ export const useAISearch = () => {
       // Build the search query for candidates
       let query = supabase
         .from('enhanced_candidates')
-        .select(`
-          *,
-          osint_profiles(*),
-          career_trajectories(*),
-          cultural_fit_indicators(*)
-        `);
+        .select(`*,osint_profiles(*),career_trajectories(*),cultural_fit_indicators(*)`);
 
       // Apply filters
       if (params.filters) {
@@ -144,15 +139,10 @@ export const useAISearch = () => {
         }
       }
 
-      // Apply text search on multiple fields
+      // Apply text search on multiple fields - fix the formatting to be on one line
       if (params.query.trim()) {
-        query = query.or(`
-          name.ilike.%${params.query}%,
-          current_title.ilike.%${params.query}%,
-          current_company.ilike.%${params.query}%,
-          bio.ilike.%${params.query}%,
-          ai_summary.ilike.%${params.query}%
-        `);
+        const searchTerm = params.query.trim();
+        query = query.or(`name.ilike.%${searchTerm}%,current_title.ilike.%${searchTerm}%,current_company.ilike.%${searchTerm}%,bio.ilike.%${searchTerm}%,ai_summary.ilike.%${searchTerm}%`);
       }
 
       query = query
@@ -216,7 +206,9 @@ export const useAISearch = () => {
           technical_depth: candidate.osint_profiles[0].technical_depth || 0,
           community_engagement: candidate.osint_profiles[0].community_engagement || 0,
           learning_velocity: candidate.osint_profiles[0].influence_score || 0,
-          availability_signals: candidate.osint_profiles[0].availability_signals || [],
+          availability_signals: Array.isArray(candidate.osint_profiles[0].availability_signals) 
+            ? candidate.osint_profiles[0].availability_signals as any[]
+            : [],
           github_profile: {
             username: candidate.osint_profiles[0].github_username || '',
             public_repos: candidate.osint_profiles[0].github_repos || 0,
@@ -246,6 +238,35 @@ export const useAISearch = () => {
             community_involvement: [],
             expertise_areas: [],
           },
+          github: {
+            username: candidate.osint_profiles[0].github_username || '',
+            stars: candidate.osint_profiles[0].github_stars || 0,
+            repos: candidate.osint_profiles[0].github_repos || 0,
+            commits: candidate.osint_profiles[0].github_commits || 0,
+          },
+          linkedin: {
+            connections: candidate.osint_profiles[0].linkedin_connections || 0,
+            url: candidate.osint_profiles[0].linkedin_url || '',
+          },
+          stackoverflow: {
+            reputation: candidate.osint_profiles[0].stackoverflow_reputation || 0,
+          },
+          twitter: {
+            followers: candidate.osint_profiles[0].twitter_followers || 0,
+            username: candidate.osint_profiles[0].twitter_username || '',
+          },
+          reddit: {
+            username: candidate.osint_profiles[0].reddit_username || '',
+          },
+          devto: {
+            username: '',
+          },
+          kaggle: {
+            username: '',
+          },
+          medium: {
+            username: '',
+          },
           red_flags: [],
           last_updated: candidate.osint_profiles[0].last_updated || new Date().toISOString(),
         } : {
@@ -271,6 +292,35 @@ export const useAISearch = () => {
             published_content: 0,
             community_involvement: [],
             expertise_areas: [],
+          },
+          github: {
+            username: '',
+            stars: 0,
+            repos: 0,
+            commits: 0,
+          },
+          linkedin: {
+            connections: 0,
+            url: '',
+          },
+          stackoverflow: {
+            reputation: 0,
+          },
+          twitter: {
+            followers: 0,
+            username: '',
+          },
+          reddit: {
+            username: '',
+          },
+          devto: {
+            username: '',
+          },
+          kaggle: {
+            username: '',
+          },
+          medium: {
+            username: '',
           },
           red_flags: [],
           last_updated: new Date().toISOString(),
