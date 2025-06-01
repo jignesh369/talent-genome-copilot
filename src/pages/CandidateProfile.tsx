@@ -1,182 +1,132 @@
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Progress } from "@/components/ui/progress";
-import { Edit, Upload } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
-import CandidateLayout from "@/components/candidate/CandidateLayout";
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { User, Mail, Phone, MapPin, Calendar, Edit } from 'lucide-react';
+import ExperienceForm from '@/components/candidate/ExperienceForm';
 
 const CandidateProfile = () => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [profileData, setProfileData] = useState({
-    name: "Alex Kumar",
-    email: "alex@example.com",
-    phone: "+1 (555) 123-4567",
-    location: "San Francisco, CA",
-    title: "Frontend Developer",
-    bio: "Passionate frontend developer with 3+ years of experience in React and TypeScript.",
-    skills: ["React", "TypeScript", "JavaScript", "Tailwind CSS", "Node.js", "Git"]
-  });
-
-  const handleEditProfile = () => {
-    setIsEditing(!isEditing);
-    if (isEditing) {
-      toast({
-        title: "Profile Updated",
-        description: "Your profile has been successfully updated!",
-      });
-    }
-  };
-
-  const handleUploadPhoto = () => {
-    toast({
-      title: "Upload Photo",
-      description: "Photo upload feature coming soon!",
-    });
-  };
-
   return (
-    <CandidateLayout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
-          <Button 
-            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white"
-            onClick={handleEditProfile}
-          >
-            <Edit className="w-4 h-4 mr-2" />
-            {isEditing ? 'Save Profile' : 'Edit Profile'}
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="space-y-6">
-            <Card>
-              <CardContent className="p-6 text-center">
-                <div className="relative inline-block">
-                  <Avatar className="w-24 h-24 mx-auto mb-4">
-                    <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-2xl">
-                      AK
-                    </AvatarFallback>
-                  </Avatar>
-                  {isEditing && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="absolute -bottom-2 left-1/2 transform -translate-x-1/2"
-                      onClick={handleUploadPhoto}
-                    >
-                      <Upload className="w-3 h-3 mr-1" />
-                      Upload
-                    </Button>
-                  )}
-                </div>
-                <h3 className="text-xl font-bold text-gray-900">{profileData.name}</h3>
-                <p className="text-gray-600 font-medium">{profileData.title}</p>
-                <p className="text-sm text-gray-500">{profileData.location}</p>
-                
-                {isEditing && (
-                  <div className="mt-4 space-y-2">
-                    <Button variant="outline" size="sm" className="w-full">
-                      Edit Contact Info
-                    </Button>
-                    <Button variant="outline" size="sm" className="w-full">
-                      Update Bio
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Profile Completion</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Profile Strength</span>
-                    <span className="font-medium">85%</span>
-                  </div>
-                  <Progress value={85} className="h-2" />
-                  <p className="text-xs text-gray-600">
-                    Add more skills and experience to reach 100%
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="lg:col-span-2 space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">About Me</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-700">{profileData.bio}</p>
-                {isEditing && (
-                  <Button variant="outline" size="sm" className="mt-2">
-                    Edit Bio
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-lg">Skills</CardTitle>
-                  {isEditing && (
-                    <Button variant="outline" size="sm">
-                      Add Skills
-                    </Button>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {profileData.skills.map((skill) => (
-                    <Badge key={skill} variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
-                      {skill}
-                      {isEditing && (
-                        <button className="ml-1 text-xs text-red-500">×</button>
-                      )}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-lg">Experience</CardTitle>
-                  {isEditing && (
-                    <Button variant="outline" size="sm">
-                      Add Experience
-                    </Button>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="border-l-2 border-purple-200 pl-4">
-                    <h4 className="font-semibold">Frontend Developer</h4>
-                    <p className="text-sm text-gray-600">TechCorp • 2021 - Present</p>
-                    <p className="text-sm text-gray-700 mt-1">
-                      Developed modern web applications using React and TypeScript
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
+        <Button>
+          <Edit className="w-4 h-4 mr-2" />
+          Edit Profile
+        </Button>
       </div>
-    </CandidateLayout>
+
+      {/* Basic Information */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <User className="w-5 h-5 mr-2" />
+            Basic Information
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="firstName">First Name</Label>
+              <Input id="firstName" placeholder="John" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lastName">Last Name</Label>
+              <Input id="lastName" placeholder="Doe" />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" placeholder="john@example.com" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone</Label>
+              <Input id="phone" placeholder="+1 (555) 123-4567" />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="location">Location</Label>
+            <Input id="location" placeholder="San Francisco, CA" />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="bio">Bio</Label>
+            <Textarea 
+              id="bio" 
+              placeholder="Tell us about yourself..."
+              rows={4}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="experience">Years of Experience</Label>
+              <Input id="experience" type="number" placeholder="5" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="availability">Availability Date</Label>
+              <Input id="availability" type="date" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Work Experience */}
+      <ExperienceForm />
+
+      {/* Skills & Preferences */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Skills & Preferences</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Skills</Label>
+            <div className="flex flex-wrap gap-2">
+              {['JavaScript', 'React', 'Node.js', 'Python', 'SQL'].map((skill) => (
+                <span key={skill} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="salaryMin">Minimum Salary</Label>
+              <Input id="salaryMin" type="number" placeholder="80000" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="salaryMax">Maximum Salary</Label>
+              <Input id="salaryMax" type="number" placeholder="120000" />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Job Types</Label>
+            <div className="flex flex-wrap gap-2">
+              {['Full-time', 'Part-time', 'Contract', 'Remote'].map((type) => (
+                <label key={type} className="flex items-center space-x-2">
+                  <input type="checkbox" className="rounded" />
+                  <span className="text-sm">{type}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Save Changes */}
+      <div className="flex justify-end">
+        <Button size="lg">Save Changes</Button>
+      </div>
+    </div>
   );
 };
 

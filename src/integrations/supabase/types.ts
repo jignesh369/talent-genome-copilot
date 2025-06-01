@@ -9,6 +9,44 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      application_documents: {
+        Row: {
+          application_id: string
+          document_type: string
+          file_name: string
+          file_size: number | null
+          file_url: string
+          id: string
+          uploaded_at: string
+        }
+        Insert: {
+          application_id: string
+          document_type: string
+          file_name: string
+          file_size?: number | null
+          file_url: string
+          id?: string
+          uploaded_at?: string
+        }
+        Update: {
+          application_id?: string
+          document_type?: string
+          file_name?: string
+          file_size?: number | null
+          file_url?: string
+          id?: string
+          uploaded_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_documents_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       applications: {
         Row: {
           applied_at: string
@@ -16,10 +54,14 @@ export type Database = {
           cover_letter: string | null
           id: string
           job_id: string
+          portfolio_url: string | null
+          rejection_reason: string | null
+          resume_url: string | null
           score: number | null
           stage: string | null
           status: Database["public"]["Enums"]["application_status"]
           updated_at: string
+          withdrawn_at: string | null
         }
         Insert: {
           applied_at?: string
@@ -27,10 +69,14 @@ export type Database = {
           cover_letter?: string | null
           id?: string
           job_id: string
+          portfolio_url?: string | null
+          rejection_reason?: string | null
+          resume_url?: string | null
           score?: number | null
           stage?: string | null
           status?: Database["public"]["Enums"]["application_status"]
           updated_at?: string
+          withdrawn_at?: string | null
         }
         Update: {
           applied_at?: string
@@ -38,10 +84,14 @@ export type Database = {
           cover_letter?: string | null
           id?: string
           job_id?: string
+          portfolio_url?: string | null
+          rejection_reason?: string | null
+          resume_url?: string | null
           score?: number | null
           stage?: string | null
           status?: Database["public"]["Enums"]["application_status"]
           updated_at?: string
+          withdrawn_at?: string | null
         }
         Relationships: [
           {
@@ -56,6 +106,218 @@ export type Database = {
             columns: ["job_id"]
             isOneToOne: false
             referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assessment_results: {
+        Row: {
+          answers: Json
+          application_id: string | null
+          assessment_id: string
+          candidate_id: string
+          completed_at: string | null
+          id: string
+          score: number
+          started_at: string
+          status: string
+          time_spent_minutes: number | null
+        }
+        Insert: {
+          answers?: Json
+          application_id?: string | null
+          assessment_id: string
+          candidate_id: string
+          completed_at?: string | null
+          id?: string
+          score: number
+          started_at?: string
+          status?: string
+          time_spent_minutes?: number | null
+        }
+        Update: {
+          answers?: Json
+          application_id?: string | null
+          assessment_id?: string
+          candidate_id?: string
+          completed_at?: string | null
+          id?: string
+          score?: number
+          started_at?: string
+          status?: string
+          time_spent_minutes?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_results_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_results_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_results_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assessments: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          duration_minutes: number
+          id: string
+          organization_id: string
+          passing_score: number | null
+          questions: Json
+          status: string
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          organization_id: string
+          passing_score?: number | null
+          questions?: Json
+          status?: string
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          organization_id?: string
+          passing_score?: number | null
+          questions?: Json
+          status?: string
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      candidate_experiences: {
+        Row: {
+          achievements: string[] | null
+          candidate_id: string
+          company: string
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          is_current: boolean
+          location: string | null
+          start_date: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          achievements?: string[] | null
+          candidate_id: string
+          company: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_current?: boolean
+          location?: string | null
+          start_date: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          achievements?: string[] | null
+          candidate_id?: string
+          company?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_current?: boolean
+          location?: string | null
+          start_date?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_experiences_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidate_preferences: {
+        Row: {
+          availability_date: string | null
+          candidate_id: string
+          created_at: string
+          id: string
+          job_types: string[] | null
+          notification_preferences: Json | null
+          preferred_locations: string[] | null
+          remote_preference: string | null
+          salary_max: number | null
+          salary_min: number | null
+          updated_at: string
+          willing_to_relocate: boolean | null
+        }
+        Insert: {
+          availability_date?: string | null
+          candidate_id: string
+          created_at?: string
+          id?: string
+          job_types?: string[] | null
+          notification_preferences?: Json | null
+          preferred_locations?: string[] | null
+          remote_preference?: string | null
+          salary_max?: number | null
+          salary_min?: number | null
+          updated_at?: string
+          willing_to_relocate?: boolean | null
+        }
+        Update: {
+          availability_date?: string | null
+          candidate_id?: string
+          created_at?: string
+          id?: string
+          job_types?: string[] | null
+          notification_preferences?: Json | null
+          preferred_locations?: string[] | null
+          remote_preference?: string | null
+          salary_max?: number | null
+          salary_min?: number | null
+          updated_at?: string
+          willing_to_relocate?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_preferences_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: true
+            referencedRelation: "candidates"
             referencedColumns: ["id"]
           },
         ]
@@ -95,7 +357,9 @@ export type Database = {
       }
       candidates: {
         Row: {
+          availability_date: string | null
           avatar_url: string | null
+          bio: string | null
           created_at: string
           current_company: string | null
           current_title: string | null
@@ -109,14 +373,20 @@ export type Database = {
           organization_id: string
           phone: string | null
           portfolio_url: string | null
+          preferred_salary_max: number | null
+          preferred_salary_min: number | null
           resume_url: string | null
           score: number
           source: Database["public"]["Enums"]["candidate_source"]
           status: Database["public"]["Enums"]["candidate_status"]
           updated_at: string
+          willing_to_relocate: boolean | null
+          years_of_experience: number | null
         }
         Insert: {
+          availability_date?: string | null
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           current_company?: string | null
           current_title?: string | null
@@ -130,14 +400,20 @@ export type Database = {
           organization_id: string
           phone?: string | null
           portfolio_url?: string | null
+          preferred_salary_max?: number | null
+          preferred_salary_min?: number | null
           resume_url?: string | null
           score?: number
           source?: Database["public"]["Enums"]["candidate_source"]
           status?: Database["public"]["Enums"]["candidate_status"]
           updated_at?: string
+          willing_to_relocate?: boolean | null
+          years_of_experience?: number | null
         }
         Update: {
+          availability_date?: string | null
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           current_company?: string | null
           current_title?: string | null
@@ -151,11 +427,15 @@ export type Database = {
           organization_id?: string
           phone?: string | null
           portfolio_url?: string | null
+          preferred_salary_max?: number | null
+          preferred_salary_min?: number | null
           resume_url?: string | null
           score?: number
           source?: Database["public"]["Enums"]["candidate_source"]
           status?: Database["public"]["Enums"]["candidate_status"]
           updated_at?: string
+          willing_to_relocate?: boolean | null
+          years_of_experience?: number | null
         }
         Relationships: [
           {
@@ -380,6 +660,53 @@ export type Database = {
           },
         ]
       }
+      messages: {
+        Row: {
+          application_id: string | null
+          content: string
+          created_at: string
+          id: string
+          message_type: string
+          read_at: string | null
+          recipient_id: string
+          sender_id: string
+          subject: string | null
+          updated_at: string
+        }
+        Insert: {
+          application_id?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          message_type?: string
+          read_at?: string | null
+          recipient_id: string
+          sender_id: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          message_type?: string
+          read_at?: string | null
+          recipient_id?: string
+          sender_id?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notes: {
         Row: {
           application_id: string | null
@@ -424,6 +751,65 @@ export type Database = {
             columns: ["candidate_id"]
             isOneToOne: false
             referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      offers: {
+        Row: {
+          application_id: string
+          benefits: string[] | null
+          created_at: string
+          created_by: string
+          expiry_date: string | null
+          id: string
+          notes: string | null
+          offer_letter_url: string | null
+          salary_amount: number
+          salary_currency: string
+          start_date: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          application_id: string
+          benefits?: string[] | null
+          created_at?: string
+          created_by: string
+          expiry_date?: string | null
+          id?: string
+          notes?: string | null
+          offer_letter_url?: string | null
+          salary_amount: number
+          salary_currency?: string
+          start_date?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string
+          benefits?: string[] | null
+          created_at?: string
+          created_by?: string
+          expiry_date?: string | null
+          id?: string
+          notes?: string | null
+          offer_letter_url?: string | null
+          salary_amount?: number
+          salary_currency?: string
+          start_date?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offers_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
             referencedColumns: ["id"]
           },
         ]
@@ -572,6 +958,42 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saved_jobs: {
+        Row: {
+          candidate_id: string
+          id: string
+          job_id: string
+          saved_at: string
+        }
+        Insert: {
+          candidate_id: string
+          id?: string
+          job_id: string
+          saved_at?: string
+        }
+        Update: {
+          candidate_id?: string
+          id?: string
+          job_id?: string
+          saved_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_jobs_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saved_jobs_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
             referencedColumns: ["id"]
           },
         ]
