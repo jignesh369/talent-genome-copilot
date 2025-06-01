@@ -109,7 +109,6 @@ export class EnhancedSearchPipeline {
         ...fallbackResults,
         osintSearchPlan: {
           queries: [],
-          platforms: ['internal'],
           expectedResults: 3,
           searchStrategy: 'fallback',
           createdAt: new Date().toISOString()
