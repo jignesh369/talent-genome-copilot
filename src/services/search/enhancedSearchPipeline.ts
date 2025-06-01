@@ -1,5 +1,3 @@
-
-
 import { naturalLanguageQueryService, QueryInterpretation } from '@/services/llm/naturalLanguageQueryService';
 import { platformQueryGenerator, OSINTSearchPlan } from '@/services/osint/platformQueryGenerator';
 import { candidateAnalysisService, CandidateAnalysisResult } from '@/services/osint/candidateAnalysisService';
@@ -223,13 +221,13 @@ export class EnhancedSearchPipeline {
       try {
         this.updateProgress('osint_discovery', 55, `Analyzing ${candidateQuery.name}...`);
         
-        // Collect real OSINT data
-        const osintData = await realOSINTCollector.collectCandidateData(candidateQuery);
+        // Collect real OSINT data using webOSINTCollector
+        const osintData = await webOSINTCollector.discoverCandidates(candidateQuery);
         
         // Convert to EnhancedCandidate format
-        const enhancedCandidate = this.convertOSINTToCandidate(candidateQuery, osintData);
-        if (enhancedCandidate) {
-          discoveredCandidates.push(enhancedCandidate);
+        const enhancedCandidates = this.convertOSINTToCandidate(candidateQuery, osintData);
+        if (enhancedCandidates && enhancedCandidates.length > 0) {
+          discoveredCandidates.push(...enhancedCandidates);
         }
       } catch (error) {
         console.error(`Failed to collect OSINT data for ${candidateQuery.name}:`, error);
@@ -263,131 +261,121 @@ export class EnhancedSearchPipeline {
     ];
   }
 
-  private convertOSINTToCandidate(query: any, osintData: any): EnhancedCandidate | null {
-    if (!osintData.github && !osintData.linkedin && !osintData.stackoverflow) {
+  private convertOSINTToCandidate(query: any, osintData: any): EnhancedCandidate[] | null {
+    if (!osintData.profiles || osintData.profiles.length === 0) {
       return null;
     }
 
-    const candidate: EnhancedCandidate = {
-      id: `osint-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      name: osintData.github?.profile?.name || osintData.linkedin?.name || query.name,
-      handle: osintData.github?.username || `@${query.name.toLowerCase().replace(' ', '')}`,
-      email: `${query.name.toLowerCase().replace(' ', '.')}@example.com`,
-      location: osintData.github?.profile?.location || osintData.linkedin?.location || 'Remote',
-      current_title: osintData.linkedin?.current_position || 'Software Engineer',
-      current_company: osintData.github?.profile?.company || osintData.linkedin?.current_company || 'Unknown',
-      experience_years: this.estimateExperience(osintData),
-      skills: query.skills || [],
-      bio: osintData.github?.profile?.bio || osintData.linkedin?.about || '',
-      ai_summary: `Real OSINT profile discovered with ${Object.keys(osintData).length} data sources`,
-      career_trajectory_analysis: {
-        progression_type: 'ascending',
-        growth_rate: 0.8,
-        stability_score: 0.9,
-        next_likely_move: 'Senior Engineer',
-        timeline_events: []
-      },
-      technical_depth_score: this.calculateTechnicalScore(osintData),
-      community_influence_score: this.calculateInfluenceScore(osintData),
-      cultural_fit_indicators: [],
-      learning_velocity_score: 8.0,
-      osint_profile: this.buildOSINTProfile(osintData),
-      match_score: this.calculateMatchScore(osintData),
-      relevance_factors: [],
-      availability_status: osintData.perplexity_insights?.availability_signals?.length > 0 ? 'active' : 'passive',
-      best_contact_method: {
-        platform: 'linkedin',
-        confidence: 0.8,
-        best_time: 'weekday_evening',
-        approach_style: 'technical'
-      },
-      profile_last_updated: new Date().toISOString(),
-      osint_last_fetched: new Date().toISOString(),
-      source_details: {
-        type: 'osint',
-        platform: 'multiple',
-        verified: true,
-        imported_date: new Date().toISOString(),
-        confidence_score: 0.9
-      }
-    };
+    return osintData.profiles.map((profile: any) => {
+      const candidate: EnhancedCandidate = {
+        id: `osint-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        name: profile.name || query.name,
+        handle: profile.handle || `@${query.name.toLowerCase().replace(' ', '')}`,
+        email: profile.email || `${query.name.toLowerCase().replace(' ', '.')}@example.com`,
+        location: profile.location || 'Remote',
+        current_title: profile.title || 'Software Engineer',
+        current_company: profile.company || 'Unknown',
+        experience_years: this.estimateExperience(profile),
+        skills: profile.skills || query.skills || [],
+        bio: profile.bio || '',
+        ai_summary: `Real OSINT profile discovered from ${profile.platform} with confidence score ${profile.confidenceScore}`,
+        career_trajectory_analysis: {
+          progression_type: 'ascending',
+          growth_rate: 0.8,
+          stability_score: 0.9,
+          next_likely_move: 'Senior Engineer',
+          timeline_events: []
+        },
+        technical_depth_score: profile.technicalScore || this.calculateTechnicalScore(profile),
+        community_influence_score: profile.influenceScore || this.calculateInfluenceScore(profile),
+        cultural_fit_indicators: [],
+        learning_velocity_score: 8.0,
+        osint_profile: this.buildOSINTProfile(profile),
+        match_score: profile.skillsMatch ? profile.skillsMatch * 100 : this.calculateMatchScore(profile),
+        relevance_factors: [],
+        availability_status: profile.availabilitySignals?.length > 0 ? 'active' : 'passive',
+        best_contact_method: {
+          platform: profile.platform || 'linkedin',
+          confidence: 0.8,
+          best_time: 'weekday_evening',
+          approach_style: 'technical'
+        },
+        profile_last_updated: new Date().toISOString(),
+        osint_last_fetched: new Date().toISOString(),
+        source_details: {
+          type: 'osint',
+          platform: profile.platform || 'multiple',
+          verified: profile.verified || false,
+          imported_date: new Date().toISOString(),
+          confidence_score: profile.confidenceScore || 0.7
+        }
+      };
 
-    return candidate;
+      return candidate;
+    });
   }
 
-  private estimateExperience(osintData: any): number {
-    if (osintData.github?.profile?.created_at) {
-      const createdDate = new Date(osintData.github.profile.created_at);
-      const yearsSinceCreation = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60 * 24 * 365);
-      return Math.min(Math.max(yearsSinceCreation, 1), 15);
+  private estimateExperience(profile: any): number {
+    if (profile.experience) return parseInt(profile.experience) || 5;
+    if (profile.joinDate) {
+      const joinDate = new Date(profile.joinDate);
+      const yearsSinceJoin = (Date.now() - joinDate.getTime()) / (1000 * 60 * 60 * 24 * 365);
+      return Math.min(Math.max(yearsSinceJoin, 1), 15);
     }
     return 5; // Default estimate
   }
 
-  private calculateTechnicalScore(osintData: any): number {
+  private calculateTechnicalScore(profile: any): number {
     let score = 5; // Base score
     
-    if (osintData.github) {
-      score += Math.min(osintData.github.public_repos / 10, 2);
-      score += Math.min(osintData.github.followers / 50, 2);
-    }
-    
-    if (osintData.stackoverflow) {
-      score += Math.min(osintData.stackoverflow.reputation / 1000, 3);
-    }
+    if (profile.repositories) score += Math.min(profile.repositories / 10, 2);
+    if (profile.followers) score += Math.min(profile.followers / 50, 2);
+    if (profile.reputation) score += Math.min(profile.reputation / 1000, 3);
     
     return Math.min(score, 10);
   }
 
-  private calculateInfluenceScore(osintData: any): number {
+  private calculateInfluenceScore(profile: any): number {
     let score = 5; // Base score
     
-    if (osintData.github) {
-      score += Math.min(osintData.github.followers / 100, 2);
-    }
-    
-    if (osintData.linkedin) {
-      score += Math.min((osintData.linkedin.connections || 0) / 200, 2);
-    }
-    
-    if (osintData.perplexity_insights) {
-      score += osintData.perplexity_insights.confidence_score || 0;
-    }
+    if (profile.followers) score += Math.min(profile.followers / 100, 2);
+    if (profile.connections) score += Math.min(profile.connections / 200, 2);
+    if (profile.posts) score += Math.min(profile.posts / 50, 1);
     
     return Math.min(score, 10);
   }
 
-  private calculateMatchScore(osintData: any): number {
+  private calculateMatchScore(profile: any): number {
     let score = 70; // Base match score
     
-    if (osintData.github?.public_repos > 10) score += 10;
-    if (osintData.stackoverflow?.reputation > 1000) score += 10;
-    if (osintData.perplexity_insights?.availability_signals?.length > 0) score += 10;
+    if (profile.repositories && profile.repositories > 10) score += 10;
+    if (profile.reputation && profile.reputation > 1000) score += 10;
+    if (profile.availabilitySignals?.length > 0) score += 10;
     
     return Math.min(score, 100);
   }
 
-  private buildOSINTProfile(osintData: any) {
+  private buildOSINTProfile(profile: any) {
     return {
       id: `profile-${Date.now()}`,
       candidate_id: 'temp-id',
-      overall_score: this.calculateTechnicalScore(osintData),
-      influence_score: this.calculateInfluenceScore(osintData),
-      technical_depth: this.calculateTechnicalScore(osintData),
-      community_engagement: this.calculateInfluenceScore(osintData),
+      overall_score: this.calculateTechnicalScore(profile),
+      influence_score: this.calculateInfluenceScore(profile),
+      technical_depth: this.calculateTechnicalScore(profile),
+      community_engagement: this.calculateInfluenceScore(profile),
       learning_velocity: 8.0,
-      availability_signals: osintData.perplexity_insights?.availability_signals || [],
-      github_profile: osintData.github ? {
-        username: osintData.github.username,
-        public_repos: osintData.github.public_repos,
-        followers: osintData.github.followers,
+      availability_signals: profile.availabilitySignals || [],
+      github_profile: profile.platform === 'github' ? {
+        username: profile.handle,
+        public_repos: profile.repositories || 0,
+        followers: profile.followers || 0,
         top_languages: ['JavaScript', 'TypeScript'],
-        contribution_activity: osintData.github.contributions,
+        contribution_activity: profile.contributions || 0,
         notable_projects: [],
-        open_source_contributions: osintData.github.public_repos
+        open_source_contributions: profile.repositories || 0
       } : undefined,
       social_presence: {
-        platforms: Object.keys(osintData),
+        platforms: [profile.platform],
         professional_consistency: 0.9,
         communication_style: 'professional' as const,
         thought_leadership_score: 7.0
@@ -395,28 +383,28 @@ export class EnhancedSearchPipeline {
       professional_reputation: {
         industry_recognition: [],
         conference_speaking: false,
-        published_content: 0,
+        published_content: profile.posts || 0,
         community_involvement: [],
-        expertise_areas: []
+        expertise_areas: profile.skills || []
       },
-      github: osintData.github ? {
-        username: osintData.github.username,
+      github: profile.platform === 'github' ? {
+        username: profile.handle,
         stars: 0,
-        repos: osintData.github.public_repos,
-        commits: osintData.github.contributions
-      } : undefined,
-      linkedin: osintData.linkedin ? {
-        connections: osintData.linkedin.connections || 0,
-        url: osintData.linkedin.profile_url
-      } : undefined,
-      stackoverflow: osintData.stackoverflow ? {
-        reputation: osintData.stackoverflow.reputation
-      } : undefined,
+        repos: profile.repositories || 0,
+        commits: profile.contributions || 0
+      } : { username: '', stars: 0, repos: 0, commits: 0 },
+      linkedin: profile.platform === 'linkedin' ? {
+        connections: profile.connections || 0,
+        url: profile.profileUrl
+      } : { connections: 0, url: '' },
+      stackoverflow: profile.platform === 'stackoverflow' ? {
+        reputation: profile.reputation || 0
+      } : { reputation: 0 },
       twitter: { followers: 0, username: '' },
-      reddit: { username: '' },
-      devto: { username: '' },
-      kaggle: { username: '' },
-      medium: { username: '' },
+      reddit: { username: profile.platform === 'reddit' ? profile.handle : '' },
+      devto: { username: profile.platform === 'devto' ? profile.handle : '' },
+      kaggle: { username: profile.platform === 'kaggle' ? profile.handle : '' },
+      medium: { username: profile.platform === 'medium' ? profile.handle : '' },
       red_flags: [],
       last_updated: new Date().toISOString()
     };
