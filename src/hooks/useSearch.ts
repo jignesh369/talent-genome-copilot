@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { EnhancedCandidate } from '@/types/enhanced-candidate';
@@ -72,10 +73,25 @@ export const useAISearch = () => {
     mutationFn: async (params: SearchParams): Promise<SearchResult> => {
       console.log('Performing AI search with params:', params);
       
-      // First, save the search query
+      // Get current user for RLS
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User must be authenticated to perform search');
+      }
+
+      // Get user's organization
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user.id)
+        .single();
+
+      // First, save the search query with proper user context
       const { data: searchQuery, error: searchError } = await supabase
         .from('search_queries')
         .insert({
+          recruiter_id: user.id,
+          organization_id: profile?.organization_id,
           original_query: params.query,
           interpreted_intent: `AI-interpreted: ${params.query}`,
           extracted_requirements: params.filters ? [params.filters] : [],
@@ -199,6 +215,8 @@ export const useAISearch = () => {
           influence_score: candidate.osint_profiles[0].influence_score || 0,
           technical_depth: candidate.osint_profiles[0].technical_depth || 0,
           community_engagement: candidate.osint_profiles[0].community_engagement || 0,
+          learning_velocity: candidate.osint_profiles[0].influence_score || 0,
+          availability_signals: candidate.osint_profiles[0].availability_signals || [],
           github_profile: {
             username: candidate.osint_profiles[0].github_username || '',
             public_repos: candidate.osint_profiles[0].github_repos || 0,
@@ -237,6 +255,8 @@ export const useAISearch = () => {
           influence_score: 0,
           technical_depth: 0,
           community_engagement: 0,
+          learning_velocity: 0,
+          availability_signals: [],
           github_profile: undefined,
           linkedin_insights: undefined,
           social_presence: {
@@ -277,6 +297,41 @@ export const useAISearch = () => {
         } : undefined,
         profile_last_updated: candidate.profile_last_updated || candidate.created_at || new Date().toISOString(),
         osint_last_fetched: candidate.osint_last_fetched || candidate.created_at || new Date().toISOString(),
+        source_details: {
+          type: 'manual_upload' as const,
+          platform: 'enhanced_candidates',
+          verified: true,
+          imported_date: candidate.created_at || new Date().toISOString(),
+          confidence_score: 0.9
+        },
+        first_name: candidate.name.split(' ')[0],
+        last_name: candidate.name.split(' ').slice(1).join(' '),
+        score: Math.round((candidate.technical_depth_score + candidate.community_influence_score) * 5) || 75,
+        education: [],
+        applications: [],
+        interviews: [],
+        notes: [],
+        tags: [],
+        organization_id: candidate.organization_id || '',
+        created_at: candidate.created_at || new Date().toISOString(),
+        updated_at: candidate.updated_at || new Date().toISOString(),
+        portal_activity_score: candidate.learning_velocity_score,
+        interaction_timeline: [],
+        engagement_score: candidate.community_influence_score,
+        response_rate: 0.8,
+        preferred_contact_method: candidate.preferred_contact_method,
+        osint_last_updated: candidate.osint_last_fetched,
+        background_verification_status: 'verified' as const,
+        placement_probability_score: Math.round((candidate.technical_depth_score + candidate.community_influence_score) * 5) || 75,
+        cultural_fit_score: candidate.community_influence_score,
+        availability_signals: [],
+        job_interests: [],
+        career_aspirations: candidate.ai_summary,
+        pipeline_stage: 'sourced',
+        stage_history: [],
+        priority_level: 'medium' as const,
+        status: 'new' as const,
+        source: 'direct' as const,
       }));
 
       // Generate AI match scores for each candidate

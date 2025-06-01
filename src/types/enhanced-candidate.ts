@@ -121,7 +121,7 @@ export interface TimelineEvent {
 }
 
 export interface CandidateSource {
-  type: string;
+  type: 'referral' | 'linkedin' | 'github' | 'osint' | 'portal' | 'ats' | 'manual_upload';
   platform?: string;
   verified?: boolean;
   imported_date?: string;

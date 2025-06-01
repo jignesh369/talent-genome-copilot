@@ -1,135 +1,98 @@
 
 export interface OSINTProfile {
+  id: string;
   candidate_id: string;
   overall_score: number;
   influence_score: number;
   technical_depth: number;
   community_engagement: number;
   learning_velocity: number;
-  last_updated: string;
   availability_signals: AvailabilitySignal[];
   
-  // Platform profiles
-  github?: GitHubProfile;
-  linkedin?: LinkedInProfile;
-  twitter?: TwitterProfile;
-  stackoverflow?: StackOverflowProfile;
-  reddit?: RedditProfile;
-  devto?: DevToProfile;
-  medium?: MediumProfile;
-  kaggle?: KaggleProfile;
+  // Platform-specific data
+  github_profile?: GitHubProfile;
+  linkedin_insights?: LinkedInInsights;
+  social_presence: SocialPresence;
+  professional_reputation: ProfessionalReputation;
+  
+  // Risk assessment
+  red_flags: RedFlag[];
+  
+  // Metadata
+  last_updated: string;
 }
 
 export interface GitHubProfile {
   username: string;
-  profile_url: string;
   public_repos: number;
   followers: number;
-  following: number;
-  contributions_last_year: number;
-  star_count: number;
-  fork_count: number;
-  primary_languages: string[];
-  recent_activity_score: number;
-  contribution_streak: number;
-  account_created: string;
-  last_activity: string;
+  top_languages: string[];
+  contribution_activity: number;
+  notable_projects: Project[];
+  open_source_contributions: number;
 }
 
-export interface LinkedInProfile {
-  profile_url: string;
-  connections: number;
-  current_position: string;
-  company: string;
-  industry: string;
-  location: string;
-  experience_years: number;
-  education: string[];
-  skills: string[];
-  recommendations_count: number;
-  posts_last_month: number;
-  engagement_rate: number;
+export interface LinkedInInsights {
+  connection_count: number;
+  recent_activity_level: 'low' | 'medium' | 'high';
+  job_change_indicators: JobChangeIndicator[];
+  skills_endorsements: Record<string, number>;
+  recommendation_count: number;
 }
 
-export interface TwitterProfile {
-  username: string;
-  profile_url: string;
-  followers: number;
-  following: number;
-  tweets_count: number;
-  listed_count: number;
-  verified: boolean;
-  account_created: string;
-  recent_activity_score: number;
-  engagement_rate: number;
-  tech_mention_frequency: number;
+export interface SocialPresence {
+  platforms: string[];
+  professional_consistency: number;
+  communication_style: 'professional' | 'casual' | 'technical' | 'mixed';
+  thought_leadership_score: number;
 }
 
-export interface StackOverflowProfile {
-  user_id: number;
-  profile_url: string;
-  reputation: number;
-  questions_count: number;
-  answers_count: number;
-  badges: {
-    gold: number;
-    silver: number;
-    bronze: number;
-  };
-  top_tags: string[];
-  answer_acceptance_rate: number;
-  last_activity: string;
-  member_since: string;
-}
-
-export interface RedditProfile {
-  username: string;
-  profile_url: string;
-  karma: number;
-  post_karma: number;
-  comment_karma: number;
-  account_created: string;
-  active_subreddits: string[];
-  recent_activity_score: number;
-  tech_community_participation: number;
-}
-
-export interface DevToProfile {
-  username: string;
-  profile_url: string;
-  followers: number;
-  posts_count: number;
-  tags: string[];
-  total_reactions: number;
-  total_comments: number;
-  recent_activity_score: number;
-}
-
-export interface MediumProfile {
-  username: string;
-  profile_url: string;
-  followers: number;
-  posts_count: number;
-  total_claps: number;
-  topics: string[];
-  recent_activity_score: number;
-}
-
-export interface KaggleProfile {
-  username: string;
-  profile_url: string;
-  tier: string;
-  competitions_entered: number;
-  datasets_count: number;
-  notebooks_count: number;
-  total_votes: number;
-  ranking: number;
+export interface ProfessionalReputation {
+  industry_recognition: Recognition[];
+  conference_speaking: boolean;
+  published_content: number;
+  community_involvement: CommunityInvolvement[];
+  expertise_areas: string[];
 }
 
 export interface AvailabilitySignal {
-  signal_type: 'job_change' | 'profile_update' | 'increased_activity' | 'skill_learning';
+  signal_type: 'profile_update' | 'job_search_activity' | 'network_expansion' | 'skill_updates';
   confidence: number;
-  detected_date: string;
+  detected_at: string;
+  details: string;
+}
+
+export interface JobChangeIndicator {
+  indicator_type: 'profile_changes' | 'activity_patterns' | 'network_signals';
+  strength: number;
   description: string;
-  platform_source: string;
+}
+
+export interface Recognition {
+  type: 'award' | 'mention' | 'feature';
+  source: string;
+  title: string;
+  date: string;
+}
+
+export interface CommunityInvolvement {
+  type: 'meetup' | 'conference' | 'open_source' | 'forum';
+  name: string;
+  role: string;
+  activity_level: 'low' | 'medium' | 'high';
+}
+
+export interface Project {
+  name: string;
+  description: string;
+  stars: number;
+  language: string;
+  last_updated: string;
+}
+
+export interface RedFlag {
+  type: 'inconsistency' | 'controversial_content' | 'employment_gap' | 'reputation_issue';
+  severity: 'low' | 'medium' | 'high';
+  description: string;
+  evidence: string[];
 }

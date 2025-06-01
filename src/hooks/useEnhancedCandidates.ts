@@ -72,6 +72,8 @@ export const useEnhancedCandidates = () => {
           influence_score: candidate.osint_profiles[0].influence_score || 0,
           technical_depth: candidate.osint_profiles[0].technical_depth || 0,
           community_engagement: candidate.osint_profiles[0].community_engagement || 0,
+          learning_velocity: candidate.osint_profiles[0].influence_score || 0, // Use influence_score as fallback
+          availability_signals: candidate.osint_profiles[0].availability_signals || [],
           github_profile: {
             username: candidate.osint_profiles[0].github_username || '',
             public_repos: candidate.osint_profiles[0].github_repos || 0,
@@ -110,6 +112,8 @@ export const useEnhancedCandidates = () => {
           influence_score: 0,
           technical_depth: 0,
           community_engagement: 0,
+          learning_velocity: 0,
+          availability_signals: [],
           github_profile: undefined,
           linkedin_insights: undefined,
           social_presence: {
@@ -152,7 +156,7 @@ export const useEnhancedCandidates = () => {
         osint_last_fetched: candidate.osint_last_fetched || candidate.created_at || new Date().toISOString(),
         // Additional fields for compatibility
         source_details: {
-          type: 'database',
+          type: 'manual_upload' as const,
           platform: 'enhanced_candidates',
           verified: true,
           imported_date: candidate.created_at || new Date().toISOString(),
